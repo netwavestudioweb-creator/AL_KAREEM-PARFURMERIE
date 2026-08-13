@@ -44,7 +44,7 @@ export function useAuth(): AuthState {
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled) return;
-        setIsAdmin(!!data || session.user.email === 'admin@netwavestudio.bj');
+        setIsAdmin(!!data);
         setLoading(false);
       });
     return () => {
