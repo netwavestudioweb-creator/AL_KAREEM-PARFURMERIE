@@ -179,7 +179,18 @@ function BoutiquePage() {
                 <option value="prix-desc">Prix décroissant</option>
               </select>
             </div>
-            {!isLoading && filtered.length === 0 ? (
+            {isLoading ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex flex-col gap-3">
+                    <div className="aspect-square w-full rounded-2xl bg-muted/40 animate-pulse" />
+                    <div className="h-3 w-1/3 rounded-full bg-muted/40 animate-pulse" />
+                    <div className="h-5 w-3/4 rounded-full bg-muted/40 animate-pulse" />
+                    <div className="h-4 w-1/4 rounded-full bg-muted/40 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 Aucun produit ne correspond à votre recherche.
               </div>

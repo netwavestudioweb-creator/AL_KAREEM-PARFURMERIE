@@ -12,8 +12,7 @@ export function LoadingScreen() {
   const [slowNav, setSlowNav] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setBooting(false), 350);
-    return () => clearTimeout(t);
+    setBooting(false);
   }, []);
 
   useEffect(() => {
