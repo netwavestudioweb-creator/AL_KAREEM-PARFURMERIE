@@ -1,10 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const BUCKET = "product-images";
-const MAX_DIM = 1600;
-const QUALITY = 0.82;
-// 10 ans — bucket privé, on sert des URLs signées longue durée.
-const SIGNED_URL_EXPIRY = 60 * 60 * 24 * 365 * 10;
+const MAX_DIM = 900;
+const QUALITY = 0.78;
+// Cache agressif 1 an
+const CACHE_CONTROL = "31536000, public, immutable";
 // Taille maximale acceptée pour le fichier source (avant compression).
 const MAX_FILE_BYTES = 15 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
@@ -70,21 +70,26 @@ async function compressImage(file: File): Promise<{ blob: Blob; ext: string; typ
 
 export async function uploadImage(file: File, prefix = ""): Promise<string> {
   await assertRealImage(file);
-  // Le fichier est ré-encodé côté navigateur : seul un vrai pixel-buffer
-  // ressort, jamais le binaire d'origine.
+  // Le fichier est ré-encodé côté navigateur en WebP optimisé
   const { blob, ext, type } = await compressImage(file);
   const path = `${prefix}${crypto.randomUUID()}.${ext}`;
   const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
     contentType: type,
-    cacheControl: "31536000",
+    cacheControl: CACHE_CONTROL,
     upsert: false,
   });
   if (error) throw error;
-  const { data, error: signErr } = await supabase.storage
+
+  // Récupération de l'URL publique directe avec cache HTTP instantané
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  if (data?.publicUrl) return data.publicUrl;
+
+  // Fallback signed URL
+  const { data: signData, error: signErr } = await supabase.storage
     .from(BUCKET)
-    .createSignedUrl(path, SIGNED_URL_EXPIRY);
-  if (signErr || !data?.signedUrl) throw signErr ?? new Error("URL non générée");
-  return data.signedUrl;
+    .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+  if (signErr || !signData?.signedUrl) throw signErr ?? new Error("URL non générée");
+  return signData.signedUrl;
 }
 
 export function uploadProductImage(file: File): Promise<string> {

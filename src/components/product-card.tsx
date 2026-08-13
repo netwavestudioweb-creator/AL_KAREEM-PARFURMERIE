@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { formatFCFA, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
@@ -6,10 +7,15 @@ import { ShoppingBag } from "lucide-react";
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <div className="group relative flex h-full flex-col">
       <Link to="/produit/$slug" params={{ slug: product.slug }} className="flex flex-1 flex-col">
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-gradient-hero">
+        <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted/40">
+          {!loaded && (
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-muted/30 via-muted/60 to-muted/30" />
+          )}
           <img
             src={product.image}
             alt={product.name}
@@ -17,8 +23,11 @@ export function ProductCard({ product }: { product: Product }) {
             decoding="async"
             width={400}
             height={400}
+            onLoad={() => setLoaded(true)}
             sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
+              loaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+            }`}
           />
           <div className="absolute top-3 left-3 flex flex-col gap-1">
             {product.promo && (
