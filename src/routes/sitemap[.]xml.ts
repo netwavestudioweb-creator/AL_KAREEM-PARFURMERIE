@@ -31,12 +31,19 @@ export const Route = createFileRoute("/sitemap.xml")({
               path: `/produit/${p.slug}`,
               lastmod: p.updated_at ? new Date(p.updated_at).toISOString() : undefined,
             }));
-          } catch {}
+          } catch {
+            /* ignore */
+          }
         }
 
         const urls = [
           ...STATIC_PATHS.map((e) => ({ ...e })),
-          ...productPaths.map((p) => ({ path: p.path, lastmod: p.lastmod, changefreq: "weekly" as const, priority: "0.7" })),
+          ...productPaths.map((p) => ({
+            path: p.path,
+            lastmod: p.lastmod,
+            changefreq: "weekly" as const,
+            priority: "0.7",
+          })),
         ].map((e) =>
           [
             `  <url>`,
@@ -45,7 +52,9 @@ export const Route = createFileRoute("/sitemap.xml")({
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
             `  </url>`,
-          ].filter(Boolean).join("\n"),
+          ]
+            .filter(Boolean)
+            .join("\n"),
         );
 
         const xml = [

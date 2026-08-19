@@ -5,13 +5,19 @@ export const Route = createFileRoute("/mentions-legales")({
   head: () => ({
     meta: [
       { title: "Mentions légales — Al Kareem Parfumerie" },
-      { name: "description", content: "Mentions légales du site Al Kareem Parfumerie, Cotonou (Bénin)." },
+      {
+        name: "description",
+        content: "Mentions légales du site Al Kareem Parfumerie, Cotonou (Bénin).",
+      },
       { property: "og:title", content: "Mentions légales — Al Kareem" },
       { property: "og:description", content: "Informations légales du site Al Kareem Parfumerie." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "/og-alkareem.jpg" },
-      { name: "twitter:image", content: "/og-alkareem.jpg" },
+      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      {
+        name: "twitter:image",
+        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+      },
       { property: "og:url", content: "/mentions-legales" },
     ],
     links: [{ rel: "canonical", href: "/mentions-legales" }],
@@ -28,7 +34,8 @@ function MentionsLegales() {
 
         <h2>Éditeur du site</h2>
         <p>
-          Al Kareem Parfumerie — Cotonou, Bénin.<br />
+          Al Kareem Parfumerie — Cotonou, Bénin.
+          <br />
           Contact : +229 01 61 88 89 87 · Instagram : @khadisidibehassan
         </p>
 
@@ -40,15 +47,15 @@ function MentionsLegales() {
 
         <h2>Propriété intellectuelle</h2>
         <p>
-          L'ensemble des contenus (textes, photos, marques, logos) présents sur ce site sont
-          la propriété d'Al Kareem Parfumerie ou de ses partenaires. Toute reproduction sans
+          L'ensemble des contenus (textes, photos, marques, logos) présents sur ce site sont la
+          propriété d'Al Kareem Parfumerie ou de ses partenaires. Toute reproduction sans
           autorisation écrite préalable est interdite.
         </p>
 
         <h2>Signalement</h2>
         <p>
-          Pour toute question ou demande relative à ces mentions, contactez-nous via WhatsApp
-          au +229 01 61 88 89 87.
+          Pour toute question ou demande relative à ces mentions, contactez-nous via WhatsApp au
+          +229 01 61 88 89 87.
         </p>
       </article>
     </SiteLayout>

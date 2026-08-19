@@ -31,10 +31,14 @@ export function ProductCard({ product }: { product: Product }) {
           />
           <div className="absolute top-3 left-3 flex flex-col gap-1">
             {product.promo && (
-              <span className="px-2 py-1 rounded-md bg-primary text-primary-foreground text-[10px] font-semibold uppercase tracking-wider">Promo</span>
+              <span className="px-2 py-1 rounded-md bg-primary text-primary-foreground text-[10px] font-semibold uppercase tracking-wider">
+                Promo
+              </span>
             )}
             {!product.inStock && (
-              <span className="px-2 py-1 rounded-md bg-foreground/70 text-primary-foreground text-[10px] font-semibold uppercase tracking-wider">Rupture</span>
+              <span className="px-2 py-1 rounded-md bg-foreground/70 text-primary-foreground text-[10px] font-semibold uppercase tracking-wider">
+                Rupture
+              </span>
             )}
           </div>
         </div>
@@ -51,7 +55,9 @@ export function ProductCard({ product }: { product: Product }) {
           <div className="mt-auto flex items-baseline gap-2 pt-2">
             <span className="font-semibold text-primary-deep">{formatFCFA(product.price)}</span>
             {product.oldPrice && (
-              <span className="text-xs text-muted-foreground line-through">{formatFCFA(product.oldPrice)}</span>
+              <span className="text-xs text-muted-foreground line-through">
+                {formatFCFA(product.oldPrice)}
+              </span>
             )}
           </div>
         </div>

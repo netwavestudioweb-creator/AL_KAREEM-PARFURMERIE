@@ -7,10 +7,17 @@ export const Route = createFileRoute("/commande-envoyee")({
   head: () => ({
     meta: [
       { title: "Commande envoyée — Al Kareem Parfumerie" },
-      { name: "description", content: "Votre commande a bien été envoyée sur WhatsApp. Nous vous contactons sur WhatsApp pour la confirmation." },
+      {
+        name: "description",
+        content:
+          "Votre commande a bien été envoyée sur WhatsApp. Nous vous contactons sur WhatsApp pour la confirmation.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Commande envoyée — Al Kareem" },
-      { property: "og:description", content: "Merci pour votre commande — nous vous contactons sur WhatsApp." },
+      {
+        property: "og:description",
+        content: "Merci pour votre commande — nous vous contactons sur WhatsApp.",
+      },
     ],
   }),
   component: OrderSentPage,
@@ -27,9 +34,8 @@ function OrderSentPage() {
           Votre commande a été envoyée sur WhatsApp
         </h1>
         <p className="text-foreground/70 mt-4 leading-relaxed">
-          Merci pour votre confiance ! Nous vous contactons très bientôt
-          pour confirmer la disponibilité, la livraison et le mode de paiement
-          (à la livraison ou en main propre).
+          Merci pour votre confiance ! Nous vous contactons très bientôt pour confirmer la
+          disponibilité, la livraison et le mode de paiement (à la livraison ou en main propre).
         </p>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">

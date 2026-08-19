@@ -5,13 +5,22 @@ export const Route = createFileRoute("/confidentialite")({
   head: () => ({
     meta: [
       { title: "Politique de confidentialité — Al Kareem Parfumerie" },
-      { name: "description", content: "Comment Al Kareem Parfumerie protège et utilise vos données personnelles." },
+      {
+        name: "description",
+        content: "Comment Al Kareem Parfumerie protège et utilise vos données personnelles.",
+      },
       { property: "og:title", content: "Confidentialité — Al Kareem" },
-      { property: "og:description", content: "Notre engagement pour la protection de vos données personnelles." },
+      {
+        property: "og:description",
+        content: "Notre engagement pour la protection de vos données personnelles.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "/og-alkareem.jpg" },
-      { name: "twitter:image", content: "/og-alkareem.jpg" },
+      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      {
+        name: "twitter:image",
+        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+      },
       { property: "og:url", content: "/confidentialite" },
     ],
     links: [{ rel: "canonical", href: "/confidentialite" }],
@@ -29,8 +38,8 @@ function Confidentialite() {
         <h2>Données que nous collectons</h2>
         <p>
           Lorsque vous passez commande ou nous contactez, nous collectons uniquement les
-          informations nécessaires : nom, téléphone (ou e-mail), zone de livraison,
-          adresse et détails de commande.
+          informations nécessaires : nom, téléphone (ou e-mail), zone de livraison, adresse et
+          détails de commande.
         </p>
 
         <h2>Utilisation des données</h2>
@@ -41,20 +50,20 @@ function Confidentialite() {
 
         <h2>Conservation</h2>
         <p>
-          Les commandes et messages sont conservés le temps nécessaire au suivi commercial
-          et légal, puis supprimés sur demande.
+          Les commandes et messages sont conservés le temps nécessaire au suivi commercial et légal,
+          puis supprimés sur demande.
         </p>
 
         <h2>Cookies</h2>
         <p>
-          Le site utilise uniquement des données locales de navigation (panier) stockées
-          dans votre navigateur. Aucun cookie publicitaire n'est déposé.
+          Le site utilise uniquement des données locales de navigation (panier) stockées dans votre
+          navigateur. Aucun cookie publicitaire n'est déposé.
         </p>
 
         <h2>Vos droits</h2>
         <p>
-          Vous pouvez à tout moment demander l'accès, la modification ou la suppression de
-          vos données en nous contactant sur WhatsApp au +229 01 61 88 89 87.
+          Vous pouvez à tout moment demander l'accès, la modification ou la suppression de vos
+          données en nous contactant sur WhatsApp au +229 01 61 88 89 87.
         </p>
       </article>
     </SiteLayout>

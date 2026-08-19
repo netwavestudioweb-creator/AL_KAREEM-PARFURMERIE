@@ -17,7 +17,11 @@ function EditProductPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin-product", id],
     queryFn: async (): Promise<ProductFormValues | null> => {
-      const { data, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
       if (error) throw error;
       if (!data) return null;
       const p = data as DbProduct;
@@ -36,11 +40,15 @@ function EditProductPage() {
   });
 
   if (isLoading) return <div className="py-16 text-center text-gray-500">Chargement…</div>;
-  if (error) return <div className="py-16 text-center text-red-600">Erreur : {(error as Error).message}</div>;
+  if (error)
+    return (
+      <div className="py-16 text-center text-red-600">Erreur : {(error as Error).message}</div>
+    );
   if (!data) return <div className="py-16 text-center text-gray-500">Produit introuvable.</div>;
 
   const handleDelete = async () => {
-    if (!window.confirm("Voulez-vous vraiment supprimer ce produit ? Cette action est définitive.")) return;
+    if (!window.confirm("Voulez-vous vraiment supprimer ce produit ? Cette action est définitive."))
+      return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) return toast.error(error.message);
     await qc.invalidateQueries({ queryKey: ["products"] });
@@ -48,5 +56,12 @@ function EditProductPage() {
     navigate({ to: "/admin" });
   };
 
-  return <ProductForm mode="edit" productId={id} initial={data ?? emptyProduct()} onDelete={handleDelete} />;
+  return (
+    <ProductForm
+      mode="edit"
+      productId={id}
+      initial={data ?? emptyProduct()}
+      onDelete={handleDelete}
+    />
+  );
 }

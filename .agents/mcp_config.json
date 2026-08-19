@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "supabase-database": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "REMPLACE_CECI_PAR_TON_URL_SUPABASE_AVEC_MOT_DE_PASSE"
+      ]
+    }
+  }
+}

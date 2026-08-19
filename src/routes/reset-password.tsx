@@ -7,14 +7,24 @@ export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
       { title: "Réinitialiser le mot de passe — Al Kareem Parfumerie" },
-      { name: "description", content: "Définissez un nouveau mot de passe pour votre espace d'administration Al Kareem Parfumerie." },
+      {
+        name: "description",
+        content:
+          "Définissez un nouveau mot de passe pour votre espace d'administration Al Kareem Parfumerie.",
+      },
       { name: "robots", content: "noindex,nofollow" },
       { property: "og:title", content: "Réinitialiser le mot de passe — Al Kareem" },
-      { property: "og:description", content: "Définissez un nouveau mot de passe pour votre espace d'administration." },
+      {
+        property: "og:description",
+        content: "Définissez un nouveau mot de passe pour votre espace d'administration.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { property: "og:image", content: "/og-alkareem.jpg" },
-      { name: "twitter:image", content: "/og-alkareem.jpg" },
+      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      {
+        name: "twitter:image",
+        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+      },
     ],
   }),
   component: ResetPasswordPage,
@@ -41,7 +51,11 @@ function ResetPasswordPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 w-full max-w-md">
         <div className="text-center mb-6">
-          <img src="/alkareem-logo.jpg" alt="Al Kareem" className="h-14 w-14 mx-auto mb-3 object-contain rounded-full" />
+          <img
+            src="/alkareem-logo.jpg"
+            alt="Al Kareem"
+            className="h-14 w-14 mx-auto mb-3 object-contain rounded-full"
+          />
           <h1 className="font-serif text-2xl text-gray-900">Nouveau mot de passe</h1>
           <p className="text-sm text-gray-600 mt-2">
             {ready
@@ -56,11 +70,15 @@ function ResetPasswordPage() {
             if (password.length < 10 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
               return toast.error("Mot de passe : 10 caractères minimum, avec lettres et chiffres.");
             }
-            if (password !== confirm) return toast.error("Les deux mots de passe ne correspondent pas.");
+            if (password !== confirm)
+              return toast.error("Les deux mots de passe ne correspondent pas.");
             setBusy(true);
             const { error } = await supabase.auth.updateUser({ password });
             setBusy(false);
-            if (error) return toast.error("Lien expiré ou invalide. Redemandez un e-mail de réinitialisation.");
+            if (error)
+              return toast.error(
+                "Lien expiré ou invalide. Redemandez un e-mail de réinitialisation.",
+              );
             toast.success("Mot de passe mis à jour ✨");
             router.navigate({ to: "/admin" });
           }}

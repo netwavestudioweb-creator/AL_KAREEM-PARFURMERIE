@@ -46,7 +46,10 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
 
   const save = useMutation({
     mutationFn: async () => {
@@ -55,10 +58,13 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
 
       const payload = {
         name: values.name.trim(),
-        slug: slugify(values.name) + (mode === "create" ? "-" + Math.random().toString(36).slice(2, 6) : ""),
+        slug:
+          slugify(values.name) +
+          (mode === "create" ? "-" + Math.random().toString(36).slice(2, 6) : ""),
         category_id: values.category_id,
         price_fcfa: Math.round(values.price_fcfa),
-        promo_price_fcfa: values.promo_price_fcfa != null ? Math.round(values.promo_price_fcfa) : null,
+        promo_price_fcfa:
+          values.promo_price_fcfa != null ? Math.round(values.promo_price_fcfa) : null,
         promo_end_date: values.promo_end_date || null,
         description: values.description,
         volume: values.volume.trim() || null,
@@ -117,7 +123,10 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
 
   return (
     <form
-      onSubmit={(e) => { e.preventDefault(); save.mutate(); }}
+      onSubmit={(e) => {
+        e.preventDefault();
+        save.mutate();
+      }}
       className="space-y-6"
     >
       <div className="flex items-center gap-2">
@@ -140,7 +149,10 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
         {values.image_urls.length > 0 && (
           <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
             {values.image_urls.map((url, i) => (
-              <li key={url} className="relative group border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
+              <li
+                key={url}
+                className="relative group border border-gray-200 rounded-xl overflow-hidden bg-gray-50"
+              >
                 <img src={url} alt="" className="w-full aspect-square object-cover" />
                 {i === 0 && (
                   <span className="absolute top-1 left-1 bg-gray-900 text-white text-[10px] px-2 py-0.5 rounded-full">
@@ -155,14 +167,18 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
                       onClick={() => moveImage(i, i - 1)}
                       className="h-7 w-7 grid place-items-center rounded hover:bg-white/10 disabled:opacity-30"
                       title="Reculer"
-                    >‹</button>
+                    >
+                      ‹
+                    </button>
                     <button
                       type="button"
                       disabled={i === values.image_urls.length - 1}
                       onClick={() => moveImage(i, i + 1)}
                       className="h-7 w-7 grid place-items-center rounded hover:bg-white/10 disabled:opacity-30"
                       title="Avancer"
-                    >›</button>
+                    >
+                      ›
+                    </button>
                     <GripVertical className="h-3 w-3 opacity-60" />
                   </div>
                   <button
@@ -180,12 +196,16 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
         )}
         <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl p-6 cursor-pointer hover:border-gray-500 text-gray-600">
           {uploading ? (
-            <><Loader2 className="h-6 w-6 animate-spin" /> Envoi en cours…</>
+            <>
+              <Loader2 className="h-6 w-6 animate-spin" /> Envoi en cours…
+            </>
           ) : (
             <>
               <ImagePlus className="h-6 w-6" />
               <span className="text-sm font-medium">Ajouter des photos</span>
-              <span className="text-xs text-gray-500">Depuis la galerie de votre téléphone ou votre ordinateur</span>
+              <span className="text-xs text-gray-500">
+                Depuis la galerie de votre téléphone ou votre ordinateur
+              </span>
             </>
           )}
           <input
@@ -193,7 +213,10 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
             accept="image/*"
             multiple
             className="hidden"
-            onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }}
+            onChange={(e) => {
+              handleFiles(e.target.files);
+              e.target.value = "";
+            }}
           />
         </label>
       </section>
@@ -218,7 +241,9 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
           >
             <option value="">— Aucune —</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
           <div className="text-xs text-gray-500 mt-1">
@@ -255,7 +280,12 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
               inputMode="numeric"
               min={0}
               value={values.promo_price_fcfa ?? ""}
-              onChange={(e) => setValues({ ...values, promo_price_fcfa: e.target.value ? Number(e.target.value) : null })}
+              onChange={(e) =>
+                setValues({
+                  ...values,
+                  promo_price_fcfa: e.target.value ? Number(e.target.value) : null,
+                })
+              }
               className={INPUT}
             />
           </Field>

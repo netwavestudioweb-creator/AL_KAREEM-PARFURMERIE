@@ -70,18 +70,32 @@ function AdminMessagesPage() {
       ) : (
         <ul className="space-y-2">
           {messages.map((m) => {
-            const date = new Date(m.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+            const date = new Date(m.created_at).toLocaleString("fr-FR", {
+              dateStyle: "short",
+              timeStyle: "short",
+            });
             const isEmail = m.contact.includes("@");
             return (
-              <li key={m.id} className={`bg-white rounded-2xl border p-4 space-y-2 ${m.read ? "border-gray-200" : "border-primary/40 bg-primary/5"}`}>
+              <li
+                key={m.id}
+                className={`bg-white rounded-2xl border p-4 space-y-2 ${m.read ? "border-gray-200" : "border-primary/40 bg-primary/5"}`}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="font-medium text-gray-900 flex items-center gap-2 flex-wrap">
                       {m.name}
-                      {!m.read && <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px]">Nouveau</span>}
+                      {!m.read && (
+                        <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px]">
+                          Nouveau
+                        </span>
+                      )}
                     </div>
-                    <a href={isEmail ? `mailto:${m.contact}` : `tel:${m.contact}`} className="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-900 mt-0.5">
-                      {isEmail ? <Mail className="h-3 w-3" /> : <Phone className="h-3 w-3" />} {m.contact}
+                    <a
+                      href={isEmail ? `mailto:${m.contact}` : `tel:${m.contact}`}
+                      className="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-900 mt-0.5"
+                    >
+                      {isEmail ? <Mail className="h-3 w-3" /> : <Phone className="h-3 w-3" />}{" "}
+                      {m.contact}
                     </a>
                     <div className="text-[11px] text-gray-500 mt-0.5">{date}</div>
                   </div>
@@ -94,7 +108,9 @@ function AdminMessagesPage() {
                       <Check className="h-3.5 w-3.5" />
                     </button>
                     <button
-                      onClick={() => { if (window.confirm("Supprimer ce message ?")) del.mutate(m.id); }}
+                      onClick={() => {
+                        if (window.confirm("Supprimer ce message ?")) del.mutate(m.id);
+                      }}
                       title="Supprimer"
                       className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-white border border-red-200 text-red-600 hover:bg-red-50"
                     >

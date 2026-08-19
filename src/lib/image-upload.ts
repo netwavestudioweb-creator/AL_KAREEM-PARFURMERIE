@@ -22,8 +22,7 @@ async function assertRealImage(file: File): Promise<void> {
     String.fromCharCode(...head.slice(start, start + len));
 
   const isJpeg = head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff;
-  const isPng =
-    head[0] === 0x89 && ascii(1, 3) === "PNG" && head[4] === 0x0d && head[5] === 0x0a;
+  const isPng = head[0] === 0x89 && ascii(1, 3) === "PNG" && head[4] === 0x0d && head[5] === 0x0a;
   const isGif = ascii(0, 6) === "GIF87a" || ascii(0, 6) === "GIF89a";
   const isRiffWebp = ascii(0, 4) === "RIFF" && ascii(8, 4) === "WEBP";
   const isAvif = ascii(4, 4) === "ftyp";

@@ -23,13 +23,18 @@ const searchSchema = z.object({
 });
 
 /** Supprime les paramètres hérités (ex: `max`, ancien filtre prix supprimé). */
-const dropLegacyParams = ({ search, next }: { search: Record<string, unknown>; next: (s: Record<string, unknown>) => Record<string, unknown> }) => {
+
+const dropLegacyParams = ({
+  search,
+  next,
+}: {
+  search: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  next: (s: any) => any;
+}) => {
   const { max: _max, ...rest } = search as Record<string, unknown> & { max?: unknown };
   return next(rest);
 };
-
-
-
 
 export const Route = createFileRoute("/boutique")({
   validateSearch: zodValidator(searchSchema),
@@ -37,14 +42,21 @@ export const Route = createFileRoute("/boutique")({
   head: () => ({
     meta: [
       { title: "Boutique — Al Kareem Parfumerie" },
-      { name: "description", content: "Parcourez notre catalogue : parfums, déodorants, huiles concentrées, brumes, diffuseurs et coffrets." },
+      {
+        name: "description",
+        content:
+          "Parcourez notre catalogue : parfums, déodorants, huiles concentrées, brumes, diffuseurs et coffrets.",
+      },
       { property: "og:title", content: "Boutique — Al Kareem Parfumerie" },
       { property: "og:description", content: "Notre catalogue complet à découvrir." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/boutique" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "/og-alkareem.jpg" },
-      { name: "twitter:image", content: "/og-alkareem.jpg" },
+      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      {
+        name: "twitter:image",
+        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+      },
     ],
     links: [{ rel: "canonical", href: "/boutique" }],
   }),
@@ -61,8 +73,14 @@ function BoutiquePage() {
   const { q, category, promo, sort } = Route.useSearch();
   const navigate = useNavigate({ from: "/boutique" });
 
-  const { data: products = [], isLoading } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
-  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
 
   const filtered = useMemo(() => {
     let out = products.slice();
@@ -113,7 +131,10 @@ function BoutiquePage() {
               className="w-full h-12 rounded-full bg-white border border-border pl-11 pr-11 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             {q && (
-              <button onClick={() => setSearch({ q: "" })} className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-secondary flex items-center justify-center">
+              <button
+                onClick={() => setSearch({ q: "" })}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-secondary flex items-center justify-center"
+              >
                 <X className="h-4 w-4" />
               </button>
             )}
@@ -125,12 +146,16 @@ function BoutiquePage() {
         <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
           <aside className="space-y-6">
             <div>
-              <div className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Catégorie</div>
+              <div className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+                Catégorie
+              </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSearch({ category: "" })}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                    !category ? "bg-primary-deep text-primary-foreground border-primary-deep" : "bg-white border-border hover:border-primary"
+                    !category
+                      ? "bg-primary-deep text-primary-foreground border-primary-deep"
+                      : "bg-white border-border hover:border-primary"
                   }`}
                 >
                   Toutes
@@ -167,7 +192,9 @@ function BoutiquePage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div className="text-sm text-muted-foreground">
-                {isLoading ? "Chargement…" : `${filtered.length} ${filtered.length > 1 ? "produits" : "produit"}`}
+                {isLoading
+                  ? "Chargement…"
+                  : `${filtered.length} ${filtered.length > 1 ? "produits" : "produit"}`}
               </div>
               <select
                 value={sort}
@@ -197,7 +224,9 @@ function BoutiquePage() {
             ) : (
               <>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {visibleProducts.map((p) => <ProductCard key={p.id} product={p} />)}
+                  {visibleProducts.map((p) => (
+                    <ProductCard key={p.id} product={p} />
+                  ))}
                 </div>
                 {hasMore && (
                   <div className="mt-10 flex justify-center">

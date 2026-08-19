@@ -64,7 +64,10 @@ async function fetchOrders(): Promise<Order[]> {
 
 function AdminOrdersPage() {
   const qc = useQueryClient();
-  const { data: orders = [], isLoading } = useQuery({ queryKey: ["admin-orders"], queryFn: fetchOrders });
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ["admin-orders"],
+    queryFn: fetchOrders,
+  });
   const [filter, setFilter] = useState<OrderStatus | "">("");
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -135,10 +138,16 @@ function AdminOrdersPage() {
           {filtered.map((o) => {
             const open = openId === o.id;
             const st = statusStyle(o.status);
-            const date = new Date(o.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+            const date = new Date(o.created_at).toLocaleString("fr-FR", {
+              dateStyle: "short",
+              timeStyle: "short",
+            });
             const waPhone = o.customer_phone.replace(/[^0-9]/g, "");
             return (
-              <li key={o.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <li
+                key={o.id}
+                className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
+              >
                 <button
                   onClick={() => setOpenId(open ? null : o.id)}
                   className="w-full text-left p-3 flex items-center gap-3 hover:bg-gray-50"
@@ -146,7 +155,11 @@ function AdminOrdersPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-gray-900 truncate">{o.customer_name}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${st.className}`}>{st.label}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${st.className}`}
+                      >
+                        {st.label}
+                      </span>
                     </div>
                     <div className="text-xs text-gray-500 truncate">
                       {o.zone} · {o.customer_phone} · {date}
@@ -154,9 +167,15 @@ function AdminOrdersPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="font-semibold text-gray-900">{formatFCFA(o.total_fcfa)}</div>
-                    <div className="text-[10px] text-gray-500">{o.items.length} article{o.items.length > 1 ? "s" : ""}</div>
+                    <div className="text-[10px] text-gray-500">
+                      {o.items.length} article{o.items.length > 1 ? "s" : ""}
+                    </div>
                   </div>
-                  {open ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
+                  {open ? (
+                    <ChevronUp className="h-4 w-4 text-gray-400" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  )}
                 </button>
 
                 {open && (
@@ -175,16 +194,16 @@ function AdminOrdersPage() {
 
                     {o.address && (
                       <div className="text-sm text-gray-700">
-                        <span className="font-medium">Adresse : </span>{o.address}
+                        <span className="font-medium">Adresse : </span>
+                        {o.address}
                       </div>
                     )}
 
                     <div className="flex flex-wrap gap-2">
                       <a
-                        href={whatsappLink(`Bonjour ${o.customer_name}, je reviens vers vous concernant votre commande Al Kareem Parfumerie du ${date}.`).replace(
-                          /wa\.me\/\d+/,
-                          `wa.me/${waPhone}`,
-                        )}
+                        href={whatsappLink(
+                          `Bonjour ${o.customer_name}, je reviens vers vous concernant votre commande Al Kareem Parfumerie du ${date}.`,
+                        ).replace(/wa\.me\/\d+/, `wa.me/${waPhone}`)}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 text-white px-4 py-2 text-xs font-medium hover:bg-emerald-700"
@@ -202,7 +221,8 @@ function AdminOrdersPage() {
                       )}
                       <button
                         onClick={() => {
-                          if (window.confirm("Supprimer définitivement cette commande ?")) del.mutate(o.id);
+                          if (window.confirm("Supprimer définitivement cette commande ?"))
+                            del.mutate(o.id);
                         }}
                         className="inline-flex items-center gap-1.5 rounded-full bg-white border border-red-200 text-red-600 px-4 py-2 text-xs font-medium hover:bg-red-50"
                       >

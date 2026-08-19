@@ -65,10 +65,15 @@ export function RotatingSelection({
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 md:pb-24">
       <div className="flex items-end justify-between mb-10">
         <div>
-          <div className="text-xs uppercase tracking-widest text-primary mb-2">Un choix par univers</div>
+          <div className="text-xs uppercase tracking-widest text-primary mb-2">
+            Un choix par univers
+          </div>
           <h2 className="font-serif text-3xl md:text-4xl text-primary-deep">Notre sélection</h2>
         </div>
-        <Link to="/boutique" className="hidden sm:inline-flex items-center gap-1 text-sm text-primary hover:text-primary-deep">
+        <Link
+          to="/boutique"
+          className="hidden sm:inline-flex items-center gap-1 text-sm text-primary hover:text-primary-deep"
+        >
           Tout voir <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -90,22 +95,42 @@ export function RotatingSelection({
 }
 
 const ENGAGEMENTS = [
-  { icon: Sparkles, title: "Parfums sélectionnés avec soin", desc: "Chaque référence est choisie et sentie avant d'entrer en boutique." },
-  { icon: BadgeCheck, title: "Qualité vérifiée", desc: "Packaging et étiquettes contrôlés, tenue et sillage testés." },
-  { icon: HeartHandshake, title: "Conseil personnalisé", desc: "On vous aide à trouver la fragrance qui vous ressemble vraiment." },
+  {
+    icon: Sparkles,
+    title: "Parfums sélectionnés avec soin",
+    desc: "Chaque référence est choisie et sentie avant d'entrer en boutique.",
+  },
+  {
+    icon: BadgeCheck,
+    title: "Qualité vérifiée",
+    desc: "Packaging et étiquettes contrôlés, tenue et sillage testés.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Conseil personnalisé",
+    desc: "On vous aide à trouver la fragrance qui vous ressemble vraiment.",
+  },
 ];
 
 /** Engagements + preuves d'authenticité + témoignages clients. */
 export function TrustSection() {
-  const { data: proofs = [] } = useQuery({ queryKey: ["authenticity-proofs"], queryFn: fetchProofs });
-  const { data: testimonials = [] } = useQuery({ queryKey: ["testimonials"], queryFn: fetchTestimonials });
+  const { data: proofs = [] } = useQuery({
+    queryKey: ["authenticity-proofs"],
+    queryFn: fetchProofs,
+  });
+  const { data: testimonials = [] } = useQuery({
+    queryKey: ["testimonials"],
+    queryFn: fetchTestimonials,
+  });
 
   return (
     <section className="bg-white border-y border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24 space-y-12 md:space-y-16">
         <div>
           <div className="text-xs uppercase tracking-widest text-primary mb-2">Nos engagements</div>
-          <h2 className="font-serif text-3xl md:text-4xl text-primary-deep">Authenticité garantie</h2>
+          <h2 className="font-serif text-3xl md:text-4xl text-primary-deep">
+            Authenticité garantie
+          </h2>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {ENGAGEMENTS.map((e) => (
               <div key={e.title} className="rounded-2xl bg-secondary p-6">
@@ -122,7 +147,9 @@ export function TrustSection() {
         {proofs.length > 0 && (
           <div>
             <h3 className="font-serif text-2xl text-primary-deep">Preuves d'authenticité</h3>
-            <p className="text-sm text-muted-foreground mt-1">Nos flacons, packagings et étiquettes en photo.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Nos flacons, packagings et étiquettes en photo.
+            </p>
             <div className="mt-6 grid gap-4 grid-cols-2 lg:grid-cols-4">
               {proofs.slice(0, 8).map((p) => (
                 <figure key={p.id} className="overflow-hidden rounded-2xl bg-gradient-hero">
@@ -134,7 +161,9 @@ export function TrustSection() {
                     className="h-full w-full aspect-square object-cover"
                   />
                   {p.caption && (
-                    <figcaption className="px-3 py-2 text-xs text-muted-foreground bg-white">{p.caption}</figcaption>
+                    <figcaption className="px-3 py-2 text-xs text-muted-foreground bg-white">
+                      {p.caption}
+                    </figcaption>
                   )}
                 </figure>
               ))}
@@ -147,7 +176,10 @@ export function TrustSection() {
             <h3 className="font-serif text-2xl text-primary-deep">Témoignages clients</h3>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {testimonials.map((t) => (
-                <blockquote key={t.id} className="rounded-2xl border border-border bg-secondary/50 p-6">
+                <blockquote
+                  key={t.id}
+                  className="rounded-2xl border border-border bg-secondary/50 p-6"
+                >
                   <Quote className="h-5 w-5 text-primary/50" />
                   <p className="mt-3 text-sm text-foreground/80 leading-relaxed">{t.message}</p>
                   <footer className="mt-4 flex items-center justify-between gap-2">

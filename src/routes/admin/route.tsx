@@ -90,14 +90,22 @@ function AdminHeader({ email }: { email: string }) {
     <header className="sticky top-0 z-20 bg-white border-b border-gray-200">
       <div className="mx-auto max-w-5xl px-4 h-16 flex items-center justify-between gap-3">
         <Link to="/admin" className="flex items-center gap-2 min-w-0">
-          <img src="/alkareem-logo.jpg" alt="Al Kareem" className="h-9 w-9 object-contain shrink-0 rounded-full" />
+          <img
+            src="/alkareem-logo.jpg"
+            alt="Al Kareem"
+            className="h-9 w-9 object-contain shrink-0 rounded-full"
+          />
           <div className="leading-tight min-w-0">
             <div className="font-serif text-base text-gray-900 truncate">Al Kareem</div>
-            <div className="text-[10px] tracking-widest text-gray-500 uppercase">Administration</div>
+            <div className="text-[10px] tracking-widest text-gray-500 uppercase">
+              Administration
+            </div>
           </div>
         </Link>
         <div className="flex items-center gap-2">
-          <span className="hidden sm:inline text-xs text-gray-500 truncate max-w-[160px]">{email}</span>
+          <span className="hidden sm:inline text-xs text-gray-500 truncate max-w-[160px]">
+            {email}
+          </span>
           <button
             onClick={async () => {
               await supabase.auth.signOut();
@@ -111,12 +119,45 @@ function AdminHeader({ email }: { email: string }) {
         </div>
       </div>
       <nav className="mx-auto max-w-5xl px-2 sm:px-4 pb-2 grid grid-cols-6 gap-1 sm:flex sm:flex-wrap sm:gap-2">
-        <NavTab to="/admin" label="Produits" short="Produits" icon={<Package className="h-5 w-5 sm:h-4 sm:w-4" />} exact />
-        <NavTab to="/admin/commandes" label="Commandes" short="Cmdes" icon={<ShoppingBag className="h-5 w-5 sm:h-4 sm:w-4" />} badge={counts.orders} />
-        <NavTab to="/admin/messages" label="Messages" short="Messages" icon={<Mail className="h-5 w-5 sm:h-4 sm:w-4" />} badge={counts.messages} />
-        <NavTab to="/admin/categories" label="Catégories" short="Catég." icon={<Tag className="h-5 w-5 sm:h-4 sm:w-4" />} />
-        <NavTab to="/admin/vitrine" label="Vitrine" short="Vitrine" icon={<Sparkles className="h-5 w-5 sm:h-4 sm:w-4" />} />
-        <NavTab to="/" label="Voir la boutique" short="Boutique" icon={<LayoutGrid className="h-5 w-5 sm:h-4 sm:w-4" />} />
+        <NavTab
+          to="/admin"
+          label="Produits"
+          short="Produits"
+          icon={<Package className="h-5 w-5 sm:h-4 sm:w-4" />}
+          exact
+        />
+        <NavTab
+          to="/admin/commandes"
+          label="Commandes"
+          short="Cmdes"
+          icon={<ShoppingBag className="h-5 w-5 sm:h-4 sm:w-4" />}
+          badge={counts.orders}
+        />
+        <NavTab
+          to="/admin/messages"
+          label="Messages"
+          short="Messages"
+          icon={<Mail className="h-5 w-5 sm:h-4 sm:w-4" />}
+          badge={counts.messages}
+        />
+        <NavTab
+          to="/admin/categories"
+          label="Catégories"
+          short="Catég."
+          icon={<Tag className="h-5 w-5 sm:h-4 sm:w-4" />}
+        />
+        <NavTab
+          to="/admin/vitrine"
+          label="Vitrine"
+          short="Vitrine"
+          icon={<Sparkles className="h-5 w-5 sm:h-4 sm:w-4" />}
+        />
+        <NavTab
+          to="/"
+          label="Voir la boutique"
+          short="Boutique"
+          icon={<LayoutGrid className="h-5 w-5 sm:h-4 sm:w-4" />}
+        />
       </nav>
     </header>
   );
@@ -132,7 +173,14 @@ function NavTab({
   icon,
   exact,
   badge,
-}: { to: string; label: string; short: string; icon: React.ReactNode; exact?: boolean; badge?: number }) {
+}: {
+  to: string;
+  label: string;
+  short: string;
+  icon: React.ReactNode;
+  exact?: boolean;
+  badge?: number;
+}) {
   return (
     <Link
       to={to}
@@ -201,7 +249,11 @@ function SetupForm({ onBack }: { onBack?: () => void } = {}) {
   return (
     <FullScreen>
       <div className="text-center mb-6">
-        <img src="/alkareem-logo.jpg" alt="Al Kareem" className="h-14 w-14 mx-auto mb-3 object-contain rounded-full" />
+        <img
+          src="/alkareem-logo.jpg"
+          alt="Al Kareem"
+          className="h-14 w-14 mx-auto mb-3 object-contain rounded-full"
+        />
         <h1 className="font-serif text-2xl text-gray-900">Bienvenue</h1>
         <p className="text-sm text-gray-600 mt-2">
           Créez votre compte administrateur pour gérer votre boutique.
@@ -217,10 +269,25 @@ function SetupForm({ onBack }: { onBack?: () => void } = {}) {
         className="space-y-4"
       >
         <Field label="Adresse e-mail">
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT} autoComplete="email" />
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={INPUT}
+            autoComplete="email"
+          />
         </Field>
         <Field label="Mot de passe (10 caractères min., lettres + chiffres)">
-          <input type="password" required minLength={10} value={password} onChange={(e) => setPassword(e.target.value)} className={INPUT} autoComplete="new-password" />
+          <input
+            type="password"
+            required
+            minLength={10}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={INPUT}
+            autoComplete="new-password"
+          />
         </Field>
         <button type="submit" disabled={mut.isPending} className={BTN_PRIMARY}>
           {mut.isPending ? "Création…" : "Créer mon compte"}
@@ -246,7 +313,9 @@ function LoginForm() {
   const [sending, setSending] = useState(false);
   const [showSetup, setShowSetup] = useState(false);
 
-  useEffect(() => { /* focus first field is nice-to-have */ }, []);
+  useEffect(() => {
+    /* focus first field is nice-to-have */
+  }, []);
 
   if (showSetup) {
     return <SetupForm onBack={() => setShowSetup(false)} />;
@@ -255,7 +324,11 @@ function LoginForm() {
   return (
     <FullScreen>
       <div className="text-center mb-6">
-        <img src="/alkareem-logo.jpg" alt="Al Kareem" className="h-14 w-14 mx-auto mb-3 object-contain rounded-full" />
+        <img
+          src="/alkareem-logo.jpg"
+          alt="Al Kareem"
+          className="h-14 w-14 mx-auto mb-3 object-contain rounded-full"
+        />
         <h1 className="font-serif text-2xl text-gray-900">Connexion</h1>
         <p className="text-sm text-gray-600 mt-2">Espace administration</p>
       </div>
@@ -263,17 +336,34 @@ function LoginForm() {
         onSubmit={async (e) => {
           e.preventDefault();
           setBusy(true);
-          const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+          const { error } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password,
+          });
           setBusy(false);
           if (error) toast.error("E-mail ou mot de passe incorrect.");
         }}
         className="space-y-4"
       >
         <Field label="Adresse e-mail">
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT} autoComplete="email" />
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={INPUT}
+            autoComplete="email"
+          />
         </Field>
         <Field label="Mot de passe">
-          <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className={INPUT} autoComplete="current-password" />
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={INPUT}
+            autoComplete="current-password"
+          />
         </Field>
         <button type="submit" disabled={busy} className={BTN_PRIMARY}>
           {busy ? "Connexion…" : "Se connecter"}
@@ -291,8 +381,12 @@ function LoginForm() {
               redirectTo: `${window.location.origin}/reset-password`,
             });
             setSending(false);
-            if (error) toast.error("Envoi impossible pour le moment. Réessayez dans quelques minutes.");
-            else toast.success("E-mail de réinitialisation envoyé. Vérifiez votre boîte de réception.");
+            if (error)
+              toast.error("Envoi impossible pour le moment. Réessayez dans quelques minutes.");
+            else
+              toast.success(
+                "E-mail de réinitialisation envoyé. Vérifiez votre boîte de réception.",
+              );
           }}
           className="w-full text-sm text-gray-600 underline underline-offset-4 hover:text-gray-900 disabled:opacity-60"
         >
@@ -309,7 +403,6 @@ function LoginForm() {
     </FullScreen>
   );
 }
-
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

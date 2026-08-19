@@ -23,7 +23,10 @@ function VitrinePage() {
 
 function ProofsSection() {
   const qc = useQueryClient();
-  const { data: proofs = [] } = useQuery({ queryKey: ["authenticity-proofs"], queryFn: fetchProofs });
+  const { data: proofs = [] } = useQuery({
+    queryKey: ["authenticity-proofs"],
+    queryFn: fetchProofs,
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [caption, setCaption] = useState("");
@@ -62,7 +65,9 @@ function ProofsSection() {
     <section className="space-y-3">
       <div>
         <h2 className="font-medium text-gray-900">Preuves d'authenticité</h2>
-        <p className="text-sm text-gray-500">Photos de parfums avec packaging ou étiquette visible.</p>
+        <p className="text-sm text-gray-500">
+          Photos de parfums avec packaging ou étiquette visible.
+        </p>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 p-3 space-y-3">
@@ -95,7 +100,8 @@ function ProofsSection() {
           onClick={() => inputRef.current?.click()}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg bg-gray-900 text-white px-4 py-3 text-sm font-medium disabled:opacity-60"
         >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />} Ajouter une photo
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}{" "}
+          Ajouter une photo
         </button>
       </div>
 
@@ -203,10 +209,14 @@ function TestimonialsSection() {
               className="h-10 w-10 grid place-items-center rounded-lg hover:bg-gray-100"
               aria-label={`${n} étoile${n > 1 ? "s" : ""}`}
             >
-              <Star className={`h-5 w-5 ${n <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+              <Star
+                className={`h-5 w-5 ${n <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}`}
+              />
             </button>
           ))}
-          <span className="text-xs text-gray-500">{rating === 0 ? "sans note" : `${rating}/5`}</span>
+          <span className="text-xs text-gray-500">
+            {rating === 0 ? "sans note" : `${rating}/5`}
+          </span>
         </div>
         <button
           type="submit"
@@ -224,7 +234,9 @@ function TestimonialsSection() {
               <div className="min-w-0 flex-1">
                 <div className="font-medium text-gray-900 truncate">
                   {t.name}
-                  {t.rating ? <span className="ml-2 text-xs text-amber-500">{"★".repeat(t.rating)}</span> : null}
+                  {t.rating ? (
+                    <span className="ml-2 text-xs text-amber-500">{"★".repeat(t.rating)}</span>
+                  ) : null}
                 </div>
                 <p className="text-sm text-gray-600 break-words">{t.message}</p>
               </div>

@@ -9,8 +9,14 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminProductsList() {
-  const { data: products = [], isLoading } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
-  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("");
 
@@ -53,7 +59,9 @@ function AdminProductsList() {
         >
           <option value="">Toutes les catégories</option>
           {categories.map((c) => (
-            <option key={c.id} value={c.slug}>{c.name}</option>
+            <option key={c.id} value={c.slug}>
+              {c.name}
+            </option>
           ))}
         </select>
       </div>
@@ -91,7 +99,11 @@ function AdminProductsList() {
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-sm">
                     <span className="font-semibold text-gray-900">{formatFCFA(p.price)}</span>
-                    {p.oldPrice && <span className="text-xs text-gray-400 line-through">{formatFCFA(p.oldPrice)}</span>}
+                    {p.oldPrice && (
+                      <span className="text-xs text-gray-400 line-through">
+                        {formatFCFA(p.oldPrice)}
+                      </span>
+                    )}
                     <span
                       className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-medium ${
                         p.inStock ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"

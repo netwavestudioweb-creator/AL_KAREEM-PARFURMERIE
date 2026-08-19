@@ -25,7 +25,9 @@ export function SiteHeader() {
             </div>
             <div className="leading-tight">
               <div className="font-serif text-xl text-primary-deep">Al Kareem</div>
-              <div className="text-[10px] tracking-[0.25em] text-muted-foreground uppercase">Parfumerie</div>
+              <div className="text-[10px] tracking-[0.25em] text-muted-foreground uppercase">
+                Parfumerie
+              </div>
             </div>
           </Link>
 
@@ -72,7 +74,12 @@ export function SiteHeader() {
           </div>
         </div>
 
-        <div className={cn("md:hidden overflow-hidden transition-all", open ? "max-h-64 pb-4" : "max-h-0")}>
+        <div
+          className={cn(
+            "md:hidden overflow-hidden transition-all",
+            open ? "max-h-64 pb-4" : "max-h-0",
+          )}
+        >
           <nav className="flex flex-col gap-1">
             {nav.map((n) => (
               <Link

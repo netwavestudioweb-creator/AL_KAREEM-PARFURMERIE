@@ -3,7 +3,15 @@ import { SiteLayout } from "@/components/layout";
 import { useCart } from "@/lib/cart";
 import { formatFCFA, whatsappLink, WHATSAPP_NUMBER } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
-import { Minus, Plus, Trash2, MessageCircle, ShoppingBag, ArrowLeft, CheckCircle2 } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  Trash2,
+  MessageCircle,
+  ShoppingBag,
+  ArrowLeft,
+  CheckCircle2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -11,14 +19,21 @@ export const Route = createFileRoute("/panier")({
   head: () => ({
     meta: [
       { title: "Panier — Al Kareem Parfumerie" },
-      { name: "description", content: "Finalisez votre commande via WhatsApp. Paiement à la livraison ou en main propre." },
+      {
+        name: "description",
+        content:
+          "Finalisez votre commande via WhatsApp. Paiement à la livraison ou en main propre.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Panier — Al Kareem" },
       { property: "og:description", content: "Finalisez votre commande de parfums via WhatsApp." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "/og-alkareem.jpg" },
-      { name: "twitter:image", content: "/og-alkareem.jpg" },
+      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      {
+        name: "twitter:image",
+        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+      },
     ],
   }),
   component: CartPage,
@@ -62,12 +77,13 @@ function CartPage() {
         const c = JSON.parse(raw);
         setForm((f) => ({ ...f, ...c }));
       }
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }, []);
 
-  const zoneLabel = form.zone === "Autre" && form.autreVille.trim()
-    ? form.autreVille.trim()
-    : form.zone;
+  const zoneLabel =
+    form.zone === "Autre" && form.autreVille.trim() ? form.autreVille.trim() : form.zone;
 
   const goToConfirm = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +92,7 @@ function CartPage() {
       return;
     }
     if (!isValidBeninPhone(form.tel)) {
-      toast.error("Numéro invalide. Utilisez un numéro béninois (8 chiffres, ex : 01 61 88 89 87).");
+      toast.error("Numéro invalide. Utilisez un numéro béninois (8 chiffres, ex : 61 88 89 87).");
       return;
     }
     if (form.zone === "Autre" && !form.autreVille.trim()) {
@@ -142,9 +158,17 @@ function CartPage() {
     try {
       localStorage.setItem(
         CUSTOMER_KEY,
-        JSON.stringify({ nom: form.nom, tel: form.tel, zone: form.zone, autreVille: form.autreVille, adresse: form.adresse }),
+        JSON.stringify({
+          nom: form.nom,
+          tel: form.tel,
+          zone: form.zone,
+          autreVille: form.autreVille,
+          adresse: form.adresse,
+        }),
       );
-    } catch {}
+    } catch {
+      /* ignore */
+    }
 
     const lines = items
       .map(
@@ -181,8 +205,13 @@ function CartPage() {
             <ShoppingBag className="h-8 w-8" />
           </div>
           <h1 className="font-serif text-3xl text-primary-deep">Votre panier est vide</h1>
-          <p className="text-muted-foreground mt-2">Découvrez nos fragrances et laissez-vous séduire.</p>
-          <Link to="/boutique" className="inline-flex mt-6 rounded-full bg-primary-deep text-primary-foreground px-6 py-3 text-sm font-medium hover:bg-primary transition-colors">
+          <p className="text-muted-foreground mt-2">
+            Découvrez nos fragrances et laissez-vous séduire.
+          </p>
+          <Link
+            to="/boutique"
+            className="inline-flex mt-6 rounded-full bg-primary-deep text-primary-foreground px-6 py-3 text-sm font-medium hover:bg-primary transition-colors"
+          >
             Aller à la boutique
           </Link>
         </section>
@@ -198,24 +227,51 @@ function CartPage() {
         <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
           <div className="space-y-4">
             {items.map((i) => (
-              <div key={i.productId} className="flex gap-4 p-4 rounded-2xl bg-white border border-border">
-                <img src={i.image} alt={i.name} className="h-24 w-24 rounded-xl object-cover shrink-0" />
+              <div
+                key={i.productId}
+                className="flex gap-4 p-4 rounded-2xl bg-white border border-border"
+              >
+                <img
+                  src={i.image}
+                  alt={i.name}
+                  className="h-24 w-24 rounded-xl object-cover shrink-0"
+                />
                 <div className="flex-1 min-w-0">
                   <div className="font-serif text-lg text-primary-deep">{i.name}</div>
                   <div className="text-xs text-muted-foreground">{i.volume}</div>
                   <div className="mt-2 font-medium text-primary-deep">{formatFCFA(i.price)}</div>
                 </div>
                 <div className="flex flex-col items-end justify-between">
-                  <button onClick={() => removeItem(i.productId)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                  <button
+                    onClick={() => removeItem(i.productId)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                   <div className="inline-flex items-center border border-border rounded-full">
-                    <button onClick={() => updateQty(i.productId, i.quantity - 1)} className="h-8 w-8 flex items-center justify-center hover:bg-secondary rounded-l-full"><Minus className="h-3 w-3" /></button>
+                    <button
+                      onClick={() => updateQty(i.productId, i.quantity - 1)}
+                      className="h-8 w-8 flex items-center justify-center hover:bg-secondary rounded-l-full"
+                    >
+                      <Minus className="h-3 w-3" />
+                    </button>
                     <span className="w-8 text-center text-sm font-medium">{i.quantity}</span>
-                    <button onClick={() => updateQty(i.productId, i.quantity + 1)} className="h-8 w-8 flex items-center justify-center hover:bg-secondary rounded-r-full"><Plus className="h-3 w-3" /></button>
+                    <button
+                      onClick={() => updateQty(i.productId, i.quantity + 1)}
+                      className="h-8 w-8 flex items-center justify-center hover:bg-secondary rounded-r-full"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </button>
                   </div>
                 </div>
               </div>
             ))}
-            <button onClick={clear} className="text-xs text-muted-foreground hover:text-destructive">Vider le panier</button>
+            <button
+              onClick={clear}
+              className="text-xs text-muted-foreground hover:text-destructive"
+            >
+              Vider le panier
+            </button>
           </div>
 
           <div className="p-6 rounded-2xl bg-white border border-border h-fit space-y-5 shadow-soft">
@@ -249,38 +305,69 @@ function CartPage() {
                 <div className="grid gap-3">
                   <label className="block">
                     <span className="text-xs font-medium text-foreground/70">Nom complet</span>
-                    <input required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} className="mt-1 w-full h-11 rounded-lg border border-border px-3 text-sm outline-none focus:border-primary" />
+                    <input
+                      required
+                      value={form.nom}
+                      onChange={(e) => setForm({ ...form, nom: e.target.value })}
+                      className="mt-1 w-full h-11 rounded-lg border border-border px-3 text-sm outline-none focus:border-primary"
+                    />
                   </label>
                   <label className="block">
-                    <span className="text-xs font-medium text-foreground/70">Téléphone (Bénin)</span>
+                    <span className="text-xs font-medium text-foreground/70">
+                      Téléphone (Bénin)
+                    </span>
                     <input
                       required
                       type="tel"
                       inputMode="tel"
-                      placeholder="Ex : 01 61 88 89 87"
+                      placeholder="Ex : 61 88 89 87"
                       value={form.tel}
                       onChange={(e) => setForm({ ...form, tel: e.target.value })}
                       className="mt-1 w-full h-11 rounded-lg border border-border px-3 text-sm outline-none focus:border-primary"
                     />
-                    <span className="text-[11px] text-muted-foreground">Format : 8 chiffres, ou avec préfixe +229.</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      Format : 8 chiffres, ou avec préfixe +229.
+                    </span>
                   </label>
                   <label className="block">
-                    <span className="text-xs font-medium text-foreground/70">Zone de livraison</span>
-                    <select value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value as ZoneKey })} className="mt-1 w-full h-11 rounded-lg border border-border bg-white px-3 text-sm outline-none focus:border-primary">
+                    <span className="text-xs font-medium text-foreground/70">
+                      Zone de livraison
+                    </span>
+                    <select
+                      value={form.zone}
+                      onChange={(e) => setForm({ ...form, zone: e.target.value as ZoneKey })}
+                      className="mt-1 w-full h-11 rounded-lg border border-border bg-white px-3 text-sm outline-none focus:border-primary"
+                    >
                       {ZONE_OPTIONS.map((z) => (
-                        <option key={z} value={z}>{z === "Autre" ? "Autre — préciser la ville" : z}</option>
+                        <option key={z} value={z}>
+                          {z === "Autre" ? "Autre — préciser la ville" : z}
+                        </option>
                       ))}
                     </select>
                   </label>
                   {form.zone === "Autre" && (
                     <label className="block">
                       <span className="text-xs font-medium text-foreground/70">Ville</span>
-                      <input required value={form.autreVille} onChange={(e) => setForm({ ...form, autreVille: e.target.value })} placeholder="Ex : Parakou" className="mt-1 w-full h-11 rounded-lg border border-border px-3 text-sm outline-none focus:border-primary" />
+                      <input
+                        required
+                        value={form.autreVille}
+                        onChange={(e) => setForm({ ...form, autreVille: e.target.value })}
+                        placeholder="Ex : Parakou"
+                        className="mt-1 w-full h-11 rounded-lg border border-border px-3 text-sm outline-none focus:border-primary"
+                      />
                     </label>
                   )}
                   <label className="block">
-                    <span className="text-xs font-medium text-foreground/70">Adresse ou point de repère <span className="text-muted-foreground">(facultatif)</span></span>
-                    <textarea value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })} rows={2} className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary" />
+                    <span className="text-xs font-medium text-foreground/70">
+                      Adresse ou point de repère{" "}
+                      <span className="text-muted-foreground">(facultatif)</span>
+                    </span>
+                    <textarea
+                      value={form.adresse}
+                      onChange={(e) => setForm({ ...form, adresse: e.target.value })}
+                      rows={2}
+                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary"
+                    />
                   </label>
                 </div>
 
@@ -310,8 +397,13 @@ function CartPage() {
                   <ul className="space-y-1">
                     {items.map((i) => (
                       <li key={i.productId} className="flex justify-between gap-3">
-                        <span className="text-foreground/80">{i.name}{i.volume ? ` (${i.volume})` : ""} × {i.quantity}</span>
-                        <span className="text-foreground/70">{formatFCFA(i.price * i.quantity)}</span>
+                        <span className="text-foreground/80">
+                          {i.name}
+                          {i.volume ? ` (${i.volume})` : ""} × {i.quantity}
+                        </span>
+                        <span className="text-foreground/70">
+                          {formatFCFA(i.price * i.quantity)}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -320,11 +412,23 @@ function CartPage() {
                     <span>{formatFCFA(total)}</span>
                   </div>
                   <div className="border-t border-border pt-2 space-y-0.5 text-foreground/80">
-                    <div><span className="text-muted-foreground">Nom : </span>{form.nom}</div>
-                    <div><span className="text-muted-foreground">Téléphone : </span>{form.tel}</div>
-                    <div><span className="text-muted-foreground">Zone : </span>{zoneLabel}</div>
+                    <div>
+                      <span className="text-muted-foreground">Nom : </span>
+                      {form.nom}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Téléphone : </span>
+                      {form.tel}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Zone : </span>
+                      {zoneLabel}
+                    </div>
                     {form.adresse.trim() && (
-                      <div><span className="text-muted-foreground">Adresse : </span>{form.adresse}</div>
+                      <div>
+                        <span className="text-muted-foreground">Adresse : </span>
+                        {form.adresse}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -338,7 +442,8 @@ function CartPage() {
                   {submitting ? "Envoi…" : "Confirmer et ouvrir WhatsApp"}
                 </button>
                 <p className="text-[11px] text-muted-foreground text-center">
-                  Vous serez redirigé·e vers WhatsApp pour finaliser avec Al Kareem (+229 {WHATSAPP_NUMBER.slice(3)}).
+                  Vous serez redirigé·e vers WhatsApp pour finaliser avec Al Kareem (+229{" "}
+                  {WHATSAPP_NUMBER.slice(3)}).
                 </p>
               </div>
             )}

@@ -79,7 +79,10 @@ function ImagePicker({
 
 function CategoriesPage() {
   const qc = useQueryClient();
-  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
   const { data: products = [] } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
 
   const [newName, setNewName] = useState("");

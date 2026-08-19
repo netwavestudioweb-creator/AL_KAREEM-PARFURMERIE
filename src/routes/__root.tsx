@@ -58,12 +58,18 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary-deep"
           >
             Réessayer
           </button>
-          <a href="/" className="rounded-full border border-input bg-background px-6 py-2.5 text-sm font-medium hover:bg-accent">
+          <a
+            href="/"
+            className="rounded-full border border-input bg-background px-6 py-2.5 text-sm font-medium hover:bg-accent"
+          >
             Accueil
           </a>
         </div>
@@ -78,10 +84,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Al Kareem Parfumerie — Sublimez votre aura" },
-      { name: "description", content: "Parfumerie de référence à Cotonou. Parfums femme, homme, unisexe et coffrets. Commande WhatsApp et paiement Mobile Money." },
+      {
+        name: "description",
+        content:
+          "Parfumerie de référence à Cotonou. Parfums femme, homme, unisexe et coffrets. Commande WhatsApp et paiement Mobile Money.",
+      },
       { property: "og:title", content: "Al Kareem Parfumerie" },
-      { property: "og:description", content: "L'amour se porte en parfum. Une sélection d'exception à Cotonou et dans tout le Bénin." },
-      { property: "og:image", content: "/og-alkareem.jpg" },
+      {
+        property: "og:description",
+        content:
+          "L'amour se porte en parfum. Une sélection d'exception à Cotonou et dans tout le Bénin.",
+      },
+      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -90,7 +104,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.ico" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,

@@ -10,13 +10,23 @@ export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: "Contact — Al Kareem Parfumerie" },
-      { name: "description", content: "Contactez Al Kareem Parfumerie à Cotonou : boutique, WhatsApp, Instagram. Nous vous répondons rapidement." },
+      {
+        name: "description",
+        content:
+          "Contactez Al Kareem Parfumerie à Cotonou : boutique, WhatsApp, Instagram. Nous vous répondons rapidement.",
+      },
       { property: "og:title", content: "Contact — Al Kareem" },
-      { property: "og:description", content: "Adresse, WhatsApp, réseaux — nous sommes à votre écoute." },
+      {
+        property: "og:description",
+        content: "Adresse, WhatsApp, réseaux — nous sommes à votre écoute.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "/og-alkareem.jpg" },
-      { name: "twitter:image", content: "/og-alkareem.jpg" },
+      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      {
+        name: "twitter:image",
+        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+      },
       { property: "og:url", content: "/contact" },
     ],
     links: [{ rel: "canonical", href: "/contact" }],
@@ -74,7 +84,8 @@ function ContactPage() {
           <div className="text-xs uppercase tracking-widest text-primary mb-3">Nous joindre</div>
           <h1 className="font-serif text-4xl md:text-5xl text-primary-deep">Restons en contact</h1>
           <p className="mt-4 text-foreground/70 max-w-xl mx-auto">
-            Une question, un conseil parfum, une commande particulière ? Nous vous répondons avec plaisir.
+            Une question, un conseil parfum, une commande particulière ? Nous vous répondons avec
+            plaisir.
           </p>
         </div>
       </section>
@@ -83,21 +94,29 @@ function ContactPage() {
         <div className="p-8 rounded-2xl bg-white border border-border shadow-soft space-y-6">
           <h2 className="font-serif text-2xl text-primary-deep">Boutique physique</h2>
           <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-primary-deep shrink-0"><MapPin className="h-5 w-5" /></div>
+            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-primary-deep shrink-0">
+              <MapPin className="h-5 w-5" />
+            </div>
             <div>
               <div className="font-medium">Cotonou, Bénin</div>
-              <div className="text-sm text-muted-foreground">Adresse précise sur demande WhatsApp</div>
+              <div className="text-sm text-muted-foreground">
+                Adresse précise sur demande WhatsApp
+              </div>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-primary-deep shrink-0"><Phone className="h-5 w-5" /></div>
+            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-primary-deep shrink-0">
+              <Phone className="h-5 w-5" />
+            </div>
             <div>
               <div className="font-medium">+229 01 61 88 89 87</div>
               <div className="text-sm text-muted-foreground">Appels & WhatsApp</div>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-primary-deep shrink-0"><Clock className="h-5 w-5" /></div>
+            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-primary-deep shrink-0">
+              <Clock className="h-5 w-5" />
+            </div>
             <div>
               <div className="font-medium">Lun — Sam · 9h - 20h</div>
               <div className="text-sm text-muted-foreground">Dimanche sur rendez-vous</div>
@@ -106,22 +125,33 @@ function ContactPage() {
           <div className="pt-4 border-t border-border">
             <a
               href={whatsappLink("Bonjour Al Kareem 👋")}
-              target="_blank" rel="noreferrer"
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground px-6 py-3 text-sm font-medium hover:opacity-90"
             >
               <MessageCircle className="h-4 w-4" /> Ouvrir WhatsApp
             </a>
             <div className="mt-4">
-              <a href="https://instagram.com/khadisidibehassan" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm text-primary-deep hover:opacity-80">
+              <a
+                href="https://instagram.com/khadisidibehassan"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-primary-deep hover:opacity-80"
+              >
                 <Instagram className="h-4 w-4" /> @khadisidibehassan
               </a>
             </div>
           </div>
         </div>
 
-        <form onSubmit={submit} className="p-8 rounded-2xl bg-gradient-primary text-primary-foreground shadow-elegant space-y-4">
+        <form
+          onSubmit={submit}
+          className="p-8 rounded-2xl bg-gradient-primary text-primary-foreground shadow-elegant space-y-4"
+        >
           <h2 className="font-serif text-2xl">Écrivez-nous</h2>
-          <p className="opacity-90 text-sm">Laissez-nous un message, nous vous répondons dès que possible.</p>
+          <p className="opacity-90 text-sm">
+            Laissez-nous un message, nous vous répondons dès que possible.
+          </p>
 
           <label className="block">
             <span className="text-xs font-medium opacity-90">Nom</span>

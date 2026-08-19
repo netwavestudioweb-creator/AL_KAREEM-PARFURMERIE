@@ -31,7 +31,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setItems(JSON.parse(raw));
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     setHydrated(true);
   }, []);
 
@@ -43,9 +45,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((i) => i.productId === p.id);
       if (existing) {
-        return prev.map((i) =>
-          i.productId === p.id ? { ...i, quantity: i.quantity + qty } : i,
-        );
+        return prev.map((i) => (i.productId === p.id ? { ...i, quantity: i.quantity + qty } : i));
       }
       return [
         ...prev,
