@@ -79,37 +79,73 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Al Kareem Parfumerie — Sublimez votre aura" },
-      {
-        name: "description",
-        content:
-          "Parfumerie de référence à Cotonou. Parfums femme, homme, unisexe et coffrets. Commande WhatsApp et paiement Mobile Money.",
-      },
-      { property: "og:title", content: "Al Kareem Parfumerie" },
-      {
-        property: "og:description",
-        content:
-          "L'amour se porte en parfum. Une sélection d'exception à Cotonou et dans tout le Bénin.",
-      },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
-      },
-    ],
-  }),
+  head: () => {
+    const scripts = [];
+
+    if (import.meta.env.VITE_CLARITY_ID) {
+      scripts.push({
+        type: "text/javascript",
+        children: `
+          (function(c,l,a,r,i,t,y){
+              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+          })(window, document, "clarity", "script", "${import.meta.env.VITE_CLARITY_ID}");
+        `,
+      });
+    }
+
+    if (import.meta.env.VITE_GA_ID) {
+      scripts.push(
+        {
+          src: `https://www.googletagmanager.com/gtag/js?id=${import.meta.env.VITE_GA_ID}`,
+          async: true,
+        },
+        {
+          type: "text/javascript",
+          children: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${import.meta.env.VITE_GA_ID}');
+          `,
+        }
+      );
+    }
+
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: "Al Kareem Parfumerie — Sublimez votre aura" },
+        {
+          name: "description",
+          content:
+            "Parfumerie de référence à Cotonou. Parfums femme, homme, unisexe et coffrets. Commande WhatsApp et paiement Mobile Money.",
+        },
+        { property: "og:title", content: "Al Kareem Parfumerie" },
+        {
+          property: "og:description",
+          content:
+            "L'amour se porte en parfum. Une sélection d'exception à Cotonou et dans tout le Bénin.",
+        },
+        { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", href: "/favicon.ico" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+        },
+      ],
+      scripts,
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

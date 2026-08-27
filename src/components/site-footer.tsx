@@ -125,7 +125,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-white/10 py-5 text-center text-xs opacity-70">
-        © {new Date().getFullYear()} Al Kareem Parfumerie — Tous droits réservés.
+        © {new Date().getFullYear()} Al Kareem Parfumerie — Tous droits réservés. Réalisé par NetWave Studio.
       </div>
     </footer>
   );
