@@ -1,4 +1,4 @@
-# 📊 Étude de Cas & Rapport Technique — Alkareem Parfumerie
+﻿# 📊 Étude de Cas & Rapport Technique — Alkareem Parfumerie
 
 > **Projet** : Plateforme E-commerce WhatsApp-First & Optimisation Haute Performance Mobile  
 > **Client** : Alkareem Parfumerie (Cotonou, Bénin)  
@@ -109,8 +109,8 @@ Pour répondre à cette double exigence de légèreté et d'adéquation métier,
 | **TTFB / Rendu initial (réseau 3G)** | 3.5s – 6.0s | **~1.0s – 1.2s** | **-75% de latence** ⚡ |
 | **Poids du transfert initial (Core)** | > 2.5 Mo | **< 350 Ko** | **-85% de données** 📉 |
 | **Catalogue administrable** | Formats non standardisés | **~500 références** | **100% fluide & instantané** |
-| **Vulnérabilités de sécurité** | Non vérifiées | **0 vulnérabilité (RLS 100%)** | **Sécurité validée** 🛡️ |
-| **Friction au paiement** | 60%+ d'abandon sur CB classique | **0 friction (WhatsApp + MoMo)** | **Parcours 100% adapté** 🚀 |
+| **Sécurité des données** | Politiques non standardisées | **Row Level Security appliqué à 100% des tables** | **Contrôle d'accès strict** 🛡️ |
+| **Friction au paiement** | Friction connue sur CB classique (marché local) | **Tunnel WhatsApp-First (MoMo & Livraison)** | **Parcours 100% adapté** 🚀 |
 
 ---
 

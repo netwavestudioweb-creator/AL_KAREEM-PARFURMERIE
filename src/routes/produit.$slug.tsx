@@ -125,6 +125,10 @@ function ProductPage() {
               height={800}
               fetchPriority="high"
               decoding="async"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
+              }}
               className="w-full h-full object-cover"
             />
           </div>
@@ -143,6 +147,10 @@ function ProductPage() {
                     decoding="async"
                     width={200}
                     height={200}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
+                    }}
                     className="w-full h-full object-cover"
                   />
                 </button>

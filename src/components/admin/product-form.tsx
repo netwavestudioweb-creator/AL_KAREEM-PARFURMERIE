@@ -84,6 +84,8 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["products"] });
+      await qc.invalidateQueries({ queryKey: ["product"] });
+      await qc.invalidateQueries({ queryKey: ["admin-product"] });
       toast.success(mode === "create" ? "Produit ajouté ✨" : "Modifications enregistrées ✨");
       navigate({ to: "/admin" });
     },
@@ -100,7 +102,7 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
         urls.push(url);
       }
       setValues((v) => ({ ...v, image_urls: [...v.image_urls, ...urls] }));
-      toast.success(`${urls.length} photo(s) ajoutée(s)`);
+      toast.success(`${urls.length} photo(s) ajoutée(s). Cliquez sur "Enregistrer" en bas pour valider.`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Envoi de la photo échoué");
     } finally {

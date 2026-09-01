@@ -6,12 +6,10 @@ export const getRouter = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        // Les catalogues changent rarement : on garde les données fraîches
-        // pendant 5 min et en cache 30 min pour éviter les rechargements
-        // à chaque navigation.
-        staleTime: 5 * 60 * 1000,
-        gcTime: 30 * 60 * 1000,
-        refetchOnWindowFocus: false,
+        // Données fraîches 30s et refetch au focus de fenêtre pour voir immédiatement les modifications faites dans l'admin
+        staleTime: 30 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: true,
         retry: 1,
       },
     },

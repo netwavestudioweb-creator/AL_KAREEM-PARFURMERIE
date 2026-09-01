@@ -79,11 +79,7 @@ export async function uploadImage(file: File, prefix = ""): Promise<string> {
   });
   if (error) throw error;
 
-  // Récupération de l'URL publique directe avec cache HTTP instantané
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  if (data?.publicUrl) return data.publicUrl;
-
-  // Fallback signed URL
+  // Le bucket Supabase étant sécurisé/privé, on génère une URL signée longue durée (10 ans)
   const { data: signData, error: signErr } = await supabase.storage
     .from(BUCKET)
     .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);

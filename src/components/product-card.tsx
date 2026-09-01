@@ -7,6 +7,7 @@ import { ShoppingBag } from "lucide-react";
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
+  const [imgSrc, setImgSrc] = useState(product.image);
   const [loaded, setLoaded] = useState(false);
 
   return (
@@ -17,13 +18,19 @@ export function ProductCard({ product }: { product: Product }) {
             <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-muted/30 via-muted/60 to-muted/30" />
           )}
           <img
-            src={product.image}
+            src={imgSrc}
             alt={product.name}
             loading="lazy"
             decoding="async"
             width={400}
             height={400}
             onLoad={() => setLoaded(true)}
+            onError={() => {
+              setLoaded(true);
+              setImgSrc(
+                "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>",
+              );
+            }}
             sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
             className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
               loaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"

@@ -22,7 +22,24 @@ export async function fetchProofs(): Promise<AuthenticityProof[]> {
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as AuthenticityProof[];
+  const list = (data ?? []) as AuthenticityProof[];
+  return Promise.all(
+    list.map(async (p) => {
+      let url = p.image_url;
+      if (url && url.includes("/storage/v1/object/public/product-images/")) {
+        try {
+          const path = url.split("/storage/v1/object/public/product-images/")[1];
+          const { data: signData } = await supabase.storage
+            .from("product-images")
+            .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+          if (signData?.signedUrl) url = signData.signedUrl;
+        } catch {
+          /* ignore */
+        }
+      }
+      return { ...p, image_url: url };
+    }),
+  );
 }
 
 export async function fetchTestimonials(): Promise<Testimonial[]> {

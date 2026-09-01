@@ -70,6 +70,32 @@ export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): 
   };
 }
 
+const signedUrlCache = new Map<string, string>();
+
+async function ensureSignedUrl(url: string | null): Promise<string | null> {
+  if (!url) return null;
+  if (!url.includes("/storage/v1/object/public/product-images/")) return url;
+  if (signedUrlCache.has(url)) return signedUrlCache.get(url)!;
+  try {
+    const path = url.split("/storage/v1/object/public/product-images/")[1];
+    const { data, error } = await supabase.storage
+      .from("product-images")
+      .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    if (!error && data?.signedUrl) {
+      signedUrlCache.set(url, data.signedUrl);
+      return data.signedUrl;
+    }
+  } catch {
+    /* fallback to url */
+  }
+  return url;
+}
+
+async function resolveProductImageUrls(image_urls: string[] | null | undefined): Promise<string[]> {
+  const urls = image_urls ?? [];
+  return Promise.all(urls.map((u) => ensureSignedUrl(u).then((res) => res ?? u)));
+}
+
 export async function fetchCategories(): Promise<Category[]> {
   const { data, error } = await supabase
     .from("categories")
@@ -77,7 +103,14 @@ export async function fetchCategories(): Promise<Category[]> {
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as Category[];
+  const list = (data ?? []) as Category[];
+  const resolved = await Promise.all(
+    list.map(async (c) => ({
+      ...c,
+      image_url: await ensureSignedUrl(c.image_url),
+    })),
+  );
+  return resolved;
 }
 
 export async function fetchProducts(): Promise<Product[]> {
@@ -87,9 +120,15 @@ export async function fetchProducts(): Promise<Product[]> {
       .from("products")
       .select("*")
       .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error) throw error;
-        return (data ?? []) as DbProduct[];
+        const list = (data ?? []) as DbProduct[];
+        return Promise.all(
+          list.map(async (p) => {
+            const fixedUrls = await resolveProductImageUrls(p.image_urls);
+            return { ...p, image_urls: fixedUrls };
+          }),
+        );
       }),
   ]);
   const map = new Map(cats.map((c) => [c.id, c]));
@@ -104,8 +143,10 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
+  const dbProd = data as DbProduct;
+  const fixedUrls = await resolveProductImageUrls(dbProd.image_urls);
   const cats = await fetchCategories();
-  return toProduct(data as DbProduct, new Map(cats.map((c) => [c.id, c])));
+  return toProduct({ ...dbProd, image_urls: fixedUrls }, new Map(cats.map((c) => [c.id, c])));
 }
 
 export function slugify(input: string): string {
