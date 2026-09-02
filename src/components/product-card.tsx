@@ -49,20 +49,20 @@ export function ProductCard({ product }: { product: Product }) {
             )}
           </div>
         </div>
-        <div className="mt-4 flex flex-1 flex-col">
+        <div className="mt-2.5 sm:mt-4 flex flex-1 flex-col">
           {/* Hauteurs fixes : les cartes de la grille restent alignées quelle
               que soit la longueur du titre ou l'absence de catégorie/volume. */}
-          <div className="h-4 text-[11px] uppercase tracking-widest text-muted-foreground truncate">
+          <div className="h-3.5 sm:h-4 text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground truncate">
             {product.category}
           </div>
-          <h3 className="mt-1 font-serif text-lg font-normal leading-snug text-foreground line-clamp-2 min-h-[3.25rem] group-hover:text-primary transition-colors">
+          <h3 className="mt-0.5 sm:mt-1 font-serif text-sm sm:text-lg font-normal leading-snug text-foreground line-clamp-2 min-h-[2.5rem] sm:min-h-[3.25rem] group-hover:text-primary transition-colors">
             {product.name}
           </h3>
-          <div className="h-4 text-xs text-muted-foreground truncate">{product.volume ?? ""}</div>
-          <div className="mt-auto flex items-baseline gap-2 pt-2">
-            <span className="font-semibold text-primary-deep">{formatFCFA(product.price)}</span>
+          <div className="h-3.5 sm:h-4 text-[11px] sm:text-xs text-muted-foreground truncate">{product.volume ?? ""}</div>
+          <div className="mt-auto flex flex-wrap items-baseline gap-1.5 sm:gap-2 pt-1.5 sm:pt-2">
+            <span className="text-sm sm:text-base font-semibold text-primary-deep">{formatFCFA(product.price)}</span>
             {product.oldPrice && (
-              <span className="text-xs text-muted-foreground line-through">
+              <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
                 {formatFCFA(product.oldPrice)}
               </span>
             )}
@@ -80,9 +80,9 @@ export function ProductCard({ product }: { product: Product }) {
           toast.success(`${product.name} ajouté au panier`);
         }}
         disabled={!product.inStock}
-        className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-white py-2.5 text-sm font-medium text-primary-deep hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-primary-deep"
+        className="mt-2 sm:mt-3 w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full border border-primary/20 bg-white py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-primary-deep hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-primary-deep min-h-[36px] sm:min-h-[40px]"
       >
-        <ShoppingBag className="h-4 w-4" /> {product.inStock ? "Ajouter" : "Rupture"}
+        <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" /> <span>{product.inStock ? "Ajouter" : "Rupture"}</span>
       </button>
     </div>
   );

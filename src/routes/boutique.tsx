@@ -117,23 +117,24 @@ function BoutiquePage() {
   return (
     <SiteLayout>
       <section className="bg-gradient-hero border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
-          <h1 className="font-serif text-4xl md:text-5xl text-primary-deep">Notre boutique</h1>
-          <p className="text-foreground/70 mt-2 max-w-xl">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-12">
+          <h1 className="font-serif text-3xl md:text-5xl text-primary-deep">Notre boutique</h1>
+          <p className="text-foreground/70 mt-1.5 max-w-xl text-sm sm:text-base">
             Trouvez la fragrance qui vous ressemble.
           </p>
-          <div className="mt-6 relative max-w-xl">
+          <div className="mt-4 sm:mt-6 relative max-w-xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               value={q}
               onChange={(e) => setSearch({ q: e.target.value })}
               placeholder="Rechercher un parfum, une catégorie…"
-              className="w-full h-12 rounded-full bg-white border border-border pl-11 pr-11 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-full h-11 sm:h-12 rounded-full bg-white border border-border pl-11 pr-11 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             {q && (
               <button
                 onClick={() => setSearch({ q: "" })}
                 className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-secondary flex items-center justify-center"
+                aria-label="Effacer la recherche"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -142,9 +143,50 @@ function BoutiquePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        {/* Filtres horizontaux sur Mobile (défilement fluide pour remonter les produits au-dessus du pli) */}
+        <div className="lg:hidden mb-5">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
+            <button
+              onClick={() => setSearch({ category: "" })}
+              className={`shrink-0 px-3.5 sm:px-4 py-2 rounded-full text-xs font-medium border transition-colors min-h-[38px] ${
+                !category
+                  ? "bg-primary-deep text-primary-foreground border-primary-deep shadow-xs"
+                  : "bg-white border-border hover:border-primary text-foreground"
+              }`}
+            >
+              Toutes
+            </button>
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setSearch({ category: c.slug })}
+                className={`shrink-0 px-3.5 sm:px-4 py-2 rounded-full text-xs font-medium border transition-colors min-h-[38px] ${
+                  category === c.slug
+                    ? "bg-primary-deep text-primary-foreground border-primary-deep shadow-xs"
+                    : "bg-white border-border hover:border-primary text-foreground"
+                }`}
+              >
+                {c.name}
+              </button>
+            ))}
+            <button
+              onClick={() => setSearch({ promo: !promo })}
+              className={`shrink-0 px-3.5 py-2 rounded-full text-xs font-medium border transition-colors flex items-center gap-1.5 min-h-[38px] ${
+                promo
+                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                  : "bg-white border-border hover:border-primary text-foreground"
+              }`}
+            >
+              <span>🔥</span>
+              <span>Promos</span>
+            </button>
+          </div>
+        </div>
+
         <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
-          <aside className="space-y-6">
+          {/* Barre latérale desktop uniquement */}
+          <aside className="hidden lg:block space-y-6">
             <div>
               <div className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
                 Catégorie
@@ -190,8 +232,8 @@ function BoutiquePage() {
           </aside>
 
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <div className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 {isLoading
                   ? "Chargement…"
                   : `${filtered.length} ${filtered.length > 1 ? "produits" : "produit"}`}
@@ -199,7 +241,7 @@ function BoutiquePage() {
               <select
                 value={sort}
                 onChange={(e) => setSearch({ sort: e.target.value })}
-                className="h-10 rounded-full border border-border bg-white px-4 text-sm outline-none focus:border-primary"
+                className="h-9 sm:h-10 rounded-full border border-border bg-white px-3 sm:px-4 text-xs sm:text-sm outline-none focus:border-primary"
               >
                 <option value="nouveaute">Nouveauté</option>
                 <option value="prix-asc">Prix croissant</option>
@@ -207,13 +249,13 @@ function BoutiquePage() {
               </select>
             </div>
             {isLoading ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex flex-col gap-3">
+                  <div key={i} className="flex flex-col gap-2 sm:gap-3">
                     <div className="aspect-square w-full rounded-2xl bg-muted/40 animate-pulse" />
                     <div className="h-3 w-1/3 rounded-full bg-muted/40 animate-pulse" />
-                    <div className="h-5 w-3/4 rounded-full bg-muted/40 animate-pulse" />
-                    <div className="h-4 w-1/4 rounded-full bg-muted/40 animate-pulse" />
+                    <div className="h-4 sm:h-5 w-3/4 rounded-full bg-muted/40 animate-pulse" />
+                    <div className="h-3 sm:h-4 w-1/4 rounded-full bg-muted/40 animate-pulse" />
                   </div>
                 ))}
               </div>
@@ -223,7 +265,7 @@ function BoutiquePage() {
               </div>
             ) : (
               <>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
                   {visibleProducts.map((p) => (
                     <ProductCard key={p.id} product={p} />
                   ))}

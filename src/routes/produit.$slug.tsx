@@ -101,7 +101,7 @@ function ProductPage() {
 
   return (
     <SiteLayout>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <nav className="text-xs text-muted-foreground flex items-center gap-1">
           <Link to="/" className="hover:text-primary">
             Accueil
@@ -111,13 +111,13 @@ function ProductPage() {
             Boutique
           </Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground">{product.name}</span>
+          <span className="text-foreground truncate">{product.name}</span>
         </nav>
       </div>
 
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 grid gap-12 lg:grid-cols-2">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16 grid gap-8 lg:gap-12 lg:grid-cols-2">
         <div className="space-y-4">
-          <div className="aspect-square rounded-3xl bg-gradient-hero overflow-hidden">
+          <div className="aspect-[4/3] sm:aspect-square max-h-[46vh] sm:max-h-none rounded-2xl sm:rounded-3xl bg-gradient-hero overflow-hidden flex items-center justify-center">
             <img
               src={product.images[activeImg]}
               alt={product.name}
@@ -129,7 +129,7 @@ function ProductPage() {
                 (e.target as HTMLImageElement).src =
                   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
               }}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain sm:object-cover"
             />
           </div>
           {product.images.length > 1 && (
@@ -165,15 +165,15 @@ function ProductPage() {
               {product.category}
             </div>
           )}
-          <h1 className="font-serif text-4xl md:text-5xl text-primary-deep">{product.name}</h1>
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-primary-deep">{product.name}</h1>
           {product.volume && (
-            <div className="text-sm text-muted-foreground mt-2">{product.volume}</div>
+            <div className="text-sm text-muted-foreground mt-1.5">{product.volume}</div>
           )}
 
-          <div className="mt-6 flex items-baseline gap-3">
-            <div className="font-serif text-3xl text-primary-deep">{formatFCFA(product.price)}</div>
+          <div className="mt-4 sm:mt-6 flex items-baseline gap-3">
+            <div className="font-serif text-2xl sm:text-3xl text-primary-deep">{formatFCFA(product.price)}</div>
             {product.oldPrice && (
-              <div className="text-lg text-muted-foreground line-through">
+              <div className="text-base sm:text-lg text-muted-foreground line-through">
                 {formatFCFA(product.oldPrice)}
               </div>
             )}
@@ -185,23 +185,25 @@ function ProductPage() {
           </div>
 
           {product.description && (
-            <p className="text-foreground/75 leading-relaxed mt-6 whitespace-pre-line">
+            <p className="text-foreground/75 leading-relaxed mt-4 sm:mt-6 whitespace-pre-line text-sm sm:text-base">
               {product.description}
             </p>
           )}
 
-          <div className="mt-8 flex items-center gap-4">
+          <div className="mt-6 sm:mt-8 flex items-center gap-4">
             <div className="inline-flex items-center border border-border rounded-full">
               <button
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
-                className="h-11 w-11 flex items-center justify-center hover:bg-secondary rounded-l-full"
+                className="h-10 sm:h-11 w-10 sm:w-11 flex items-center justify-center hover:bg-secondary rounded-l-full"
+                aria-label="Diminuer la quantité"
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="w-10 text-center font-medium">{qty}</span>
+              <span className="w-10 text-center font-medium text-sm">{qty}</span>
               <button
                 onClick={() => setQty((q) => q + 1)}
-                className="h-11 w-11 flex items-center justify-center hover:bg-secondary rounded-r-full"
+                className="h-10 sm:h-11 w-10 sm:w-11 flex items-center justify-center hover:bg-secondary rounded-r-full"
+                aria-label="Augmenter la quantité"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -236,21 +238,62 @@ function ProductPage() {
             </a>
           </div>
 
-          <div className="mt-8 border-t border-border pt-6 space-y-3 text-sm text-foreground/75">
+          <div className="mt-6 sm:mt-8 border-t border-border pt-6 space-y-3 text-sm text-foreground/75">
             <div className="flex items-center gap-3">
-              <Truck className="h-4 w-4 text-primary" /> Livraison Cotonou & Abomey-Calavi sous
+              <Truck className="h-4 w-4 text-primary shrink-0" /> Livraison Cotonou & Abomey-Calavi sous
               24-48h
             </div>
             <div className="flex items-center gap-3">
-              <ShieldCheck className="h-4 w-4 text-primary" /> Paiement Mobile Money ou à la
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" /> Paiement Mobile Money ou à la
               livraison
             </div>
           </div>
         </div>
       </section>
 
+      {/* Barre d'action fixe en bas sur Mobile (Sticky CTA — adaptée du plus petit iPhone SE (320px) au plus grand iPhone 16 Pro Max / Android) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-white/95 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))]">
+        <div className="flex items-center justify-between gap-2 sm:gap-3 max-w-md mx-auto">
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] sm:text-xs text-muted-foreground truncate font-medium">{product.name}</div>
+            <div className="font-serif text-base sm:text-lg font-semibold text-primary-deep leading-tight truncate">
+              {formatFCFA(product.price * qty)}
+              {qty > 1 && (
+                <span className="text-[10px] sm:text-[11px] font-sans font-normal text-muted-foreground ml-1">
+                  ({qty}x)
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <button
+              onClick={() => {
+                if (!product.inStock) {
+                  toast.error("Ce produit est en rupture.");
+                  return;
+                }
+                addItem(product, qty);
+                toast.success(`${product.name} ajouté au panier`);
+              }}
+              disabled={!product.inStock}
+              className="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-full border border-primary text-primary-deep px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 min-h-[40px]"
+            >
+              <ShoppingBag className="h-3.5 w-3.5 shrink-0" /> <span>Panier</span>
+            </button>
+            <a
+              href={whatsappLink(waMessage)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-full bg-whatsapp text-whatsapp-foreground px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold shadow-sm hover:opacity-90 min-h-[40px]"
+            >
+              <MessageCircle className="h-3.5 w-3.5 shrink-0" /> <span>WhatsApp</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {similar.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-28 lg:pb-20">
           <h2 className="font-serif text-2xl md:text-3xl text-primary-deep mb-8">
             Vous aimerez aussi
           </h2>

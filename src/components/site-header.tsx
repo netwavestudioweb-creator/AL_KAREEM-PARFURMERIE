@@ -16,16 +16,16 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border">
+    <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border pt-[env(safe-area-inset-top,0px)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-3 shrink-0" onClick={() => setOpen(false)}>
-            <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-soft border border-border overflow-hidden">
-              <img src="/alkareem-logo.jpg" alt="Al Kareem" className="h-10 w-10 object-contain" />
+        <div className="flex h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4">
+          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0" onClick={() => setOpen(false)}>
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white flex items-center justify-center shadow-soft border border-border overflow-hidden">
+              <img src="/alkareem-logo.jpg" alt="Al Kareem" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
             </div>
             <div className="leading-tight">
-              <div className="font-serif text-xl text-primary-deep">Al Kareem</div>
-              <div className="text-[10px] tracking-[0.25em] text-muted-foreground uppercase">
+              <div className="font-serif text-lg sm:text-xl text-primary-deep">Al Kareem</div>
+              <div className="text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.25em] text-muted-foreground uppercase">
                 Parfumerie
               </div>
             </div>
