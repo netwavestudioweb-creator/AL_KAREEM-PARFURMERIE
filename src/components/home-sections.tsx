@@ -282,8 +282,8 @@ export function RotatingSelection({
           </div>
         </div>
 
-        {/* Onglets miniatures des vrais produits en bas du carrousel */}
-        <div className="mt-8 pt-6 border-t border-border grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
+        {/* Onglets miniatures des vrais produits (visibles sur tablette et bureau pour une navigation directe) */}
+        <div className="mt-6 pt-5 border-t border-border hidden sm:grid sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
           {featuredItems.map((item, idx) => {
             const isActive = idx === activeIndex;
             return (
@@ -318,7 +318,7 @@ export function RotatingSelection({
           })}
         </div>
 
-        {/* Indicateurs de progression (Dots) */}
+        {/* Indicateurs de progression (Dots épurés et modernes) */}
         <div className="mt-5 flex items-center justify-center gap-2">
           {featuredItems.map((_, idx) => (
             <button
@@ -333,29 +333,6 @@ export function RotatingSelection({
             />
           ))}
         </div>
-      </div>
-
-      {/* Bannière de conversion intermédiaire invitant à visiter la boutique */}
-      <div className="mt-10 rounded-2xl bg-gradient-primary text-primary-foreground p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-elegant">
-        <div className="space-y-1 text-center md:text-left">
-          <div className="text-xs uppercase tracking-widest text-gold font-semibold">
-            Catalogue Réel & Disponible
-          </div>
-          <h3 className="font-serif text-2xl sm:text-3xl text-white">
-            Trouvez votre parfum idéal parmi notre sélection
-          </h3>
-          <p className="text-xs sm:text-sm text-primary-foreground/80 max-w-xl">
-            Eaux de parfum authentiques, huiles concentrées et déodorants soignés. Livraison rapide
-            à Cotonou, Calavi et dans tout le Bénin.
-          </p>
-        </div>
-        <Link
-          to="/boutique"
-          className="shrink-0 inline-flex items-center gap-2 rounded-full bg-white text-primary-deep px-6 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold hover:bg-accent transition-all shadow-lg hover:scale-105 whitespace-nowrap"
-        >
-          <span>Accéder à la boutique (plus de 100 parfums)</span>
-          <ArrowRight className="h-4 w-4" />
-        </Link>
       </div>
     </div>
   );

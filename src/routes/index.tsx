@@ -129,44 +129,50 @@ function HomePage() {
         </div>
       </section>
 
-      {/* 3. REASSURANCE : LES 4 PILIERS DE CONFIANCE */}
-      <section className="border-b border-border bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              icon: ShoppingBag,
-              title: "Commande Simple & Rapide",
-              desc: "Parcourez la boutique et commandez en 1 clic",
-            },
-            {
-              icon: Smartphone,
-              title: "Paiement à la Réception",
-              desc: "En espèces, MTN MoMo ou Moov Money",
-            },
-            {
-              icon: Truck,
-              title: "Livraison 24h Garantie",
-              desc: "Cotonou · Calavi · Porto-Novo · Tout le Bénin",
-            },
-            {
-              icon: ShieldCheck,
-              title: "Flacons 100% Authentiques",
-              desc: "Sélection contrôlée et testée en boutique",
-            },
-          ].map((f) => (
-            <div
-              key={f.title}
-              className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-secondary/30 border border-primary/5 hover:border-gold/30 hover:bg-white hover:shadow-soft transition-all"
-            >
-              <div className="h-11 w-11 rounded-full bg-white flex items-center justify-center text-primary-deep shadow-sm shrink-0 border border-border">
-                <f.icon className="h-5 w-5 text-primary" />
+      {/* 3. REASSURANCE : LES 4 PILIERS DE CONFIANCE (GRILLE 2x2 COMPACTE ET ÉLÉGANTE SUR MOBILE) */}
+      <section className="border-b border-border/80 bg-white py-6 sm:py-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+            {[
+              {
+                icon: ShoppingBag,
+                title: "Commande Simple",
+                desc: "En 1 clic sans inscription",
+              },
+              {
+                icon: Smartphone,
+                title: "Paiement Réception",
+                desc: "Espèces, MoMo ou Moov",
+              },
+              {
+                icon: Truck,
+                title: "Livraison 24h",
+                desc: "Cotonou & tout le Bénin",
+              },
+              {
+                icon: ShieldCheck,
+                title: "100% Authentique",
+                desc: "Flacons scellés & certifiés",
+              },
+            ].map((f) => (
+              <div
+                key={f.title}
+                className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-secondary/25 border border-primary/5 hover:border-gold/30 hover:bg-white hover:shadow-soft transition-all"
+              >
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-white flex items-center justify-center text-primary-deep shadow-xs shrink-0 border border-border">
+                  <f.icon className="h-4 w-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-xs sm:text-sm text-foreground leading-tight">
+                    {f.title}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                    {f.desc}
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="font-semibold text-sm text-foreground">{f.title}</div>
-                <div className="text-xs text-muted-foreground mt-0.5 leading-snug">{f.desc}</div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
