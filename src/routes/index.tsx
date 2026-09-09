@@ -111,25 +111,14 @@ function HomePage() {
               immédiatement en boutique avec livraison rapide à Cotonou et au Bénin.
             </p>
 
-            {/* Bouton direct vers la boutique & Rassurance */}
-            <div className="pt-1 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                to="/boutique"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-primary-deep text-primary-foreground px-7 py-3.5 text-sm sm:text-base font-semibold hover:bg-primary transition-all shadow-elegant hover:scale-105 active:scale-95 group whitespace-nowrap"
-              >
-                <ShoppingBag className="h-4 w-4 text-gold" />
-                <span>Explorer toute la boutique (sensiblement 100 parfums)</span>
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground font-medium pt-1">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
+            {/* Indicateurs de rassurance prestigieux */}
+            <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gold/30 text-xs font-medium text-primary-deep shadow-xs">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                 <span>Flacons 100% Authentiques</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gold/30 text-xs font-medium text-primary-deep shadow-xs">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                 <span>Paiement à la réception</span>
               </div>
             </div>
