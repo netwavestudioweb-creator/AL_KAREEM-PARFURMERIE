@@ -92,56 +92,56 @@ function HomePage() {
   const promos = products.filter((p) => p.promo).slice(0, 4);
 
   return (
-    <SiteLayout>
-      {/* 1. HERO SECTION : HAUTE PARFUMERIE & ACCROCHE PRESTIGE */}
-      <section className="relative overflow-hidden bg-gradient-hero border-b border-border/60">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-center relative z-10 space-y-6">
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-deep leading-[1.08] tracking-tight">
-            Sublimez votre aura.
-            <span className="block mt-2 font-serif italic text-2xl sm:text-3xl md:text-4xl text-primary font-normal">
-              L'amour se porte en parfum
-            </span>
-          </h1>
+    <SiteLayout hideFooter>
+      {/* 1. HERO & VITRINE PRESTIGE : SUBLIMEZ VOTRE AURA & COUPS DE CŒUR */}
+      <section className="relative overflow-hidden bg-gradient-hero border-b border-border/60 pt-8 sm:pt-14 pb-12 sm:pb-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Accroche Prestige */}
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12 space-y-4">
+            <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl text-primary-deep leading-tight tracking-tight">
+              Sublimez votre aura.
+              <span className="block mt-1 sm:mt-2 font-serif italic text-xl sm:text-3xl md:text-4xl text-primary font-normal">
+                L'amour se porte en parfum
+              </span>
+            </h1>
 
-          <p className="text-base sm:text-lg text-foreground/80 max-w-2xl mx-auto leading-relaxed font-normal">
-            Explorez notre univers de <strong>plus de 100 fragrances d'exception</strong> :
-            grandes créations de maisons renommées (Lattafa, Ahmed Al Maghribi, Nusuk...), huiles
-            pures et coffrets, disponibles immédiatement en boutique avec livraison rapide à
-            Cotonou et au Bénin.
-          </p>
+            <p className="text-xs sm:text-base text-foreground/80 max-w-xl mx-auto leading-relaxed font-normal">
+              Explorez notre sélection de <strong>plus de 100 fragrances d'exception</strong> :
+              grandes créations de maisons renommées, huiles pures et coffrets, disponibles
+              immédiatement en boutique avec livraison rapide à Cotonou et au Bénin.
+            </p>
 
-          {/* CTA principal : Pousser directement vers la Boutique */}
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              to="/boutique"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-primary-deep text-primary-foreground px-8 py-4 text-sm sm:text-base font-semibold hover:bg-primary transition-all shadow-elegant hover:scale-105 active:scale-95 group whitespace-nowrap"
-            >
-              <ShoppingBag className="h-4 w-4 text-gold" />
-              <span className="hidden sm:inline">Explorer la boutique (sensiblement 100 parfums)</span>
-              <span className="sm:hidden">Boutique (plus de 100 parfums)</span>
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            {/* Bouton direct vers la boutique & Rassurance */}
+            <div className="pt-1 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/boutique"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-primary-deep text-primary-foreground px-7 py-3.5 text-sm sm:text-base font-semibold hover:bg-primary transition-all shadow-elegant hover:scale-105 active:scale-95 group whitespace-nowrap"
+              >
+                <ShoppingBag className="h-4 w-4 text-gold" />
+                <span>Explorer toute la boutique (sensiblement 100 parfums)</span>
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground font-medium pt-1">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <span>Flacons 100% Authentiques</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <span>Paiement à la réception</span>
+              </div>
+            </div>
           </div>
 
-          {/* Indicateurs de rassurance sous le bouton */}
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground font-medium">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span>Flacons 100% Authentiques</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span>Paiement à la réception</span>
-            </div>
-          </div>
+          {/* 2. LE CARROUSEL DES COUPS DE CŒUR DE LA BOUTIQUE */}
+          <RotatingSelection products={products} categories={categories} />
         </div>
       </section>
 
-      {/* 2. LE CARROUSEL DES VRAIS PRODUITS QUI DÉFILENT DIRECTEMENT (COUPS DE CŒUR APRÈS LE HERO) */}
-      <RotatingSelection products={products} categories={categories} />
-
-      {/* 3. REASSURANCE : LES 4 PILIERS DE CONFIANCE (SOUS LES COUPS DE CŒUR) */}
-      <section className="border-y border-border bg-white">
+      {/* 3. REASSURANCE : LES 4 PILIERS DE CONFIANCE */}
+      <section className="border-b border-border bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {[
             {
@@ -180,70 +180,6 @@ function HomePage() {
           ))}
         </div>
       </section>
-
-      {/* 4. NOS UNIVERS OLFACTIFS (CATÉGORIES DE LA BOUTIQUE) */}
-      {categories.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-border">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 md:mb-14">
-            <div>
-              <div className="text-xs uppercase tracking-widest text-gold font-semibold mb-2">
-                Collection Complète
-              </div>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-primary-deep tracking-tight">
-                Explorer par Catégorie
-              </h2>
-              <p className="mt-2 text-sm sm:text-base text-muted-foreground max-w-xl">
-                Choisissez votre univers pour découvrir tous les flacons disponibles en boutique.
-              </p>
-            </div>
-            <Link
-              to="/boutique"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-deep self-start sm:self-end group"
-            >
-              <span>Voir toute la boutique</span>
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {categories.slice(0, 8).map((c) => (
-              <Link
-                key={c.id}
-                to="/boutique"
-                search={{ category: c.slug }}
-                className="group relative rounded-2xl overflow-hidden bg-gradient-primary text-primary-foreground aspect-[4/5] p-5 sm:p-6 flex flex-col justify-end hover:shadow-elegant transition-all hover:-translate-y-1"
-              >
-                {c.image_url ? (
-                  <>
-                    <img
-                      src={c.image_url}
-                      alt={c.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary-deep/90 via-primary-deep/40 to-transparent" />
-                  </>
-                ) : (
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_60%)]" />
-                )}
-                <div className="relative z-10">
-                  <span className="text-[10px] uppercase tracking-widest text-gold font-medium block mb-1">
-                    Univers Al Kareem
-                  </span>
-                  <div className="font-serif text-xl sm:text-2xl md:text-3xl text-white">
-                    {c.name}
-                  </div>
-                  <div className="mt-3 inline-flex items-center gap-1.5 text-xs uppercase tracking-wider font-semibold opacity-90 group-hover:translate-x-1.5 transition-transform text-white">
-                    <span>Explorer le rayon</span>
-                    <ArrowRight className="h-3.5 w-3.5 text-gold" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* 5. BONS PLANS & OFFRES SPÉCIALES DE LA BOUTIQUE */}
       {promos.length > 0 && (

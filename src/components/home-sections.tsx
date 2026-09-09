@@ -112,31 +112,31 @@ export function RotatingSelection({
   };
 
   return (
-    <section
-      className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24 overflow-hidden"
+    <div
+      className="relative mx-auto max-w-7xl overflow-hidden pt-2"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* En-tête de section avec orientation claire vers la boutique */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 md:mb-14">
+      {/* En-tête de section Coups de Cœur */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6 md:mb-8">
         <div>
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-primary-deep tracking-tight">
+          <div className="text-xs uppercase tracking-widest text-gold font-semibold mb-1">
+            En Boutique à Cotonou
+          </div>
+          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-primary-deep tracking-tight">
             Les Coups de Cœur de la Boutique
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-muted-foreground max-w-xl">
-            Découvrez nos flacons réels les plus plébiscités. Tous sont disponibles immédiatement à
-            la commande dans notre boutique.
+          <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-xl">
+            Découvrez nos flacons réels les plus plébiscités, disponibles immédiatement à Cotonou.
           </p>
         </div>
 
-        {/* Bouton vers toute la collection */}
         <Link
           to="/boutique"
-          className="inline-flex items-center gap-2 self-start md:self-end rounded-full bg-primary-deep text-primary-foreground px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold hover:bg-primary transition-all shadow-elegant hover:scale-105 whitespace-nowrap"
+          className="hidden sm:inline-flex items-center gap-2 self-start md:self-end rounded-full bg-primary-deep text-primary-foreground px-5 py-2.5 text-xs sm:text-sm font-semibold hover:bg-primary transition-all shadow-md hover:scale-105 whitespace-nowrap"
         >
-          <span className="hidden sm:inline">Voir toute la boutique (plus de 100 parfums)</span>
-          <span className="sm:hidden">Boutique (plus de 100 parfums)</span>
-          <ArrowRight className="h-4 w-4" />
+          <span>Voir toute la boutique (plus de 100 parfums)</span>
+          <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
@@ -146,22 +146,6 @@ export function RotatingSelection({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Contrôles de navigation flèches */}
-        <button
-          onClick={goToPrev}
-          aria-label="Article précédent"
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/90 border border-primary/20 text-primary-deep flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all hover:scale-110 active:scale-95"
-        >
-          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
-        </button>
-        <button
-          onClick={goToNext}
-          aria-label="Article suivant"
-          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/90 border border-primary/20 text-primary-deep flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all hover:scale-110 active:scale-95"
-        >
-          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
-        </button>
-
         {/* Vue Slide active en grand format */}
         <div className="grid gap-6 lg:grid-cols-12 items-center min-h-[380px] sm:min-h-[420px]">
           {/* Vraie Image du produit en boutique */}
@@ -173,10 +157,28 @@ export function RotatingSelection({
               height={600}
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+
+            {/* Flèches de navigation positionnées sur l'image (ne recouvrent aucun texte) */}
+            <button
+              type="button"
+              onClick={goToPrev}
+              aria-label="Article précédent"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/45 backdrop-blur-md text-white border border-white/20 flex items-center justify-center shadow-lg hover:bg-black/70 hover:scale-110 active:scale-90 transition-all cursor-pointer"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={goToNext}
+              aria-label="Article suivant"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/45 backdrop-blur-md text-white border border-white/20 flex items-center justify-center shadow-lg hover:bg-black/70 hover:scale-110 active:scale-90 transition-all cursor-pointer"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
 
             {/* Badge flottant réel */}
-            <div className="absolute top-4 left-4 flex gap-1.5">
+            <div className="absolute top-4 left-4 flex gap-1.5 pointer-events-none">
               {currentProduct.promo ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-destructive text-white text-xs font-semibold shadow-sm">
                   <Flame className="h-3 w-3" /> Promotion
@@ -189,7 +191,7 @@ export function RotatingSelection({
             </div>
 
             {/* Pastille du vrai prix en boutique */}
-            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
+            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white pointer-events-none">
               <span className="text-xs uppercase tracking-widest text-white/80">
                 {currentProduct.volume ? currentProduct.volume : "Prix boutique"}
               </span>
@@ -207,7 +209,7 @@ export function RotatingSelection({
           </div>
 
           {/* Description & Vrais Call to Action vers la boutique */}
-          <div className="lg:col-span-7 flex flex-col justify-center px-2 sm:px-6 space-y-4 sm:space-y-6">
+          <div className="lg:col-span-7 flex flex-col justify-center px-1 sm:px-6 space-y-4 sm:space-y-6">
             <div className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-primary font-semibold">
               <span>{currentProduct.category || "Parfumerie d'Exception"}</span>
               <span className="h-1 w-1 rounded-full bg-gold" />
@@ -229,40 +231,42 @@ export function RotatingSelection({
               </p>
             )}
 
-            {/* Groupe de boutons d'action concrets */}
-            <div className="pt-2 flex flex-wrap items-center gap-2.5 sm:gap-3">
+            {/* Groupe de boutons d'action lisibles, bien positionnés et aérés */}
+            <div className="pt-2 space-y-2.5">
               <Link
                 to="/produit/$slug"
                 params={{ slug: currentProduct.slug }}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-deep text-primary-foreground px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold hover:bg-primary transition-all shadow-elegant whitespace-nowrap"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary-deep text-primary-foreground px-6 py-3.5 text-sm sm:text-base font-semibold hover:bg-primary transition-all shadow-md active:scale-95 text-center"
               >
                 <span>Commander ce parfum</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
 
-              <button
-                onClick={() => {
-                  addItem(currentProduct);
-                  toast.success(`${currentProduct.name} ajouté au panier`);
-                }}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/30 bg-white text-primary-deep px-4 sm:px-5 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold hover:bg-primary hover:text-white transition-colors whitespace-nowrap"
-              >
-                <ShoppingBag className="h-4 w-4" />
-                <span className="hidden sm:inline">Ajouter au panier</span>
-                <span className="sm:hidden">Ajouter</span>
-              </button>
+              <div className="grid grid-cols-2 gap-2.5 w-full">
+                <button
+                  type="button"
+                  onClick={() => {
+                    addItem(currentProduct);
+                    toast.success(`${currentProduct.name} ajouté au panier ✨`);
+                  }}
+                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full border border-primary/25 bg-white text-primary-deep px-3 py-3 text-xs sm:text-sm font-semibold hover:bg-primary hover:text-white transition-colors shadow-sm active:scale-95"
+                >
+                  <ShoppingBag className="h-4 w-4 text-gold shrink-0" />
+                  <span>Ajouter au panier</span>
+                </button>
 
-              <a
-                href={whatsappLink(
-                  `Bonjour Al Kareem, je souhaite commander le parfum "${currentProduct.name}" à ${formatFCFA(currentProduct.price)} 🌸`,
-                )}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground px-4 sm:px-5 py-3 sm:py-3.5 text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span>WhatsApp</span>
-              </a>
+                <a
+                  href={whatsappLink(
+                    `Bonjour Al Kareem, je souhaite commander le parfum "${currentProduct.name}" à ${formatFCFA(currentProduct.price)} 🌸`,
+                  )}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full bg-whatsapp text-whatsapp-foreground px-3 py-3 text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity shadow-sm active:scale-95"
+                >
+                  <MessageCircle className="h-4 w-4 shrink-0" />
+                  <span>WhatsApp</span>
+                </a>
+              </div>
             </div>
 
             {/* Lien direct pour découvrir l'ensemble du catalogue en boutique */}
@@ -271,7 +275,7 @@ export function RotatingSelection({
                 to="/boutique"
                 className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary-deep transition-colors group"
               >
-                <span>Explorer l'ensemble des 100 parfums en boutique</span>
+                <span>Explorer toute la boutique (plus de 100 parfums)</span>
                 <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
@@ -349,11 +353,11 @@ export function RotatingSelection({
           to="/boutique"
           className="shrink-0 inline-flex items-center gap-2 rounded-full bg-white text-primary-deep px-6 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold hover:bg-accent transition-all shadow-lg hover:scale-105 whitespace-nowrap"
         >
-          <span>Accéder à la boutique (100 parfums)</span>
+          <span>Accéder à la boutique (plus de 100 parfums)</span>
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-    </section>
+    </div>
   );
 }
 
