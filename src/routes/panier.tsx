@@ -44,17 +44,56 @@ const CUSTOMER_KEY = "alkareem_customer_v1";
 type ZoneKey = "Cotonou" | "Abomey-Calavi" | "Porto-Novo" | "Autre";
 const ZONE_OPTIONS: ZoneKey[] = ["Cotonou", "Abomey-Calavi", "Porto-Novo", "Autre"];
 
-/** Numéro béninois : 8 chiffres locaux, éventuellement précédés du préfixe 229
- *  et/ou d'un + ou de 00, et pouvant contenir espaces, tirets ou points. */
-function isValidBeninPhone(input: string) {
-  const digits = input.replace(/[^\d]/g, "");
-  // Accepte 8 chiffres (local), 10 (avec 229) ou 11 (avec 00229)
-  if (digits.length === 8) return /^[0-9]{8}$/.test(digits);
-  if (digits.length === 10 && digits.startsWith("229")) return true;
-  if (digits.length === 11 && digits.startsWith("00229")) return true;
-  // Certains numéros locaux courants tapés avec un 0 initial : 9 chiffres
-  if (digits.length === 9 && digits.startsWith("0")) return true;
-  return false;
+/** Normalise et valide un numéro béninois (10 chiffres avec 01, ou ancien 8 chiffres, avec ou sans +229/00229). */
+function normalizeBeninPhone(input: string): string | null {
+  let digits = input.replace(/[^\d]/g, "");
+
+  if (digits.startsWith("00229")) {
+    digits = digits.slice(5);
+  } else if (digits.startsWith("229")) {
+    digits = digits.slice(3);
+  }
+
+  // Nouveau format officiel Bénin : 10 chiffres commençant par 01
+  if (digits.length === 10 && digits.startsWith("01")) {
+    return digits;
+  }
+
+  // Ancien format local : 8 chiffres -> on préfixe automatiquement '01'
+  if (digits.length === 8) {
+    return `01${digits}`;
+  }
+
+  // Numéro tapé avec un seul 0 au début (ex : 061888987 -> 9 chiffres)
+  if (digits.length === 9 && digits.startsWith("0")) {
+    return `01${digits.slice(1)}`;
+  }
+
+  // Si 10 chiffres (autres préfixes d'opérateurs)
+  if (digits.length === 10) {
+    return digits;
+  }
+
+  // Numéros internationaux ou autres formats (entre 8 et 15 chiffres)
+  if (digits.length >= 8 && digits.length <= 15) {
+    return digits;
+  }
+
+  return null;
+}
+
+function formatBeninPhone(digits: string): string {
+  if (digits.length === 10 && digits.startsWith("01")) {
+    return `${digits.slice(0, 2)} ${digits.slice(2, 4)} ${digits.slice(4, 6)} ${digits.slice(6, 8)} ${digits.slice(8, 10)}`;
+  }
+  if (digits.length === 8) {
+    return `${digits.slice(0, 2)} ${digits.slice(2, 4)} ${digits.slice(4, 6)} ${digits.slice(6, 8)}`;
+  }
+  return digits;
+}
+
+function isValidBeninPhone(input: string): boolean {
+  return normalizeBeninPhone(input) !== null;
 }
 
 function CartPage() {
@@ -91,10 +130,15 @@ function CartPage() {
       toast.error("Merci d'indiquer votre nom.");
       return;
     }
-    if (!isValidBeninPhone(form.tel)) {
-      toast.error("Numéro invalide. Utilisez un numéro béninois (8 chiffres, ex : 61 88 89 87).");
+    const normalized = normalizeBeninPhone(form.tel);
+    if (!normalized) {
+      toast.error("Numéro de téléphone invalide. Merci d'indiquer un numéro joignable (ex : 01 61 88 89 87 ou 61 88 89 87).");
       return;
     }
+    // Formate joliment pour la prévisualisation et la transmission WhatsApp
+    const formatted = formatBeninPhone(normalized);
+    setForm((f) => ({ ...f, tel: formatted }));
+
     if (form.zone === "Autre" && !form.autreVille.trim()) {
       toast.error("Merci de préciser votre ville.");
       return;
@@ -320,13 +364,13 @@ function CartPage() {
                       required
                       type="tel"
                       inputMode="tel"
-                      placeholder="Ex : 61 88 89 87"
+                      placeholder="Ex : 01 61 88 89 87 ou 61 88 89 87"
                       value={form.tel}
                       onChange={(e) => setForm({ ...form, tel: e.target.value })}
                       className="mt-1 w-full h-11 rounded-lg border border-border px-3 text-sm outline-none focus:border-primary"
                     />
                     <span className="text-[11px] text-muted-foreground">
-                      Format : 8 chiffres, ou avec préfixe +229.
+                      Format : 10 chiffres (avec 01) ou 8 chiffres locaux, avec ou sans +229.
                     </span>
                   </label>
                   <label className="block">
