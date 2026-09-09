@@ -104,10 +104,6 @@ function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 md:py-24 grid gap-10 md:grid-cols-2 items-center relative z-10">
           {/* Colonne Gauche : Accroche Prestige & CTAs Boutique */}
           <div className="space-y-6 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-md px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary-deep border border-gold/30 shadow-sm">
-              <Sparkles className="h-3.5 w-3.5 text-gold" /> Haute Parfumerie · Cotonou, Bénin
-            </div>
-
             <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-deep leading-[1.08] tracking-tight">
               Sublimez
               <br />
@@ -141,15 +137,11 @@ function HomePage() {
             <div className="pt-4 flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 text-xs text-muted-foreground font-medium">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>100 Parfums en stock</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
                 <span>Flacons 100% Authentiques</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>Paiement à la livraison</span>
+                <span>Paiement à la réception</span>
               </div>
             </div>
           </div>
@@ -170,8 +162,11 @@ function HomePage() {
         </div>
       </section>
 
-      {/* 2. REASSURANCE : LES 4 PILIERS DE CONFIANCE */}
-      <section className="border-b border-border bg-white">
+      {/* 2. LE CARROUSEL DES VRAIS PRODUITS QUI DÉFILENT DIRECTEMENT (COUPS DE CŒUR APRÈS LE HERO) */}
+      <RotatingSelection products={products} categories={categories} />
+
+      {/* 3. REASSURANCE : LES 4 PILIERS DE CONFIANCE (SOUS LES COUPS DE CŒUR) */}
+      <section className="border-y border-border bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {[
             {
@@ -210,9 +205,6 @@ function HomePage() {
           ))}
         </div>
       </section>
-
-      {/* 3. LE CARROUSEL DES VRAIS PRODUITS QUI DÉFILENT DIRECTEMENT */}
-      <RotatingSelection products={products} categories={categories} />
 
       {/* 4. NOS UNIVERS OLFACTIFS (CATÉGORIES DE LA BOUTIQUE) */}
       {categories.length > 0 && (

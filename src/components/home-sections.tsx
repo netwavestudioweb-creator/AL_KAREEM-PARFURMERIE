@@ -120,9 +120,6 @@ export function RotatingSelection({
       {/* En-tête de section avec orientation claire vers la boutique */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 md:mb-14">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-gold bg-gold/10 px-3 py-1 rounded-full mb-3 border border-gold/20">
-            <Sparkles className="h-3.5 w-3.5" /> Sélections Phares en Défilement
-          </div>
           <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-primary-deep tracking-tight">
             Les Coups de Cœur de la Boutique
           </h2>
