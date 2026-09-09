@@ -15,7 +15,6 @@ import {
   ShoppingBag,
   CheckCircle2,
 } from "lucide-react";
-import hero from "@/assets/hero-perfumes.jpg";
 import boutiqueImg from "@/assets/boutique.jpg";
 
 export const Route = createFileRoute("/")({
@@ -25,7 +24,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Découvrez 100 parfums, huiles concentrées, brumes et coffrets chez Al Kareem Parfumerie à Cotonou. Flacons 100% authentiques, commande en ligne et livraison express Bénin.",
+          "Découvrez plus de 100 parfums, huiles concentrées, brumes et coffrets chez Al Kareem Parfumerie à Cotonou. Flacons 100% authentiques, commande en ligne et livraison express Bénin.",
       },
       { property: "og:title", content: "Al Kareem Parfumerie — Sublimez votre aura" },
       {
@@ -43,10 +42,6 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: "/" },
-      { rel: "preload", as: "image", href: hero, fetchPriority: "high" } as unknown as {
-        rel: string;
-        href: string;
-      },
     ],
     scripts: [
       {
@@ -56,7 +51,7 @@ export const Route = createFileRoute("/")({
           "@type": "Store",
           name: "Al Kareem Parfumerie",
           description:
-            "Parfumerie d'exception à Cotonou, Bénin. 100 références de parfums disponibles en boutique, commande via WhatsApp, paiement à la livraison ou Mobile Money.",
+            "Parfumerie d'exception à Cotonou, Bénin. Plus de 100 références de parfums disponibles en boutique, commande via WhatsApp, paiement à la livraison ou Mobile Money.",
           url: "https://alkareem-parfumerie.bj/",
           telephone: "+2290161888987",
           currenciesAccepted: "XOF",
@@ -95,69 +90,49 @@ function HomePage() {
   });
 
   const promos = products.filter((p) => p.promo).slice(0, 4);
-  const totalCount = 100;
 
   return (
     <SiteLayout>
-      {/* 1. HERO SECTION : HAUTE PARFUMERIE & INCITATION FORTE À LA BOUTIQUE */}
+      {/* 1. HERO SECTION : HAUTE PARFUMERIE & ACCROCHE PRESTIGE */}
       <section className="relative overflow-hidden bg-gradient-hero border-b border-border/60">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 md:py-24 grid gap-10 md:grid-cols-2 items-center relative z-10">
-          {/* Colonne Gauche : Accroche Prestige & CTAs Boutique */}
-          <div className="space-y-6 text-center md:text-left">
-            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-deep leading-[1.08] tracking-tight">
-              Sublimez
-              <br />
-              votre aura.
-              <span className="block mt-2 font-serif italic text-2xl sm:text-3xl md:text-4xl text-primary font-normal">
-                L'amour se porte en parfum
-              </span>
-            </h1>
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-center relative z-10 space-y-6">
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-deep leading-[1.08] tracking-tight">
+            Sublimez votre aura.
+            <span className="block mt-2 font-serif italic text-2xl sm:text-3xl md:text-4xl text-primary font-normal">
+              L'amour se porte en parfum
+            </span>
+          </h1>
 
-            <p className="text-base sm:text-lg text-foreground/80 max-w-xl mx-auto md:mx-0 leading-relaxed font-normal">
-              Explorez notre univers de <strong>{totalCount} fragrances d'exception</strong> :
-              grandes créations de maisons renommées (Lattafa, Ahmed Al Maghribi, Nusuk...), huiles
-              pures et coffrets, disponibles immédiatement en boutique avec livraison rapide à
-              Cotonou et au Bénin.
-            </p>
+          <p className="text-base sm:text-lg text-foreground/80 max-w-2xl mx-auto leading-relaxed font-normal">
+            Explorez notre univers de <strong>plus de 100 fragrances d'exception</strong> :
+            grandes créations de maisons renommées (Lattafa, Ahmed Al Maghribi, Nusuk...), huiles
+            pures et coffrets, disponibles immédiatement en boutique avec livraison rapide à
+            Cotonou et au Bénin.
+          </p>
 
-            {/* CTA principal : Pousser directement vers la Boutique */}
-            <div className="pt-2 flex justify-center md:justify-start">
-              <Link
-                to="/boutique"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-primary-deep text-primary-foreground px-8 py-4 text-sm sm:text-base font-semibold hover:bg-primary transition-all shadow-elegant hover:scale-105 active:scale-95 group whitespace-nowrap"
-              >
-                <ShoppingBag className="h-4 w-4 text-gold" />
-                <span className="hidden sm:inline">Explorer la boutique (100 parfums)</span>
-                <span className="sm:hidden">Boutique (100 parfums)</span>
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-
-            {/* Indicateurs de rassurance sous les boutons */}
-            <div className="pt-4 flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 text-xs text-muted-foreground font-medium">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>Flacons 100% Authentiques</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>Paiement à la réception</span>
-              </div>
-            </div>
+          {/* CTA principal : Pousser directement vers la Boutique */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              to="/boutique"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-primary-deep text-primary-foreground px-8 py-4 text-sm sm:text-base font-semibold hover:bg-primary transition-all shadow-elegant hover:scale-105 active:scale-95 group whitespace-nowrap"
+            >
+              <ShoppingBag className="h-4 w-4 text-gold" />
+              <span className="hidden sm:inline">Explorer la boutique (sensiblement 100 parfums)</span>
+              <span className="sm:hidden">Boutique (plus de 100 parfums)</span>
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
 
-          {/* Colonne Droite : L'image originale du Hero conservée intacte */}
-          <div className="relative">
-            <div className="absolute -inset-4 bg-white/40 rounded-3xl blur-2xl pointer-events-none" />
-            <img
-              src={hero}
-              alt="Sélection de parfums d'exception Al Kareem Parfumerie"
-              width={1600}
-              height={1000}
-              fetchPriority="high"
-              decoding="async"
-              className="relative rounded-3xl shadow-elegant object-cover w-full aspect-[4/3]"
-            />
+          {/* Indicateurs de rassurance sous le bouton */}
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground font-medium">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span>Flacons 100% Authentiques</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span>Paiement à la réception</span>
+            </div>
           </div>
         </div>
       </section>
@@ -316,14 +291,11 @@ function HomePage() {
             />
           </div>
           <div className="space-y-5">
-            <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-gold font-semibold bg-gold/10 px-3 py-1 rounded-full border border-gold/20">
-              <Sparkles className="h-3.5 w-3.5" /> Maison Fondée à Cotonou
-            </div>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-primary-deep leading-tight">
               Une Maison de Parfum Née à Cotonou
             </h2>
             <p className="text-foreground/80 leading-relaxed text-sm sm:text-base">
-              Al Kareem Parfumerie, c'est une sélection soignée de {totalCount} parfums,
+              Al Kareem Parfumerie, c'est une sélection soignée de plus de 100 parfums,
               huiles, brumes et coffrets pour révéler la personnalité de chacun(e).
             </p>
             <p className="text-foreground/80 leading-relaxed text-sm sm:text-base">
@@ -363,7 +335,7 @@ function HomePage() {
             Prêt(e) à révéler votre présence en parfum ?
           </h2>
           <p className="text-base sm:text-lg text-primary-foreground/80 max-w-2xl mx-auto leading-relaxed">
-            Parcourez dès aujourd'hui notre collection complète de {totalCount} références.
+            Parcourez dès aujourd'hui notre collection complète de plus de 100 parfums d'exception.
             Commandez en toute simplicité et recevez votre flacon chez vous à Cotonou avec paiement
             à la livraison.
           </p>

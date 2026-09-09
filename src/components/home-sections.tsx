@@ -134,8 +134,8 @@ export function RotatingSelection({
           to="/boutique"
           className="inline-flex items-center gap-2 self-start md:self-end rounded-full bg-primary-deep text-primary-foreground px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold hover:bg-primary transition-all shadow-elegant hover:scale-105 whitespace-nowrap"
         >
-          <span className="hidden sm:inline">Voir toute la boutique (100 parfums)</span>
-          <span className="sm:hidden">Boutique (100 parfums)</span>
+          <span className="hidden sm:inline">Voir toute la boutique (plus de 100 parfums)</span>
+          <span className="sm:hidden">Boutique (plus de 100 parfums)</span>
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
