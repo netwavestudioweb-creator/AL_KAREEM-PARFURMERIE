@@ -5,15 +5,25 @@ import { useCart } from "@/lib/cart";
 import { toast } from "sonner";
 import { ShoppingBag } from "lucide-react";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  className,
+}: {
+  product: Product;
+  className?: string;
+}) {
   const { addItem } = useCart();
   const [imgSrc, setImgSrc] = useState(product.image);
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className="group relative flex h-full flex-col">
+    <div
+      className={`group relative flex h-full flex-col rounded-2xl bg-card p-2.5 sm:p-3.5 border border-border/60 shadow-xs transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-lg ${
+        className ?? ""
+      }`}
+    >
       <Link to="/produit/$slug" params={{ slug: product.slug }} className="flex flex-1 flex-col">
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted/40">
+        <div className="relative aspect-square overflow-hidden rounded-xl bg-muted/40">
           {!loaded && (
             <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-muted/30 via-muted/60 to-muted/30" />
           )}
@@ -32,8 +42,8 @@ export function ProductCard({ product }: { product: Product }) {
               );
             }}
             sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
-            className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
-              loaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+            className={`h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
+              loaded ? "opacity-100" : "opacity-0"
             }`}
           />
           <div className="absolute top-3 left-3 flex flex-col gap-1">
@@ -87,3 +97,5 @@ export function ProductCard({ product }: { product: Product }) {
     </div>
   );
 }
+
+export default ProductCard;

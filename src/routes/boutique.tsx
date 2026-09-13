@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/layout";
 import { ProductCard } from "@/components/product-card";
+import { ProductSkeleton } from "@/components/ProductSkeleton";
 import { fetchProducts, fetchCategories } from "@/lib/products";
 import { Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -73,10 +74,15 @@ function BoutiquePage() {
   const { q, category, promo, sort } = Route.useSearch();
   const navigate = useNavigate({ from: "/boutique" });
 
-  const { data: products = [], isLoading } = useQuery({
+  const {
+    data: products = [],
+    isLoading,
+    isPending,
+  } = useQuery({
     queryKey: ["products"],
     queryFn: fetchProducts,
   });
+  const isQueryLoading = isLoading || isPending;
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,
@@ -234,8 +240,8 @@ function BoutiquePage() {
           <div>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="text-xs sm:text-sm text-muted-foreground">
-                {isLoading
-                  ? "Chargement…"
+                {isQueryLoading
+                  ? "Chargement des parfums…"
                   : `${filtered.length} ${filtered.length > 1 ? "produits" : "produit"}`}
               </div>
               <select
@@ -248,15 +254,10 @@ function BoutiquePage() {
                 <option value="prix-desc">Prix décroissant</option>
               </select>
             </div>
-            {isLoading ? (
-              <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex flex-col gap-2 sm:gap-3">
-                    <div className="aspect-square w-full rounded-2xl bg-muted/40 animate-pulse" />
-                    <div className="h-3 w-1/3 rounded-full bg-muted/40 animate-pulse" />
-                    <div className="h-4 sm:h-5 w-3/4 rounded-full bg-muted/40 animate-pulse" />
-                    <div className="h-3 sm:h-4 w-1/4 rounded-full bg-muted/40 animate-pulse" />
-                  </div>
+            {isQueryLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <ProductSkeleton key={i} />
                 ))}
               </div>
             ) : filtered.length === 0 ? (

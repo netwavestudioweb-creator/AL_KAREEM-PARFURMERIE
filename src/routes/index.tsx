@@ -2,17 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/layout";
 import { ProductCard } from "@/components/product-card";
+import { ProductSkeleton } from "@/components/ProductSkeleton";
 import { RotatingSelection, TrustSection } from "@/components/home-sections";
 import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
 import { fetchProducts, fetchCategories, whatsappLink } from "@/lib/products";
 import {
-  Truck,
-  Smartphone,
   MessageCircle,
-  ShieldCheck,
   ArrowRight,
   Sparkles,
-  ShoppingBag,
   CheckCircle2,
 } from "lucide-react";
 import boutiqueImg from "@/assets/boutique.jpg";
@@ -83,12 +80,17 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { data: products = [] } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
+  const {
+    data: products = [],
+    isLoading,
+    isPending,
+  } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,
   });
 
+  const isQueryLoading = isLoading || isPending;
   const promos = products.filter((p) => p.promo).slice(0, 4);
 
   return (
@@ -129,55 +131,29 @@ function HomePage() {
         </div>
       </section>
 
-      {/* 3. REASSURANCE : LES 4 PILIERS DE CONFIANCE (GRILLE 2x2 COMPACTE ET ÉLÉGANTE SUR MOBILE) */}
-      <section className="border-b border-border/80 bg-white py-6 sm:py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-            {[
-              {
-                icon: ShoppingBag,
-                title: "Commande Simple",
-                desc: "En 1 clic sans inscription",
-              },
-              {
-                icon: Smartphone,
-                title: "Paiement Réception",
-                desc: "Espèces, MoMo ou Moov",
-              },
-              {
-                icon: Truck,
-                title: "Livraison 24h",
-                desc: "Cotonou & tout le Bénin",
-              },
-              {
-                icon: ShieldCheck,
-                title: "100% Authentique",
-                desc: "Flacons scellés & certifiés",
-              },
-            ].map((f) => (
-              <div
-                key={f.title}
-                className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-secondary/25 border border-primary/5 hover:border-gold/30 hover:bg-white hover:shadow-soft transition-all"
-              >
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-white flex items-center justify-center text-primary-deep shadow-xs shrink-0 border border-border">
-                  <f.icon className="h-4 w-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <div className="font-semibold text-xs sm:text-sm text-foreground leading-tight">
-                    {f.title}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                    {f.desc}
-                  </div>
-                </div>
+      {/* 5. BONS PLANS & OFFRES SPÉCIALES DE LA BOUTIQUE */}
+      {isQueryLoading ? (
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-border">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 md:mb-12">
+            <div>
+              <div className="text-xs uppercase tracking-widest text-gold font-semibold mb-2">
+                Opportunités du Moment
               </div>
+              <h2 className="font-serif text-3xl sm:text-4xl text-primary-deep">
+                Offres Spéciales en Boutique
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Chargement des offres du moment…
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <ProductSkeleton key={i} />
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* 5. BONS PLANS & OFFRES SPÉCIALES DE LA BOUTIQUE */}
-      {promos.length > 0 && (
+        </section>
+      ) : promos.length > 0 ? (
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-border">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 md:mb-12">
             <div>
@@ -199,13 +175,13 @@ function HomePage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {promos.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </section>
-      )}
+      ) : null}
 
       {/* 6. HISTOIRE & STORYTELLING : UNE MAISON NÉE À COTONOU */}
       <section className="bg-secondary/70 border-t border-border">
