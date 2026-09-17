@@ -92,7 +92,7 @@ function HomePage() {
   });
 
   return (
-    <SiteLayout hideFooter>
+    <SiteLayout>
       {/* 1. HERO PRESTIGE : IMAGE FULL-BLEED SUR LE CÔTÉ DROIT SANS AUCUNE CARTE ET FUSION PARFAITE */}
       <section className="relative overflow-hidden bg-[#2D1244] text-white border-b border-border/60 min-h-[520px] sm:min-h-[580px] lg:min-h-[640px] flex items-center">
         
