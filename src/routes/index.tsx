@@ -93,90 +93,72 @@ function HomePage() {
 
   return (
     <SiteLayout hideFooter>
-      {/* 1. HERO PRESTIGE DOUBLE COLONNE : VISUEL ÉCLATANT SANS MASQUE ET TEXTE ÉLÉGANT */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-deep via-[#3A1657] to-primary-deep text-white border-b border-border/60 py-12 sm:py-16 md:py-20">
-        {/* Cercles de lumière dorée & violette subtiles */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold/15 blur-3xl rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/20 blur-3xl rounded-full pointer-events-none" />
+      {/* 1. HERO PRESTIGE : IMAGE FULL-BLEED SUR LE CÔTÉ DROIT SANS AUCUNE CARTE ET FUSION PARFAITE */}
+      <section className="relative overflow-hidden bg-[#2D1244] text-white border-b border-border/60 min-h-[520px] sm:min-h-[580px] lg:min-h-[640px] flex items-center">
+        
+        {/* Image de la femme se parfumant positionnée sans cadre sur toute la droite */}
+        <div className="absolute inset-y-0 right-0 w-full lg:w-[62%] z-0 pointer-events-none">
+          <img
+            src={womanHeroImg}
+            alt="Femme élégante se parfumant — Al Kareem Parfumerie"
+            className="w-full h-full object-cover object-top sm:object-center"
+          />
+          
+          {/* Fondu de transition du violet solide à gauche vers la photo 100% nette à droite */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2D1244] via-[#2D1244]/80 via-40% sm:via-45% to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2D1244] via-transparent to-[#2D1244]/30" />
+        </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
-            
-            {/* Colonne Gauche : Accroche & Boutons d'accès direct */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-gold/40 text-xs font-semibold uppercase tracking-widest text-gold shadow-sm">
-                <Sparkles className="h-3.5 w-3.5 text-gold" />
-                <span>Parfumerie d'Exception à Cotonou</span>
-              </div>
+        {/* Lueurs dorées en arrière-plan */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-gold/10 blur-3xl rounded-full pointer-events-none" />
 
-              <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white leading-tight tracking-tight font-medium">
-                Sublimez votre aura.
-                <span className="block mt-2 font-serif italic text-2xl sm:text-4xl text-gold font-normal">
-                  L'amour se porte en parfum
-                </span>
-              </h1>
-
-              <p className="text-sm sm:text-base md:text-lg text-white/90 max-w-xl leading-relaxed font-light">
-                Laissez votre sillage révéler l'élégance qui est en vous. Explorez notre sélection de 
-                <strong className="text-gold font-semibold"> plus de 100 fragrances d'exception</strong>, 
-                huiles pures concentrées et coffrets de prestige disponibles à Cotonou.
-              </p>
-
-              {/* Bouton CTA */}
-              <div className="flex flex-wrap gap-4 pt-2">
-                <Link
-                  to="/boutique"
-                  className="inline-flex items-center gap-2 rounded-full bg-gold text-primary-deep px-8 py-4 text-sm sm:text-base font-bold hover:bg-white transition-all shadow-xl hover:scale-105 active:scale-95 cursor-pointer"
-                >
-                  <span>Accéder à la boutique</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-
-              {/* Badges de confiance */}
-              <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-white/15">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/30 backdrop-blur-md border border-white/20 text-xs font-medium text-white">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-gold" />
-                  <span>Flacons 100% Authentiques</span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/30 backdrop-blur-md border border-white/20 text-xs font-medium text-white">
-                  <ShieldCheck className="h-3.5 w-3.5 text-gold" />
-                  <span>Paiement MoMo / Espèces</span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/30 backdrop-blur-md border border-white/20 text-xs font-medium text-white">
-                  <Award className="h-3.5 w-3.5 text-gold" />
-                  <span>Conseil Olfactif Privé</span>
-                </div>
-              </div>
+        {/* Contenu Texte positionné à gauche */}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 w-full py-12 sm:py-16">
+          <div className="max-w-xl lg:max-w-2xl space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-gold/40 text-xs font-semibold uppercase tracking-widest text-gold shadow-sm">
+              <Sparkles className="h-3.5 w-3.5 text-gold" />
+              <span>Parfumerie d'Exception à Cotonou</span>
             </div>
 
-            {/* Colonne Droite : Image de la Femme se parfumant 100% Nette et Lumineuse */}
-            <div className="lg:col-span-5 relative group">
-              {/* Cadre de prestige avec lueur dorée */}
-              <div className="absolute -inset-1.5 rounded-3xl bg-gradient-to-tr from-gold via-primary-soft to-gold opacity-75 blur-md group-hover:opacity-100 transition-opacity" />
-              
-              <div className="relative overflow-hidden rounded-3xl border-2 border-gold/50 shadow-2xl bg-black">
-                <img
-                  src={womanHeroImg}
-                  alt="Femme élégante se parfumant — Al Kareem Parfumerie"
-                  width={800}
-                  height={1000}
-                  priority="true"
-                  className="w-full h-auto max-h-[520px] object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                />
-                
-                {/* Petit bandeau subtil en bas de la photo */}
-                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 sm:p-5 flex items-center justify-between text-white">
-                  <span className="text-xs uppercase tracking-widest text-gold font-semibold">
-                    Signature Al Kareem
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-xs text-white/90">
-                    <Sparkles className="h-3.5 w-3.5 text-gold" /> L'Art du Parfum
-                  </span>
-                </div>
-              </div>
+            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl text-white leading-tight tracking-tight font-medium drop-shadow-md">
+              Sublimez votre aura.
+              <span className="block mt-2 font-serif italic text-2xl sm:text-4xl md:text-5xl text-gold font-normal">
+                L'amour se porte en parfum
+              </span>
+            </h1>
+
+            <p className="text-sm sm:text-base md:text-lg text-white/95 max-w-xl leading-relaxed font-light drop-shadow-xs">
+              Laissez votre sillage révéler l'élégance qui est en vous. Explorez notre sélection de 
+              <strong className="text-gold font-semibold"> plus de 100 fragrances d'exception</strong>, 
+              huiles pures concentrées et coffrets de prestige disponibles immédiatement à Cotonou.
+            </p>
+
+            {/* Boutons d'accès direct */}
+            <div className="flex flex-wrap gap-4 pt-2">
+              <Link
+                to="/boutique"
+                className="inline-flex items-center gap-2 rounded-full bg-gold text-primary-deep px-8 py-4 text-sm sm:text-base font-bold hover:bg-white transition-all shadow-xl hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <span>Accéder à la boutique</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
 
+            {/* Badges de rassurance */}
+            <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-white/15">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-xs font-medium text-white">
+                <CheckCircle2 className="h-4 w-4 text-gold" />
+                <span>Flacons 100% Authentiques</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-xs font-medium text-white">
+                <ShieldCheck className="h-4 w-4 text-gold" />
+                <span>Paiement MoMo / Espèces</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-xs font-medium text-white">
+                <Award className="h-4 w-4 text-gold" />
+                <span>Conseil Olfactif Privé</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
