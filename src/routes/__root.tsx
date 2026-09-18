@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { CartProvider } from "../lib/cart";
 import { SiteLayout } from "../components/layout";
 import { LoadingScreen } from "../components/loading-screen";
+import { SITE_CONFIG } from "../lib/site-config";
 
 function NotFoundComponent() {
   return (
@@ -113,6 +114,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       );
     }
 
+    scripts.push({
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": ["Organization", "Store", "PerfumeStore"],
+        "@id": `${SITE_CONFIG.url}/#organization`,
+        name: SITE_CONFIG.name,
+        altName: "Al Kareem Scents & Parfumerie",
+        url: SITE_CONFIG.url,
+        logo: {
+          "@type": "ImageObject",
+          url: SITE_CONFIG.logoUrl,
+          width: "512",
+          height: "512",
+        },
+        image: SITE_CONFIG.ogImageUrl,
+        description: SITE_CONFIG.description,
+        telephone: SITE_CONFIG.phone,
+        priceRange: SITE_CONFIG.priceRange,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: SITE_CONFIG.address.streetAddress,
+          addressLocality: SITE_CONFIG.address.addressLocality,
+          addressCountry: SITE_CONFIG.address.addressCountry,
+        },
+        currenciesAccepted: SITE_CONFIG.currency,
+        paymentAccepted: "Cash, MTN Mobile Money, Moov Money",
+        sameAs: [`https://wa.me/${SITE_CONFIG.whatsapp.replace(/[^0-9]/g, "")}`],
+      }),
+    });
+
     return {
       meta: [
         { charSet: "utf-8" },
@@ -125,25 +157,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "apple-mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-status-bar-style", content: "default" },
         { name: "format-detection", content: "telephone=no" },
-        { title: "Al Kareem Parfumerie — Sublimez votre aura" },
+        { title: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
         {
           name: "description",
-          content:
-            "Parfumerie de référence à Cotonou. Parfums femme, homme, unisexe et coffrets. Commande WhatsApp et paiement Mobile Money.",
+          content: SITE_CONFIG.description,
         },
-        { property: "og:title", content: "Al Kareem Parfumerie" },
+        { property: "og:site_name", content: SITE_CONFIG.name },
+        { property: "og:title", content: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
         {
           property: "og:description",
-          content:
-            "L'amour se porte en parfum. Une sélection d'exception à Cotonou et dans tout le Bénin.",
+          content: SITE_CONFIG.description,
         },
-        { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+        { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+        { property: "og:logo", content: SITE_CONFIG.logoUrl },
         { property: "og:type", content: "website" },
+        { property: "og:url", content: SITE_CONFIG.url },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
+        { name: "twitter:description", content: SITE_CONFIG.description },
+        { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
       ],
       links: [
+        { rel: "manifest", href: "/site.webmanifest" },
         { rel: "stylesheet", href: appCss },
         { rel: "icon", href: "/favicon.ico" },
+        { rel: "apple-touch-icon", href: "/alkareem-logo.jpg" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
         {

@@ -8,6 +8,7 @@ import { ProductSkeleton } from "@/components/ProductSkeleton";
 import { fetchProducts, fetchCategories } from "@/lib/products";
 import { Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 const searchDefaults = {
   q: "",
@@ -42,24 +43,23 @@ export const Route = createFileRoute("/boutique")({
   search: { middlewares: [dropLegacyParams, stripSearchParams(searchDefaults)] },
   head: () => ({
     meta: [
-      { title: "Boutique — Al Kareem Parfumerie" },
+      { title: `Boutique & Catalogue — ${SITE_CONFIG.name}` },
       {
         name: "description",
         content:
-          "Parcourez notre catalogue : parfums, déodorants, huiles concentrées, brumes, diffuseurs et coffrets.",
+          "Parcourez notre catalogue complet d'exception : parfums femme, homme, unisexe, huiles concentrées, brumes et coffrets chez Al Kareem Parfumerie Cotonou.",
       },
-      { property: "og:title", content: "Boutique — Al Kareem Parfumerie" },
-      { property: "og:description", content: "Notre catalogue complet à découvrir." },
+      { property: "og:site_name", content: SITE_CONFIG.name },
+      { property: "og:title", content: `Boutique — ${SITE_CONFIG.name}` },
+      { property: "og:description", content: "Parfums d'exception, huiles et coffrets à Cotonou et au Bénin." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/boutique" },
+      { property: "og:url", content: getCanonicalUrl("/boutique") },
+      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
-      {
-        name: "twitter:image",
-        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
-      },
+      { name: "twitter:title", content: `Boutique — ${SITE_CONFIG.name}` },
+      { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
     ],
-    links: [{ rel: "canonical", href: "/boutique" }],
+    links: [{ rel: "canonical", href: getCanonicalUrl("/boutique") }],
   }),
   loader: ({ context }) => {
     void context.queryClient.prefetchQuery({ queryKey: ["products"], queryFn: fetchProducts });

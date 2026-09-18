@@ -1,0 +1,17 @@
+{
+  "name": "Al Kareem Parfumerie",
+  "short_name": "Al Kareem",
+  "description": "Parfumerie d'exception à Cotonou, Bénin. Parfums femme, homme, unisexe et coffrets.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4B1D6E",
+  "icons": [
+    {
+      "src": "/alkareem-logo.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -2,28 +2,28 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout";
 import boutique from "@/assets/boutique.jpg";
 import { Heart, Sparkles, Users } from "lucide-react";
+import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/a-propos")({
   head: () => ({
     meta: [
-      { title: "À propos — Al Kareem Parfumerie" },
+      { title: `À propos — ${SITE_CONFIG.name}` },
       {
         name: "description",
         content:
-          "Découvrez l'histoire d'Al Kareem Parfumerie, une maison de parfum née à Cotonou, portée par la passion et le conseil personnalisé.",
+          "Découvrez l'histoire d'Al Kareem Parfumerie, une maison de parfum d'exception née à Cotonou, portée par la passion et le conseil personnalisé.",
       },
-      { property: "og:title", content: "À propos — Al Kareem" },
-      { property: "og:description", content: "Notre histoire, nos valeurs, notre engagement." },
+      { property: "og:site_name", content: SITE_CONFIG.name },
+      { property: "og:title", content: `À propos — ${SITE_CONFIG.name}` },
+      { property: "og:description", content: "Notre histoire, nos valeurs et notre engagement parfum à Cotonou." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: getCanonicalUrl("/a-propos") },
+      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
-      {
-        name: "twitter:image",
-        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
-      },
-      { property: "og:url", content: "/a-propos" },
+      { name: "twitter:title", content: `À propos — ${SITE_CONFIG.name}` },
+      { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
     ],
-    links: [{ rel: "canonical", href: "/a-propos" }],
+    links: [{ rel: "canonical", href: getCanonicalUrl("/a-propos") }],
   }),
   component: AboutPage,
 });

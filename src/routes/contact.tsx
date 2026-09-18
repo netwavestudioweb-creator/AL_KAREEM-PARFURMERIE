@@ -5,31 +5,31 @@ import { whatsappLink } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — Al Kareem Parfumerie" },
+      { title: `Contact & Boutique — ${SITE_CONFIG.name}` },
       {
         name: "description",
         content:
-          "Contactez Al Kareem Parfumerie à Cotonou : boutique, WhatsApp, Instagram. Nous vous répondons rapidement.",
+          "Contactez Al Kareem Parfumerie à Cotonou : WhatsApp direct (+229 01 61 88 89 87), boutique et conseils sur mesure. Commandes et livraisons au Bénin.",
       },
-      { property: "og:title", content: "Contact — Al Kareem" },
+      { property: "og:site_name", content: SITE_CONFIG.name },
+      { property: "og:title", content: `Contact — ${SITE_CONFIG.name}` },
       {
         property: "og:description",
-        content: "Adresse, WhatsApp, réseaux — nous sommes à votre écoute.",
+        content: "Boutique Cotonou, WhatsApp, livraisons Bénin. Nous sommes à votre écoute.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: getCanonicalUrl("/contact") },
+      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
-      {
-        name: "twitter:image",
-        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
-      },
-      { property: "og:url", content: "/contact" },
+      { name: "twitter:title", content: `Contact — ${SITE_CONFIG.name}` },
+      { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
     ],
-    links: [{ rel: "canonical", href: "/contact" }],
+    links: [{ rel: "canonical", href: getCanonicalUrl("/contact") }],
   }),
   component: ContactPage,
 });

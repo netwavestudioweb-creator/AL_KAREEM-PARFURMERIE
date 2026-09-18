@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { SITE_CONFIG } from "@/lib/site-config";
 
-const BASE_URL = process.env.SITE_URL || "https://alkareem-parfumerie.bj";
+const BASE_URL = process.env.SITE_URL || SITE_CONFIG.url;
 
 const STATIC_PATHS = [
   { path: "/", priority: "1.0", changefreq: "weekly" as const },

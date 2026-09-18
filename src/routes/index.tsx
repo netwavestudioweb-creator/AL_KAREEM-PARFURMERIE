@@ -18,53 +18,67 @@ import {
 } from "lucide-react";
 import boutiqueImg from "@/assets/boutique.jpg";
 import womanHeroImg from "@/assets/perfume-woman-hero.jpg";
+import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Al Kareem Parfumerie — Parfums d'Exception à Cotonou, Bénin" },
+      { title: `${SITE_CONFIG.name} — Parfums d'Exception à Cotonou, Bénin` },
       {
         name: "description",
         content:
           "Découvrez plus de 100 parfums, huiles concentrées, brumes et coffrets chez Al Kareem Parfumerie à Cotonou. Flacons 100% authentiques, commande en ligne et livraison express Bénin.",
       },
-      { property: "og:title", content: "Al Kareem Parfumerie — Sublimez votre aura" },
+      { property: "og:title", content: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
       {
         property: "og:description",
         content: "L'amour se porte en parfum. Parfumerie d'exception à Cotonou, Bénin.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: getCanonicalUrl("/") },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
-      {
-        name: "twitter:image",
-        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
-      },
+      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+      { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
     ],
     links: [
-      { rel: "canonical", href: "/" },
+      { rel: "canonical", href: getCanonicalUrl("/") },
     ],
     scripts: [
       {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Store",
-          name: "Al Kareem Parfumerie",
-          description:
-            "Parfumerie d'exception à Cotonou, Bénin. Plus de 100 références de parfums disponibles en boutique, commande via WhatsApp, paiement à la livraison ou Mobile Money.",
-          url: "https://alkareem-parfumerie.bj/",
-          telephone: "+2290161888987",
-          currenciesAccepted: "XOF",
+          "@type": ["Store", "PerfumeStore"],
+          name: SITE_CONFIG.name,
+          description: SITE_CONFIG.description,
+          url: SITE_CONFIG.url,
+          logo: SITE_CONFIG.logoUrl,
+          image: SITE_CONFIG.ogImageUrl,
+          telephone: SITE_CONFIG.phone,
+          currenciesAccepted: SITE_CONFIG.currency,
           paymentAccepted: "Espèces, MTN MoMo, Moov Money",
           address: {
             "@type": "PostalAddress",
-            addressLocality: "Cotonou",
-            addressCountry: "BJ",
+            streetAddress: SITE_CONFIG.address.streetAddress,
+            addressLocality: SITE_CONFIG.address.addressLocality,
+            addressCountry: SITE_CONFIG.address.addressCountry,
           },
           areaServed: "Bénin",
-          sameAs: ["https://instagram.com/khadisidibehassan"],
+          sameAs: [`https://wa.me/${SITE_CONFIG.whatsapp.replace(/[^0-9]/g, "")}`],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: SITE_CONFIG.name,
+          url: SITE_CONFIG.url,
+          potentialAction: {
+            "@type": "SearchAction",
+            target: `${SITE_CONFIG.url}/boutique?search={search_term_string}`,
+            "query-input": "required name=search_term_string",
+          },
         }),
       },
     ],

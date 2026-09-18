@@ -1,5 +1,10 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /reset-password
 
-Sitemap: /sitemap.xml
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+
+Sitemap: https://al-kareem-parfurmerie.vercel.app/sitemap.xml

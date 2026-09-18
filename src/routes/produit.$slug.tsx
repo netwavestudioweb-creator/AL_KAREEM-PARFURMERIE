@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const SITE_URL = "https://al-kareem-parfurmerie.vercel.app";
+import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/produit/$slug")({
   loader: async ({ params, context }) => {
@@ -33,29 +33,94 @@ export const Route = createFileRoute("/produit/$slug")({
   },
   head: ({ params, loaderData }) => {
     const p = loaderData ?? null;
-    const title = p ? `${p.name} — Al Kareem Parfumerie` : `${params.slug} — Al Kareem Parfumerie`;
+    const title = p ? `${p.name} — ${SITE_CONFIG.name}` : `${params.slug} — ${SITE_CONFIG.name}`;
     const desc = p
       ? p.description?.slice(0, 155) ||
         `${p.name}${p.volume ? ` (${p.volume})` : ""} — ${formatFCFA(p.price)}. Commande WhatsApp, livraison au Bénin.`
-      : "Fiche produit Al Kareem Parfumerie.";
+      : `Flacon d'exception ${params.slug} chez ${SITE_CONFIG.name}.`;
     const image = p?.images?.[0];
-    const url = `${SITE_URL}/produit/${params.slug}`;
+    const url = getCanonicalUrl(`/produit/${params.slug}`);
+    const share = image && /^https?:\/\//.test(image) ? image : SITE_CONFIG.ogImageUrl;
+
     const meta = [
       { title },
       { name: "description", content: desc },
+      { property: "og:site_name", content: SITE_CONFIG.name },
       { property: "og:title", content: p?.name ?? params.slug },
       { property: "og:description", content: desc },
       { property: "og:type", content: "product" },
       { property: "og:url", content: url },
+      { property: "og:image", content: share },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: desc },
+      { name: "twitter:image", content: share },
     ];
-    const share = image && /^https?:\/\//.test(image) ? image : `${SITE_URL}/og-alkareem.jpg`;
-    meta.push({ property: "og:image", content: share });
-    meta.push({ name: "twitter:image", content: share });
+
+    const scripts: { type: string; children: string }[] = [];
+
+    if (p) {
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: p.name,
+          image: p.images && p.images.length > 0 ? p.images : [share],
+          description: p.description || desc,
+          sku: p.id || params.slug,
+          brand: {
+            "@type": "Brand",
+            name: SITE_CONFIG.name,
+          },
+          offers: {
+            "@type": "Offer",
+            url: url,
+            priceCurrency: SITE_CONFIG.currency,
+            price: p.price,
+            availability: (p.stock ?? 1) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            itemCondition: "https://schema.org/NewCondition",
+            seller: {
+              "@type": "Organization",
+              name: SITE_CONFIG.name,
+            },
+          },
+        }),
+      });
+
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "Accueil",
+              item: SITE_CONFIG.url,
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "Boutique",
+              item: `${SITE_CONFIG.url}/boutique`,
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: p.name,
+              item: url,
+            },
+          ],
+        }),
+      });
+    }
 
     return {
       meta,
       links: [{ rel: "canonical", href: url }],
+      scripts,
     };
   },
   component: ProductPage,
