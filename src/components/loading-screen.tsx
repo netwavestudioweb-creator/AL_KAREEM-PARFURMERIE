@@ -40,10 +40,12 @@ export function LoadingScreen() {
 function AlKareemMark() {
   return (
     <div className="flex flex-col items-center gap-4 alk-loader-mark">
-      <div className="h-24 w-24 rounded-full bg-white p-2 shadow-2xl flex items-center justify-center animate-pulse">
+      <div className="h-24 w-24 rounded-full bg-white p-2 shadow-2xl flex items-center justify-center shrink-0">
         <img
-          src="/alkareem-logo.jpg"
+          src="/alkareem-logo.webp"
           alt="Al Kareem Parfumerie"
+          width={105}
+          height={140}
           className="h-20 w-20 object-contain rounded-full"
         />
       </div>

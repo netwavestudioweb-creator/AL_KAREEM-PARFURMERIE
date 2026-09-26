@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout";
+import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/cgv")({
   head: () => ({
@@ -17,14 +18,14 @@ export const Route = createFileRoute("/cgv")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       {
         name: "twitter:image",
-        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+        content: SITE_CONFIG.ogImageUrl,
       },
-      { property: "og:url", content: "/cgv" },
+      { property: "og:url", content: getCanonicalUrl("/cgv") },
     ],
-    links: [{ rel: "canonical", href: "/cgv" }],
+    links: [{ rel: "canonical", href: getCanonicalUrl("/cgv") }],
   }),
   component: CGV,
 });
@@ -34,7 +35,7 @@ function CGV() {
     <SiteLayout>
       <article className="mx-auto max-w-3xl px-4 py-16 prose prose-neutral">
         <h1 className="font-serif text-4xl text-primary-deep">Conditions générales de vente</h1>
-        <p className="text-sm text-muted-foreground">Dernière mise à jour : 2025</p>
+        <p className="text-sm text-muted-foreground">Dernière mise à jour : septembre 2026</p>
 
         <h2>1. Objet</h2>
         <p>
@@ -44,8 +45,9 @@ function CGV() {
 
         <h2>2. Commande</h2>
         <p>
-          La commande est validée après confirmation par WhatsApp. Les prix sont affichés en francs
-          CFA (FCFA), toutes taxes locales incluses.
+          Une demande de commande est créée sur le site puis doit être envoyée sur WhatsApp. La
+          commande est validée uniquement après confirmation par Al Kareem sur WhatsApp. Les prix
+          des articles sont affichés en francs CFA (FCFA), toutes taxes locales incluses.
         </p>
 
         <h2>3. Paiement</h2>
@@ -57,7 +59,9 @@ function CGV() {
         <h2>4. Livraison</h2>
         <p>
           Livraison à Cotonou, Abomey-Calavi, Porto-Novo et sur demande partout au Bénin. Les délais
-          et frais sont communiqués lors de la confirmation.
+          et modalités sont confirmés par WhatsApp avant validation définitive. À réception,
+          vérifiez l'état du colis avant d'accepter la livraison et contactez-nous immédiatement en
+          cas d'anomalie.
         </p>
 
         <h2>5. Retours et remboursements</h2>

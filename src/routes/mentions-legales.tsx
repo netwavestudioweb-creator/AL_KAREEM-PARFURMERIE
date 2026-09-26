@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout";
+import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/mentions-legales")({
   head: () => ({
@@ -13,14 +14,14 @@ export const Route = createFileRoute("/mentions-legales")({
       { property: "og:description", content: "Informations légales du site Al Kareem Parfumerie." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       {
         name: "twitter:image",
-        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+        content: SITE_CONFIG.ogImageUrl,
       },
-      { property: "og:url", content: "/mentions-legales" },
+      { property: "og:url", content: getCanonicalUrl("/mentions-legales") },
     ],
-    links: [{ rel: "canonical", href: "/mentions-legales" }],
+    links: [{ rel: "canonical", href: getCanonicalUrl("/mentions-legales") }],
   }),
   component: MentionsLegales,
 });
@@ -30,7 +31,7 @@ function MentionsLegales() {
     <SiteLayout>
       <article className="mx-auto max-w-3xl px-4 py-16 prose prose-neutral">
         <h1 className="font-serif text-4xl text-primary-deep">Mentions légales</h1>
-        <p className="text-sm text-muted-foreground">Dernière mise à jour : 2025</p>
+        <p className="text-sm text-muted-foreground">Dernière mise à jour : septembre 2026</p>
 
         <h2>Éditeur du site</h2>
         <p>

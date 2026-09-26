@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout";
+import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/confidentialite")({
   head: () => ({
@@ -16,14 +17,14 @@ export const Route = createFileRoute("/confidentialite")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       {
         name: "twitter:image",
-        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+        content: SITE_CONFIG.ogImageUrl,
       },
-      { property: "og:url", content: "/confidentialite" },
+      { property: "og:url", content: getCanonicalUrl("/confidentialite") },
     ],
-    links: [{ rel: "canonical", href: "/confidentialite" }],
+    links: [{ rel: "canonical", href: getCanonicalUrl("/confidentialite") }],
   }),
   component: Confidentialite,
 });
@@ -33,7 +34,7 @@ function Confidentialite() {
     <SiteLayout>
       <article className="mx-auto max-w-3xl px-4 py-16 prose prose-neutral">
         <h1 className="font-serif text-4xl text-primary-deep">Politique de confidentialité</h1>
-        <p className="text-sm text-muted-foreground">Dernière mise à jour : 2025</p>
+        <p className="text-sm text-muted-foreground">Dernière mise à jour : septembre 2026</p>
 
         <h2>Données que nous collectons</h2>
         <p>
@@ -51,13 +52,14 @@ function Confidentialite() {
         <h2>Conservation</h2>
         <p>
           Les commandes et messages sont conservés le temps nécessaire au suivi commercial et légal,
-          puis supprimés sur demande.
+          puis supprimés sur demande. Les coordonnées préremplies dans votre navigateur sont
+          conservées au maximum 30 jours pour vous éviter de les ressaisir.
         </p>
 
         <h2>Cookies</h2>
         <p>
-          Le site utilise uniquement des données locales de navigation (panier) stockées dans votre
-          navigateur. Aucun cookie publicitaire n'est déposé.
+          Le site utilise uniquement des données locales de navigation (panier et coordonnées de
+          commande) stockées dans votre navigateur. Aucun cookie publicitaire n'est déposé.
         </p>
 
         <h2>Vos droits</h2>

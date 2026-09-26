@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout";
-import boutique from "@/assets/boutique.jpg";
+import boutique from "@/assets/boutique.webp";
 import { Heart, Sparkles, Users } from "lucide-react";
 import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
@@ -15,7 +15,10 @@ export const Route = createFileRoute("/a-propos")({
       },
       { property: "og:site_name", content: SITE_CONFIG.name },
       { property: "og:title", content: `À propos — ${SITE_CONFIG.name}` },
-      { property: "og:description", content: "Notre histoire, nos valeurs et notre engagement parfum à Cotonou." },
+      {
+        property: "og:description",
+        content: "Notre histoire, nos valeurs et notre engagement parfum à Cotonou.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: getCanonicalUrl("/a-propos") },
       { property: "og:image", content: SITE_CONFIG.ogImageUrl },

@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+import { SITE_CONFIG } from "@/lib/site-config";
+
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
@@ -20,10 +22,10 @@ export const Route = createFileRoute("/reset-password")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       {
         name: "twitter:image",
-        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+        content: SITE_CONFIG.ogImageUrl,
       },
     ],
   }),
@@ -52,7 +54,7 @@ function ResetPasswordPage() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 w-full max-w-md">
         <div className="text-center mb-6">
           <img
-            src="/alkareem-logo.jpg"
+            src="/alkareem-logo.webp"
             alt="Al Kareem"
             className="h-14 w-14 mx-auto mb-3 object-contain rounded-full"
           />

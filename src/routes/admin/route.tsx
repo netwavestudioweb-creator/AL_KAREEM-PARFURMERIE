@@ -91,7 +91,7 @@ function AdminHeader({ email }: { email: string }) {
       <div className="mx-auto max-w-5xl px-4 h-16 flex items-center justify-between gap-3">
         <Link to="/admin" className="flex items-center gap-2 min-w-0">
           <img
-            src="/alkareem-logo.jpg"
+            src="/alkareem-logo.webp"
             alt="Al Kareem"
             className="h-9 w-9 object-contain shrink-0 rounded-full"
           />
@@ -250,7 +250,7 @@ function SetupForm({ onBack }: { onBack?: () => void } = {}) {
     <FullScreen>
       <div className="text-center mb-6">
         <img
-          src="/alkareem-logo.jpg"
+          src="/alkareem-logo.webp"
           alt="Al Kareem"
           className="h-14 w-14 mx-auto mb-3 object-contain rounded-full"
         />
@@ -325,7 +325,7 @@ function LoginForm() {
     <FullScreen>
       <div className="text-center mb-6">
         <img
-          src="/alkareem-logo.jpg"
+          src="/alkareem-logo.webp"
           alt="Al Kareem"
           className="h-14 w-14 mx-auto mb-3 object-contain rounded-full"
         />

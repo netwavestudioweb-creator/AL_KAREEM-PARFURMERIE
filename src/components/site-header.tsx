@@ -19,9 +19,19 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border pt-[env(safe-area-inset-top,0px)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4">
-          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0" onClick={() => setOpen(false)}>
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 sm:gap-3 shrink-0"
+            onClick={() => setOpen(false)}
+          >
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white flex items-center justify-center shadow-soft border border-border overflow-hidden">
-              <img src="/alkareem-logo.jpg" alt="Al Kareem" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
+              <img
+                src="/alkareem-logo.webp"
+                alt="Al Kareem"
+                width={105}
+                height={140}
+                className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
+              />
             </div>
             <div className="leading-tight">
               <div className="font-serif text-lg sm:text-xl text-primary-deep">Al Kareem</div>
@@ -67,7 +77,9 @@ export function SiteHeader() {
             <button
               className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-secondary"
               onClick={() => setOpen((o) => !o)}
-              aria-label="Menu"
+              aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-expanded={open}
+              aria-controls="navigation-mobile"
             >
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -80,7 +92,7 @@ export function SiteHeader() {
             open ? "max-h-64 pb-4" : "max-h-0",
           )}
         >
-          <nav className="flex flex-col gap-1">
+          <nav id="navigation-mobile" className="flex flex-col gap-1">
             {nav.map((n) => (
               <Link
                 key={n.to}

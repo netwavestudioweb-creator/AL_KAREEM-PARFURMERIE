@@ -102,7 +102,9 @@ export function ProductForm({ mode, productId, initial, onDelete }: Props) {
         urls.push(url);
       }
       setValues((v) => ({ ...v, image_urls: [...v.image_urls, ...urls] }));
-      toast.success(`${urls.length} photo(s) ajoutée(s). Cliquez sur "Enregistrer" en bas pour valider.`);
+      toast.success(
+        `${urls.length} photo(s) ajoutée(s). Cliquez sur "Enregistrer" en bas pour valider.`,
+      );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Envoi de la photo échoué");
     } finally {

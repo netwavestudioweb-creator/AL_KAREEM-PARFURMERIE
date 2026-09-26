@@ -43,12 +43,7 @@ const AUTOPLAY_MS = 4500;
 /**
  * 1. CARROUSEL ÉLITE DES COUPS DE CŒUR (Inspiration Creed & Kilian Paris)
  */
-export function RotatingSelection({
-  products,
-}: {
-  products: Product[];
-  categories: Category[];
-}) {
+export function RotatingSelection({ products }: { products: Product[]; categories: Category[] }) {
   const { addItem } = useCart();
   const reduced = usePrefersReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -116,8 +111,8 @@ export function RotatingSelection({
     >
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6 md:mb-8">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-gold font-semibold mb-1">
-            <Crown className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4B1D6E] text-[#F5E096] text-xs uppercase tracking-widest font-semibold mb-2 shadow-xs border border-[#E5B842]/40">
+            <Crown className="h-3.5 w-3.5 text-[#F5E096]" />
             <span>Sélection d'Exception à Cotonou</span>
           </div>
           <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-primary-deep tracking-tight">
@@ -216,7 +211,8 @@ export function RotatingSelection({
               </p>
             ) : (
               <p className="text-sm sm:text-base text-foreground/85 leading-relaxed">
-                Création emblématique sélectionnée avec exigence pour révéler votre présence et laisser un sillage inoubliable.
+                Création emblématique sélectionnée avec exigence pour révéler votre présence et
+                laisser un sillage inoubliable.
               </p>
             )}
 
@@ -274,18 +270,22 @@ export function RotatingSelection({
           <span className="text-xs font-medium text-muted-foreground">
             Modèle {activeIndex + 1} sur {totalSlides}
           </span>
-          <div className="flex items-center gap-1.5">
-            {featuredItems.map((_, idx) => (
+          <div className="flex items-center gap-2">
+            {featuredItems.map((item, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveIndex(idx)}
-                aria-label={`Aller au parfum ${idx + 1}`}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  idx === activeIndex
-                    ? "w-8 bg-primary-deep"
-                    : "w-2.5 bg-primary/20 hover:bg-primary/40"
-                }`}
-              />
+                aria-label={`Aller au parfum ${idx + 1} : ${item.name}`}
+                className="min-h-[28px] min-w-[28px] p-1 flex items-center justify-center transition-all cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <span
+                  className={`h-3 rounded-full transition-all duration-300 ${
+                    idx === activeIndex
+                      ? "w-8 bg-primary-deep"
+                      : "w-3 bg-primary/25 hover:bg-primary/50"
+                  }`}
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -314,7 +314,9 @@ export function ScentFinderSection({ products }: { products: Product[] }) {
     if (selectedCategory === "all") return products.slice(0, 4);
     const opt = categoryOptions.find((c) => c.id === selectedCategory);
     if (!opt || !opt.slug) return products.slice(0, 4);
-    const matches = products.filter((p) => p.categorySlug === opt.slug || p.category.toLowerCase().includes(opt.id));
+    const matches = products.filter(
+      (p) => p.categorySlug === opt.slug || p.category.toLowerCase().includes(opt.id),
+    );
     return matches.length > 0 ? matches.slice(0, 4) : products.slice(0, 4);
   }, [products, selectedCategory]);
 
@@ -359,7 +361,11 @@ export function ScentFinderSection({ products }: { products: Product[] }) {
                 key={product.id}
                 className="group relative flex flex-col rounded-2xl bg-white p-3 border border-border/80 shadow-xs hover:shadow-md transition-all"
               >
-                <Link to="/produit/$slug" params={{ slug: product.slug }} className="block aspect-square overflow-hidden rounded-xl bg-muted/30">
+                <Link
+                  to="/produit/$slug"
+                  params={{ slug: product.slug }}
+                  className="block aspect-square overflow-hidden rounded-xl bg-muted/30"
+                >
                   <img
                     src={product.image}
                     alt={product.name}
@@ -382,6 +388,7 @@ export function ScentFinderSection({ products }: { products: Product[] }) {
                     <Link
                       to="/produit/$slug"
                       params={{ slug: product.slug }}
+                      aria-label={`Voir ${product.name}`}
                       className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5"
                     >
                       Voir <ArrowRight className="h-3 w-3" />
@@ -395,7 +402,11 @@ export function ScentFinderSection({ products }: { products: Product[] }) {
           <div className="mt-8 text-center">
             <Link
               to="/boutique"
-              search={selectedCategory !== "all" ? { category: categoryOptions.find(c => c.id === selectedCategory)?.slug } : undefined}
+              search={
+                selectedCategory !== "all"
+                  ? { category: categoryOptions.find((c) => c.id === selectedCategory)?.slug }
+                  : undefined
+              }
               className="inline-flex items-center gap-2 rounded-full bg-primary-deep text-white px-7 py-3 text-xs sm:text-sm font-semibold hover:bg-primary transition-all shadow-md hover:scale-105"
             >
               <span>Voir tous ces modèles dans la boutique</span>
@@ -414,12 +425,42 @@ export function ScentFinderSection({ products }: { products: Product[] }) {
 export function CategoryShowcaseSection({ categories }: { categories: Category[] }) {
   // Liste officielle des univers olfactifs avec leurs slugs correspondant en base de données
   const defaultCategories = [
-    { name: "Parfums d'Exception", slug: "parfums", desc: "Grandes créations de marques renommées & jus rares", badge: "Incontournables" },
-    { name: "Huiles Concentrées & Attars", slug: "huiles-concentrees", desc: "Huiles pures sans alcool à la tenue intense et raffinée", badge: "Pureté" },
-    { name: "Senteurs Unisexe", slug: "senteurs-unisexe", desc: "Notes mixtes audacieuses et équilibrées", badge: "Tendance" },
-    { name: "Brumes & Sprays Corporels", slug: "brumes-sprays-corporels", desc: "Fraîcheur quotidienne légère et captivante", badge: "Fraîcheur" },
-    { name: "Déodorants de Luxe", slug: "deodorants", desc: "Protection parfumée haut de gamme au quotidien", badge: "Soin" },
-    { name: "Coffrets Cadeaux", slug: "coffrets-cadeaux", desc: "L'art d'offrir dans des écrins de prestige", badge: "Exclusif" },
+    {
+      name: "Parfums d'Exception",
+      slug: "parfums",
+      desc: "Grandes créations de marques renommées & jus rares",
+      badge: "Incontournables",
+    },
+    {
+      name: "Huiles Concentrées & Attars",
+      slug: "huiles-concentrees",
+      desc: "Huiles pures sans alcool à la tenue intense et raffinée",
+      badge: "Pureté",
+    },
+    {
+      name: "Senteurs Unisexe",
+      slug: "senteurs-unisexe",
+      desc: "Notes mixtes audacieuses et équilibrées",
+      badge: "Tendance",
+    },
+    {
+      name: "Brumes & Sprays Corporels",
+      slug: "brumes-sprays-corporels",
+      desc: "Fraîcheur quotidienne légère et captivante",
+      badge: "Fraîcheur",
+    },
+    {
+      name: "Déodorants de Luxe",
+      slug: "deodorants",
+      desc: "Protection parfumée haut de gamme au quotidien",
+      badge: "Soin",
+    },
+    {
+      name: "Coffrets Cadeaux",
+      slug: "coffrets-cadeaux",
+      desc: "L'art d'offrir dans des écrins de prestige",
+      badge: "Exclusif",
+    },
   ];
 
   const catsToDisplay = categories.length > 0 ? categories : defaultCategories;
@@ -451,8 +492,14 @@ export function CategoryShowcaseSection({ categories }: { categories: Category[]
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {catsToDisplay.map((cat, idx) => {
             const catSlug = cat.slug || defaultCategories[idx % defaultCategories.length].slug;
-            const catBadge = "badge" in cat ? (cat as any).badge : "Collection";
-            const catDesc = "desc" in cat ? (cat as any).desc : "Sélection soignée de parfums et senteurs authentiques.";
+            const catBadge =
+              "badge" in cat && typeof (cat as Record<string, unknown>).badge === "string"
+                ? ((cat as Record<string, unknown>).badge as string)
+                : "Collection";
+            const catDesc =
+              "desc" in cat && typeof (cat as Record<string, unknown>).desc === "string"
+                ? ((cat as Record<string, unknown>).desc as string)
+                : "Sélection soignée de parfums et senteurs authentiques.";
 
             return (
               <Link
@@ -462,7 +509,7 @@ export function CategoryShowcaseSection({ categories }: { categories: Category[]
                 className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-secondary/80 via-white to-secondary/30 p-7 border border-gold/25 shadow-xs hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between min-h-[210px] cursor-pointer"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
-                
+
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-primary-deep text-[11px] font-semibold border border-gold/30 shadow-xs">
@@ -531,8 +578,9 @@ export function TrustSection() {
     <section className="bg-white border-y border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24 space-y-16">
         <div>
-          <div className="text-xs uppercase tracking-widest text-gold font-semibold mb-2">
-            La Garantie Al Kareem
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4B1D6E] text-[#F5E096] text-xs uppercase tracking-widest font-semibold mb-2 shadow-xs border border-[#E5B842]/40">
+            <ShieldCheck className="h-3.5 w-3.5 text-[#F5E096]" />
+            <span>La Garantie Al Kareem</span>
           </div>
           <h2 className="font-serif text-3xl md:text-4xl text-primary-deep">
             L'Excellence & la Confiance
@@ -621,9 +669,7 @@ export function TrustSection() {
                   className="rounded-2xl border border-border bg-white p-6 shadow-sm hover:shadow-md transition-shadow relative"
                 >
                   <Quote className="h-6 w-6 text-primary/20 mb-2" />
-                  <p className="text-sm text-foreground/80 leading-relaxed italic">
-                    "{t.message}"
-                  </p>
+                  <p className="text-sm text-foreground/80 leading-relaxed italic">"{t.message}"</p>
                   <footer className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between gap-2">
                     <span className="text-sm font-semibold text-primary-deep">{t.name}</span>
                     {t.rating ? (
@@ -632,9 +678,7 @@ export function TrustSection() {
                           <Star
                             key={i}
                             className={`h-3.5 w-3.5 ${
-                              i < t.rating!
-                                ? "fill-gold text-gold"
-                                : "text-muted-foreground/30"
+                              i < t.rating! ? "fill-gold text-gold" : "text-muted-foreground/30"
                             }`}
                           />
                         ))}

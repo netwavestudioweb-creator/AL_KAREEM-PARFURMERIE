@@ -9,25 +9,19 @@ import {
 } from "@/components/home-sections";
 import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
 import { fetchProducts, fetchCategories } from "@/lib/products";
-import {
-  ArrowRight,
-  Sparkles,
-  CheckCircle2,
-  ShieldCheck,
-  Award,
-} from "lucide-react";
-import boutiqueImg from "@/assets/boutique.jpg";
-import womanHeroImg from "@/assets/perfume-woman-hero.jpg";
+import { ArrowRight, Sparkles, CheckCircle2, ShieldCheck, Award } from "lucide-react";
+import boutiqueImg from "@/assets/boutique.webp";
+import womanHeroImg from "@/assets/perfume-woman-hero.webp";
 import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `${SITE_CONFIG.name} — Parfums d'Exception à Cotonou, Bénin` },
+      { title: `Parfumerie à Cotonou — ${SITE_CONFIG.name}` },
       {
         name: "description",
         content:
-          "Découvrez plus de 100 parfums, huiles concentrées, brumes et coffrets chez Al Kareem Parfumerie à Cotonou. Flacons 100% authentiques, commande en ligne et livraison express Bénin.",
+          "Parfumerie d'exception à Cotonou, Bénin. Collection de parfums, huiles et coffrets authentiques. Commande WhatsApp et livraison rapide au Bénin.",
       },
       { property: "og:title", content: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
       {
@@ -40,9 +34,7 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
     ],
-    links: [
-      { rel: "canonical", href: getCanonicalUrl("/") },
-    ],
+    links: [{ rel: "canonical", href: getCanonicalUrl("/") }],
     scripts: [
       {
         type: "application/ld+json",
@@ -59,7 +51,6 @@ export const Route = createFileRoute("/")({
           paymentAccepted: "Espèces, MTN MoMo, Moov Money",
           address: {
             "@type": "PostalAddress",
-            streetAddress: SITE_CONFIG.address.streetAddress,
             addressLocality: SITE_CONFIG.address.addressLocality,
             addressCountry: SITE_CONFIG.address.addressCountry,
           },
@@ -83,41 +74,56 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  loader: ({ context }) => {
-    void context.queryClient.prefetchQuery({ queryKey: ["products"], queryFn: fetchProducts });
-    void context.queryClient.prefetchQuery({ queryKey: ["categories"], queryFn: fetchCategories });
-    void context.queryClient.prefetchQuery({
-      queryKey: ["authenticity-proofs"],
-      queryFn: fetchProofs,
-    });
-    void context.queryClient.prefetchQuery({
-      queryKey: ["testimonials"],
-      queryFn: fetchTestimonials,
-    });
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["products"],
+        queryFn: () => fetchProducts(),
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["categories"],
+        queryFn: fetchCategories,
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["authenticity-proofs"],
+        queryFn: fetchProofs,
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["testimonials"],
+        queryFn: fetchTestimonials,
+      }),
+    ]);
   },
   component: HomePage,
 });
 
 function HomePage() {
-  const { data: products = [] } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
+  const { data: products = [] } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => fetchProducts(),
+  });
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,
   });
 
+  const countText =
+    products.length > 50 ? `plus de ${Math.floor(products.length / 50) * 50}` : "plus de 400";
+
   return (
     <SiteLayout>
       {/* 1. HERO PRESTIGE : IMAGE FULL-BLEED SUR LE CÔTÉ DROIT SANS AUCUNE CARTE ET FUSION PARFAITE */}
       <section className="relative overflow-hidden bg-[#2D1244] text-white border-b border-border/60 min-h-[520px] sm:min-h-[580px] lg:min-h-[640px] flex items-center">
-        
         {/* Image de la femme se parfumant positionnée sans cadre sur toute la droite */}
         <div className="absolute inset-y-0 right-0 w-full lg:w-[62%] z-0 pointer-events-none">
           <img
             src={womanHeroImg}
-            alt="Femme élégante se parfumant — Al Kareem Parfumerie"
+            alt="Femme élégante se parfumant — Al Kareem Parfumerie Cotonou"
+            fetchPriority="high"
+            decoding="sync"
             className="w-full h-full object-cover object-top sm:object-center"
           />
-          
+
           {/* Fondu de transition du violet solide à gauche vers la photo 100% nette à droite */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#2D1244] via-[#2D1244]/80 via-40% sm:via-45% to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#2D1244] via-transparent to-[#2D1244]/30" />
@@ -137,14 +143,17 @@ function HomePage() {
             <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl text-white leading-tight tracking-tight font-medium drop-shadow-md">
               Sublimez votre aura.
               <span className="block mt-2 font-serif italic text-2xl sm:text-4xl md:text-5xl text-gold font-normal">
-                L'amour se porte en parfum
+                Parfumerie d'Exception à Cotonou
               </span>
             </h1>
 
             <p className="text-sm sm:text-base md:text-lg text-white/95 max-w-xl leading-relaxed font-light drop-shadow-xs">
-              Laissez votre sillage révéler l'élégance qui est en vous. Explorez notre sélection de 
-              <strong className="text-gold font-semibold"> plus de 100 fragrances d'exception</strong>, 
-              huiles pures concentrées et coffrets de prestige disponibles immédiatement à Cotonou.
+              Laissez votre sillage révéler l'élégance qui est en vous. Explorez notre sélection de{" "}
+              <strong className="text-gold font-semibold">
+                {countText} fragrances d'exception
+              </strong>
+              , huiles pures concentrées et coffrets de prestige disponibles immédiatement à
+              Cotonou.
             </p>
 
             {/* Boutons d'accès direct */}
@@ -213,14 +222,15 @@ function HomePage() {
             </h2>
 
             <p className="text-foreground/85 leading-relaxed text-sm sm:text-base">
-              Al Kareem Parfumerie est née d'un amour profond pour la parfumerie et les essences rares.
-              Nous sélectionnons avec une rigueur absolue plus de 100 parfums, huiles concentrées sans alcool
-              et coffrets pour permettre à chacun(e) d'affirmer sa personnalité unique.
+              Al Kareem Parfumerie est née d'un amour profond pour la parfumerie et les essences
+              rares. Nous sélectionnons avec une rigueur absolue {countText} parfums, huiles
+              concentrées sans alcool et coffrets pour permettre à chacun(e) d'affirmer sa
+              personnalité unique.
             </p>
 
             <p className="text-foreground/85 leading-relaxed text-sm sm:text-base">
-              Chaque client(e) bénéficie en boutique comme à distance d'un conseil personnalisé et attentif.
-              Nos flacons sont garantis 100% originaux et scellés.
+              Chaque client(e) bénéficie en boutique comme à distance d'un conseil personnalisé et
+              attentif. Nos flacons sont garantis 100% originaux et scellés.
             </p>
 
             <div className="pt-2 flex flex-wrap gap-3">

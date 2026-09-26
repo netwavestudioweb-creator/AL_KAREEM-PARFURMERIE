@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/produit/:slug",
+      "destination": "/parfum/:slug",
+      "permanent": true
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-export interface ProductSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
+export type ProductSkeletonProps = React.HTMLAttributes<HTMLDivElement>;
 
 /**
  * ProductSkeleton — Skeleton Loader élégant et mobile-first pour les cartes de parfums.

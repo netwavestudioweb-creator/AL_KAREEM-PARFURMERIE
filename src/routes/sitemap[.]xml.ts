@@ -3,7 +3,7 @@ import type {} from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { SITE_CONFIG } from "@/lib/site-config";
 
-const BASE_URL = process.env.SITE_URL || SITE_CONFIG.url;
+const BASE_URL = process.env.VITE_SITE_URL || process.env.SITE_URL || SITE_CONFIG.url;
 
 const STATIC_PATHS = [
   { path: "/", priority: "1.0", changefreq: "weekly" as const },
@@ -13,6 +13,18 @@ const STATIC_PATHS = [
   { path: "/mentions-legales", priority: "0.2", changefreq: "yearly" as const },
   { path: "/confidentialite", priority: "0.2", changefreq: "yearly" as const },
   { path: "/cgv", priority: "0.2", changefreq: "yearly" as const },
+];
+
+const CATEGORY_PATHS = [
+  "/boutique/parfums",
+  "/boutique/huiles-concentrees",
+  "/boutique/senteurs-unisexe",
+  "/boutique/brumes-sprays-corporels",
+  "/boutique/deodorants",
+  "/boutique/coffrets-cadeaux",
+  "/boutique/genre/femme",
+  "/boutique/genre/homme",
+  "/boutique/genre/unisexe",
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({
@@ -29,7 +41,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             });
             const { data } = await sb.from("products").select("slug,updated_at");
             productPaths = (data ?? []).map((p) => ({
-              path: `/produit/${p.slug}`,
+              path: `/parfum/${p.slug}`,
               lastmod: p.updated_at ? new Date(p.updated_at).toISOString() : undefined,
             }));
           } catch {
@@ -39,6 +51,11 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         const urls = [
           ...STATIC_PATHS.map((e) => ({ ...e })),
+          ...CATEGORY_PATHS.map((path) => ({
+            path,
+            priority: "0.8",
+            changefreq: "weekly" as const,
+          })),
           ...productPaths.map((p) => ({
             path: p.path,
             lastmod: p.lastmod,

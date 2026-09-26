@@ -113,23 +113,25 @@ export async function fetchCategories(): Promise<Category[]> {
   return resolved;
 }
 
-export async function fetchProducts(): Promise<Product[]> {
+export async function fetchProducts(limit?: number): Promise<Product[]> {
+  let query = supabase.from("products").select("*").order("created_at", { ascending: false });
+
+  if (limit && limit > 0) {
+    query = query.limit(limit);
+  }
+
   const [cats, prods] = await Promise.all([
     fetchCategories(),
-    supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .then(async ({ data, error }) => {
-        if (error) throw error;
-        const list = (data ?? []) as DbProduct[];
-        return Promise.all(
-          list.map(async (p) => {
-            const fixedUrls = await resolveProductImageUrls(p.image_urls);
-            return { ...p, image_urls: fixedUrls };
-          }),
-        );
-      }),
+    query.then(async ({ data, error }) => {
+      if (error) throw error;
+      const list = (data ?? []) as DbProduct[];
+      return Promise.all(
+        list.map(async (p) => {
+          const fixedUrls = await resolveProductImageUrls(p.image_urls);
+          return { ...p, image_urls: fixedUrls };
+        }),
+      );
+    }),
   ]);
   const map = new Map(cats.map((c) => [c.id, c]));
   return prods.map((p) => toProduct(p, map));

@@ -110,7 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             gtag('js', new Date());
             gtag('config', '${import.meta.env.VITE_GA_ID}');
           `,
-        }
+        },
       );
     }
 
@@ -135,7 +135,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         priceRange: SITE_CONFIG.priceRange,
         address: {
           "@type": "PostalAddress",
-          streetAddress: SITE_CONFIG.address.streetAddress,
           addressLocality: SITE_CONFIG.address.addressLocality,
           addressCountry: SITE_CONFIG.address.addressCountry,
         },
@@ -150,8 +149,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { charSet: "utf-8" },
         {
           name: "viewport",
-          content:
-            "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover",
+          content: "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover",
         },
         { name: "theme-color", content: "#4B1D6E" },
         { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -179,9 +177,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       ],
       links: [
         { rel: "manifest", href: "/site.webmanifest" },
+        { rel: "preload", as: "style", href: appCss },
+        {
+          rel: "preload",
+          as: "style",
+          href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+        },
         { rel: "stylesheet", href: appCss },
         { rel: "icon", href: "/favicon.ico" },
-        { rel: "apple-touch-icon", href: "/alkareem-logo.jpg" },
+        { rel: "apple-touch-icon", href: "/alkareem-logo.webp" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
         {

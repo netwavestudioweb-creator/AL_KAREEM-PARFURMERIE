@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout";
 import { useCart } from "@/lib/cart";
+import { SITE_CONFIG } from "@/lib/site-config";
 import { formatFCFA, whatsappLink, WHATSAPP_NUMBER } from "@/lib/products";
+import { buildOrderMessage } from "@/lib/order-message";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Minus,
@@ -14,6 +16,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { trackWhatsAppClick } from "@/lib/analytics";
 
 export const Route = createFileRoute("/panier")({
   head: () => ({
@@ -24,15 +27,15 @@ export const Route = createFileRoute("/panier")({
         content:
           "Finalisez votre commande via WhatsApp. Paiement à la livraison ou en main propre.",
       },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Panier — Al Kareem" },
       { property: "og:description", content: "Finalisez votre commande de parfums via WhatsApp." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg" },
+      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       {
         name: "twitter:image",
-        content: "https://al-kareem-parfurmerie.vercel.app/og-alkareem.jpg",
+        content: SITE_CONFIG.ogImageUrl,
       },
     ],
   }),
@@ -40,6 +43,7 @@ export const Route = createFileRoute("/panier")({
 });
 
 const CUSTOMER_KEY = "alkareem_customer_v1";
+const CUSTOMER_FORM_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 type ZoneKey = "Cotonou" | "Abomey-Calavi" | "Porto-Novo" | "Autre";
 const ZONE_OPTIONS: ZoneKey[] = ["Cotonou", "Abomey-Calavi", "Porto-Novo", "Autre"];
@@ -101,6 +105,7 @@ function CartPage() {
   const { items, updateQty, removeItem, total, clear } = useCart();
   const [step, setStep] = useState<"cart" | "form" | "confirm">("cart");
   const [submitting, setSubmitting] = useState(false);
+  const [orderCreated, setOrderCreated] = useState(false);
   const [form, setForm] = useState({
     nom: "",
     tel: "",
@@ -113,8 +118,12 @@ function CartPage() {
     try {
       const raw = localStorage.getItem(CUSTOMER_KEY);
       if (raw) {
-        const c = JSON.parse(raw);
-        setForm((f) => ({ ...f, ...c }));
+        const c = JSON.parse(raw) as { savedAt?: number } & typeof form;
+        if (c.savedAt && Date.now() - c.savedAt <= CUSTOMER_FORM_TTL_MS) {
+          setForm((f) => ({ ...f, ...c }));
+        } else {
+          localStorage.removeItem(CUSTOMER_KEY);
+        }
       }
     } catch {
       /* ignore */
@@ -132,7 +141,9 @@ function CartPage() {
     }
     const normalized = normalizeBeninPhone(form.tel);
     if (!normalized) {
-      toast.error("Numéro de téléphone invalide. Merci d'indiquer un numéro joignable (ex : 01 61 88 89 87 ou 61 88 89 87).");
+      toast.error(
+        "Numéro de téléphone invalide. Merci d'indiquer un numéro joignable (ex : 01 61 88 89 87 ou 61 88 89 87).",
+      );
       return;
     }
     // Formate joliment pour la prévisualisation et la transmission WhatsApp
@@ -144,13 +155,43 @@ function CartPage() {
       return;
     }
     setStep("confirm");
+    setOrderCreated(false);
   };
 
-  const confirmAndSend = async () => {
+  const orderMessage = () =>
+    buildOrderMessage({
+      items,
+      total,
+      name: form.nom,
+      phone: form.tel,
+      zone: zoneLabel,
+      address: form.adresse,
+    });
+
+  const openWhatsApp = () => {
+    trackWhatsAppClick("cart_checkout", total);
+    const popup = window.open(whatsappLink(orderMessage()), "_blank");
+    if (popup) {
+      popup.opener = null;
+      toast.info("WhatsApp est ouvert : envoyez le message pour contacter la boutique.");
+    } else {
+      toast.error("WhatsApp ne s'est pas ouvert. Autorisez les fenêtres pop-up puis réessayez.");
+    }
+  };
+
+  const createOrderAndOpenWhatsApp = async () => {
     if (items.length === 0) {
       toast.error("Votre panier est vide.");
       return;
     }
+    // Ouvre la fenêtre pendant le geste utilisateur : sinon un navigateur mobile peut bloquer
+    // WhatsApp une fois l'enregistrement asynchrone terminé.
+    const whatsappWindow = window.open("about:blank", "_blank");
+    if (!whatsappWindow) {
+      toast.error("WhatsApp ne s'est pas ouvert. Autorisez les fenêtres pop-up puis réessayez.");
+      return;
+    }
+    whatsappWindow.opener = null;
     setSubmitting(true);
 
     const orderItems = items.map((i) => ({
@@ -177,12 +218,14 @@ function CartPage() {
       error = res.error;
     } catch {
       // Coupure réseau ou requête interrompue
+      whatsappWindow.close();
       setSubmitting(false);
       toast.error("Connexion interrompue. Vérifiez votre réseau puis réessayez.");
       return;
     }
 
     if (error) {
+      whatsappWindow.close();
       setSubmitting(false);
       const m = error.message ?? "";
       toast.error(
@@ -208,36 +251,21 @@ function CartPage() {
           zone: form.zone,
           autreVille: form.autreVille,
           adresse: form.adresse,
+          savedAt: Date.now(),
         }),
       );
     } catch {
       /* ignore */
     }
 
-    const lines = items
-      .map(
-        (i) =>
-          `• ${i.name}${i.volume ? ` (${i.volume})` : ""} × ${i.quantity} — ${formatFCFA(i.price)} l'unité = ${formatFCFA(i.price * i.quantity)}`,
-      )
-      .join("\n");
-
-    const msg =
-      `Bonjour Al Kareem Parfumerie 🌸\n\n` +
-      `Je souhaite commander les articles suivants sur votre site :\n\n` +
-      `${lines}\n\n` +
-      `Sous-total : ${formatFCFA(total)}\n` +
-      `Frais de livraison : à confirmer selon la zone\n` +
-      `Total : ${formatFCFA(total)}\n\n` +
-      `Mes coordonnées :\n` +
-      `• Nom : ${form.nom}\n` +
-      `• Téléphone : ${form.tel}\n` +
-      `• Zone de livraison : ${zoneLabel}\n` +
-      (form.adresse.trim() ? `• Adresse / point de repère : ${form.adresse}\n` : "") +
-      `\nMerci de me confirmer la disponibilité et les modalités de paiement.`;
-
-    window.open(whatsappLink(msg), "_blank");
-    clear();
+    setOrderCreated(true);
     setSubmitting(false);
+    whatsappWindow.location.href = whatsappLink(orderMessage());
+    toast.info("WhatsApp est ouvert : envoyez le message pour contacter la boutique.");
+  };
+
+  const finishOrder = () => {
+    clear();
     navigate({ to: "/commande-envoyee" });
   };
 
@@ -289,6 +317,7 @@ function CartPage() {
                   <button
                     onClick={() => removeItem(i.productId)}
                     className="text-muted-foreground hover:text-destructive"
+                    aria-label={`Retirer ${i.name} du panier`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -296,6 +325,7 @@ function CartPage() {
                     <button
                       onClick={() => updateQty(i.productId, i.quantity - 1)}
                       className="h-8 w-8 flex items-center justify-center hover:bg-secondary rounded-l-full"
+                      aria-label={`Diminuer la quantité de ${i.name}`}
                     >
                       <Minus className="h-3 w-3" />
                     </button>
@@ -303,6 +333,7 @@ function CartPage() {
                     <button
                       onClick={() => updateQty(i.productId, i.quantity + 1)}
                       className="h-8 w-8 flex items-center justify-center hover:bg-secondary rounded-r-full"
+                      aria-label={`Augmenter la quantité de ${i.name}`}
                     >
                       <Plus className="h-3 w-3" />
                     </button>
@@ -428,7 +459,10 @@ function CartPage() {
               <div className="space-y-4">
                 <button
                   type="button"
-                  onClick={() => setStep("form")}
+                  onClick={() => {
+                    setOrderCreated(false);
+                    setStep("form");
+                  }}
                   className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary-deep"
                 >
                   <ArrowLeft className="h-3 w-3" /> Modifier
@@ -477,16 +511,40 @@ function CartPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={confirmAndSend}
-                  disabled={submitting}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground py-3.5 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  {submitting ? "Envoi…" : "Confirmer et ouvrir WhatsApp"}
-                </button>
+                {orderCreated ? (
+                  <div
+                    className="rounded-xl border border-primary/30 bg-secondary/40 p-4 space-y-3"
+                    role="status"
+                  >
+                    <p className="text-sm text-foreground/85">
+                      Votre demande est enregistrée. Envoyez maintenant le message WhatsApp ; votre
+                      panier reste disponible jusqu'à votre confirmation.
+                    </p>
+                    <button
+                      onClick={openWhatsApp}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-primary text-primary-deep py-3 text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      <MessageCircle className="h-4 w-4" /> Rouvrir WhatsApp
+                    </button>
+                    <button
+                      onClick={finishOrder}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground py-3.5 text-sm font-medium hover:opacity-90 transition-opacity"
+                    >
+                      <CheckCircle2 className="h-4 w-4" /> J'ai envoyé mon message
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={createOrderAndOpenWhatsApp}
+                    disabled={submitting}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground py-3.5 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    {submitting ? "Enregistrement…" : "Enregistrer et ouvrir WhatsApp"}
+                  </button>
+                )}
                 <p className="text-[11px] text-muted-foreground text-center">
-                  Vous serez redirigé·e vers WhatsApp pour finaliser avec Al Kareem (+229{" "}
+                  La commande est finalisée lorsque vous envoyez le message à Al Kareem (+229{" "}
                   {WHATSAPP_NUMBER.slice(3)}).
                 </p>
               </div>

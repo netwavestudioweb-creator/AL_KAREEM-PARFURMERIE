@@ -10,8 +10,11 @@ export function SiteFooter() {
           <div className="flex items-center gap-3 mb-4">
             <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-soft overflow-hidden shrink-0">
               <img
-                src="/alkareem-logo.jpg"
+                src="/alkareem-logo.webp"
                 alt="Al Kareem Parfumerie"
+                width={105}
+                height={140}
+                loading="lazy"
                 className="h-10 w-10 object-contain"
               />
             </div>
@@ -125,7 +128,8 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-white/10 py-5 text-center text-xs opacity-70">
-        © {new Date().getFullYear()} Al Kareem Parfumerie — Tous droits réservés. Réalisé par NetWave Studio.
+        © {new Date().getFullYear()} Al Kareem Parfumerie — Tous droits réservés. Réalisé par
+        NetWave Studio.
       </div>
     </footer>
   );

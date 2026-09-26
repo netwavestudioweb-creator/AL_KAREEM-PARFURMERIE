@@ -20,6 +20,23 @@ export default defineConfig({
     react(),
     nitro({ defaultPreset: "cloudflare-module" }),
   ],
+  build: {
+    target: "esnext",
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("@supabase")) return "vendor-supabase";
+            if (id.includes("lucide-react")) return "vendor-icons";
+            if (id.includes("@radix-ui") || id.includes("cmdk") || id.includes("vaul")) return "vendor-ui";
+            if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
+            if (id.includes("zod") || id.includes("@hookform")) return "vendor-forms";
+          }
+        },
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": "/src",

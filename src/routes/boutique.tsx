@@ -1,4 +1,10 @@
-import { createFileRoute, useNavigate, stripSearchParams } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  stripSearchParams,
+  redirect,
+  Link,
+} from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
@@ -43,27 +49,58 @@ export const Route = createFileRoute("/boutique")({
   search: { middlewares: [dropLegacyParams, stripSearchParams(searchDefaults)] },
   head: () => ({
     meta: [
-      { title: `Boutique & Catalogue — ${SITE_CONFIG.name}` },
+      { title: "Boutique de parfums à Cotonou — Femme, Homme, Huiles | Al Kareem" },
       {
         name: "description",
         content:
           "Parcourez notre catalogue complet d'exception : parfums femme, homme, unisexe, huiles concentrées, brumes et coffrets chez Al Kareem Parfumerie Cotonou.",
       },
       { property: "og:site_name", content: SITE_CONFIG.name },
-      { property: "og:title", content: `Boutique — ${SITE_CONFIG.name}` },
-      { property: "og:description", content: "Parfums d'exception, huiles et coffrets à Cotonou et au Bénin." },
+      { property: "og:title", content: "Boutique de parfums à Cotonou — Al Kareem" },
+      {
+        property: "og:description",
+        content: "Parfums d'exception, huiles et coffrets à Cotonou et au Bénin.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: getCanonicalUrl("/boutique") },
       { property: "og:image", content: SITE_CONFIG.ogImageUrl },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: `Boutique — ${SITE_CONFIG.name}` },
+      { name: "twitter:title", content: "Boutique de parfums à Cotonou — Al Kareem" },
       { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
     ],
     links: [{ rel: "canonical", href: getCanonicalUrl("/boutique") }],
   }),
-  loader: ({ context }) => {
-    void context.queryClient.prefetchQuery({ queryKey: ["products"], queryFn: fetchProducts });
-    void context.queryClient.prefetchQuery({ queryKey: ["categories"], queryFn: fetchCategories });
+  loader: async ({ context, location }) => {
+    const searchParams = new URLSearchParams(location.search);
+    const legacyCategory = searchParams.get("category");
+    const legacyGenre = searchParams.get("genre");
+
+    if (legacyCategory) {
+      throw redirect({
+        to: "/boutique/$category",
+        params: { category: legacyCategory },
+        statusCode: 301,
+      });
+    }
+
+    if (legacyGenre) {
+      throw redirect({
+        to: "/boutique/genre/$genre",
+        params: { genre: legacyGenre },
+        statusCode: 301,
+      });
+    }
+
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["products", { limit: 24 }],
+        queryFn: () => fetchProducts(24),
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["categories"],
+        queryFn: fetchCategories,
+      }),
+    ]);
   },
   component: BoutiquePage,
 });
@@ -74,15 +111,26 @@ function BoutiquePage() {
   const { q, category, promo, sort } = Route.useSearch();
   const navigate = useNavigate({ from: "/boutique" });
 
+  const [visible, setVisible] = useState(PAGE_SIZE);
+
   const {
-    data: products = [],
-    isLoading,
-    isPending,
+    data: initialProducts = [],
+    isLoading: isInitLoading,
+    isPending: isInitPending,
   } = useQuery({
-    queryKey: ["products"],
-    queryFn: fetchProducts,
+    queryKey: ["products", { limit: 24 }],
+    queryFn: () => fetchProducts(24),
   });
-  const isQueryLoading = isLoading || isPending;
+
+  const needsFull = Boolean(q || category || promo || sort !== "nouveaute" || visible > 24);
+  const { data: fullProducts, isLoading: isFullLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => fetchProducts(),
+    enabled: needsFull,
+  });
+
+  const products = fullProducts ?? initialProducts;
+  const isQueryLoading = (isInitLoading || isInitPending) && !products.length;
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,
@@ -110,7 +158,6 @@ function BoutiquePage() {
   // Chargement progressif : n'afficher que PAGE_SIZE produits au départ,
   // puis étendre au clic. Le compteur est réinitialisé quand les filtres
   // changent.
-  const [visible, setVisible] = useState(PAGE_SIZE);
   useEffect(() => {
     setVisible(PAGE_SIZE);
   }, [q, category, promo, sort]);
@@ -164,9 +211,10 @@ function BoutiquePage() {
               Toutes
             </button>
             {categories.map((c) => (
-              <button
+              <Link
                 key={c.id}
-                onClick={() => setSearch({ category: c.slug })}
+                to="/boutique/$category"
+                params={{ category: c.slug }}
                 className={`shrink-0 px-3.5 sm:px-4 py-2 rounded-full text-xs font-medium border transition-colors min-h-[38px] ${
                   category === c.slug
                     ? "bg-primary-deep text-primary-foreground border-primary-deep shadow-xs"
@@ -174,7 +222,7 @@ function BoutiquePage() {
                 }`}
               >
                 {c.name}
-              </button>
+              </Link>
             ))}
             <button
               onClick={() => setSearch({ promo: !promo })}
@@ -209,9 +257,10 @@ function BoutiquePage() {
                   Toutes
                 </button>
                 {categories.map((c) => (
-                  <button
+                  <Link
                     key={c.id}
-                    onClick={() => setSearch({ category: c.slug })}
+                    to="/boutique/$category"
+                    params={{ category: c.slug }}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                       category === c.slug
                         ? "bg-primary-deep text-primary-foreground border-primary-deep"
@@ -219,7 +268,7 @@ function BoutiquePage() {
                     }`}
                   >
                     {c.name}
-                  </button>
+                  </Link>
                 ))}
               </div>
             </div>

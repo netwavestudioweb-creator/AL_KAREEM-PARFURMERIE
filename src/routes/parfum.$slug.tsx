@@ -4,7 +4,8 @@ import { SiteLayout } from "@/components/layout";
 import { ProductCard } from "@/components/product-card";
 import { fetchProductBySlug, fetchProducts, formatFCFA, whatsappLink } from "@/lib/products";
 import { useCart } from "@/lib/cart";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackProductView, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
 import {
   MessageCircle,
   ShoppingBag,
@@ -13,12 +14,13 @@ import {
   ChevronRight,
   Truck,
   ShieldCheck,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
-export const Route = createFileRoute("/produit/$slug")({
+export const Route = createFileRoute("/parfum/$slug")({
   loader: async ({ params, context }) => {
     await context.queryClient.ensureQueryData({
       queryKey: ["product", params.slug],
@@ -33,20 +35,22 @@ export const Route = createFileRoute("/produit/$slug")({
   },
   head: ({ params, loaderData }) => {
     const p = loaderData ?? null;
-    const title = p ? `${p.name} — ${SITE_CONFIG.name}` : `${params.slug} — ${SITE_CONFIG.name}`;
-    const desc = p
-      ? p.description?.slice(0, 155) ||
-        `${p.name}${p.volume ? ` (${p.volume})` : ""} — ${formatFCFA(p.price)}. Commande WhatsApp, livraison au Bénin.`
-      : `Flacon d'exception ${params.slug} chez ${SITE_CONFIG.name}.`;
+    const title = p
+      ? `${p.name} ${SITE_CONFIG.name} — Prix ${formatFCFA(p.price)} | Al Kareem Parfumerie Cotonou`
+      : `${params.slug} — ${SITE_CONFIG.name}`;
+    const rawDesc =
+      p?.description ||
+      `${p?.name || params.slug} chez Al Kareem Parfumerie Cotonou. Commandez en ligne et faites-vous livrer au Bénin.`;
+    const desc = rawDesc.length > 155 ? `${rawDesc.slice(0, 152)}...` : rawDesc;
     const image = p?.images?.[0];
-    const url = getCanonicalUrl(`/produit/${params.slug}`);
+    const url = getCanonicalUrl(`/parfum/${params.slug}`);
     const share = image && /^https?:\/\//.test(image) ? image : SITE_CONFIG.ogImageUrl;
 
     const meta = [
       { title },
       { name: "description", content: desc },
       { property: "og:site_name", content: SITE_CONFIG.name },
-      { property: "og:title", content: p?.name ?? params.slug },
+      { property: "og:title", content: title },
       { property: "og:description", content: desc },
       { property: "og:type", content: "product" },
       { property: "og:url", content: url },
@@ -78,7 +82,9 @@ export const Route = createFileRoute("/produit/$slug")({
             url: url,
             priceCurrency: SITE_CONFIG.currency,
             price: p.price,
-            availability: (p.stock ?? 1) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            availability: p.inStock
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
             itemCondition: "https://schema.org/NewCondition",
             seller: {
               "@type": "Organization",
@@ -137,11 +143,17 @@ function ProductPage() {
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
 
+  useEffect(() => {
+    if (product) {
+      trackProductView(product);
+    }
+  }, [product]);
+
   if (isLoading) {
     return (
       <SiteLayout>
         <div className="mx-auto max-w-7xl px-4 py-24 text-center text-muted-foreground">
-          Chargement…
+          Chargement du parfum…
         </div>
       </SiteLayout>
     );
@@ -150,8 +162,14 @@ function ProductPage() {
     return (
       <SiteLayout>
         <div className="mx-auto max-w-7xl px-4 py-24 text-center">
-          <h1 className="font-serif text-3xl text-primary-deep">Produit introuvable</h1>
-          <Link to="/boutique" className="mt-6 inline-block text-primary underline">
+          <h1 className="font-serif text-3xl text-primary-deep">Parfum introuvable</h1>
+          <p className="mt-2 text-muted-foreground">
+            Ce parfum n'existe pas ou n'est plus disponible au catalogue.
+          </p>
+          <Link
+            to="/boutique"
+            className="mt-6 inline-block rounded-full bg-primary-deep text-primary-foreground px-6 py-3 text-sm font-medium hover:bg-primary transition-colors"
+          >
             Retour à la boutique
           </Link>
         </div>
@@ -160,7 +178,7 @@ function ProductPage() {
   }
 
   const similar = all
-    .filter((p) => p.categorySlug === product.categorySlug && p.id !== product.id)
+    .filter((p) => (p.categorySlug === product.categorySlug || p.inStock) && p.id !== product.id)
     .slice(0, 4);
   const waMessage = `Bonjour Al Kareem 🌸\nJe souhaite commander : ${product.name}${product.volume ? ` (${product.volume})` : ""} — ${formatFCFA(product.price)}.`;
 
@@ -182,7 +200,12 @@ function ProductPage() {
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16 grid gap-8 lg:gap-12 lg:grid-cols-2">
         <div className="space-y-4">
-          <div className="aspect-[4/3] sm:aspect-square max-h-[46vh] sm:max-h-none rounded-2xl sm:rounded-3xl bg-gradient-hero overflow-hidden flex items-center justify-center">
+          <div className="aspect-[4/3] sm:aspect-square max-h-[46vh] sm:max-h-none rounded-2xl sm:rounded-3xl bg-gradient-hero overflow-hidden flex items-center justify-center relative">
+            {!product.inStock && (
+              <div className="absolute top-4 left-4 z-10 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-destructive/90 text-white text-xs font-semibold shadow-md">
+                <AlertCircle className="h-3.5 w-3.5" /> Rupture de stock
+              </div>
+            )}
             <img
               src={product.images[activeImg]}
               alt={product.name}
@@ -194,7 +217,7 @@ function ProductPage() {
                 (e.target as HTMLImageElement).src =
                   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
               }}
-              className="w-full h-full object-contain sm:object-cover"
+              className={`w-full h-full object-contain sm:object-cover ${!product.inStock ? "opacity-80 grayscale-[30%]" : ""}`}
             />
           </div>
           {product.images.length > 1 && (
@@ -230,13 +253,17 @@ function ProductPage() {
               {product.category}
             </div>
           )}
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-primary-deep">{product.name}</h1>
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-primary-deep">
+            {product.name}
+          </h1>
           {product.volume && (
             <div className="text-sm text-muted-foreground mt-1.5">{product.volume}</div>
           )}
 
           <div className="mt-4 sm:mt-6 flex items-baseline gap-3">
-            <div className="font-serif text-2xl sm:text-3xl text-primary-deep">{formatFCFA(product.price)}</div>
+            <div className="font-serif text-2xl sm:text-3xl text-primary-deep">
+              {formatFCFA(product.price)}
+            </div>
             {product.oldPrice && (
               <div className="text-base sm:text-lg text-muted-foreground line-through">
                 {formatFCFA(product.oldPrice)}
@@ -249,6 +276,16 @@ function ProductPage() {
             )}
           </div>
 
+          {!product.inStock && (
+            <div className="mt-4 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
+              <span>
+                Ce flacon est temporairement en rupture de stock. Découvrez nos alternatives
+                olfactives ci-dessous.
+              </span>
+            </div>
+          )}
+
           {product.description && (
             <p className="text-foreground/75 leading-relaxed mt-4 sm:mt-6 whitespace-pre-line text-sm sm:text-base">
               {product.description}
@@ -259,22 +296,28 @@ function ProductPage() {
             <div className="inline-flex items-center border border-border rounded-full">
               <button
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
-                className="h-10 sm:h-11 w-10 sm:w-11 flex items-center justify-center hover:bg-secondary rounded-l-full"
+                className="h-10 sm:h-11 w-10 sm:w-11 flex items-center justify-center hover:bg-secondary rounded-l-full disabled:opacity-40"
                 aria-label="Diminuer la quantité"
+                disabled={!product.inStock}
               >
                 <Minus className="h-4 w-4" />
               </button>
               <span className="w-10 text-center font-medium text-sm">{qty}</span>
               <button
                 onClick={() => setQty((q) => q + 1)}
-                className="h-10 sm:h-11 w-10 sm:w-11 flex items-center justify-center hover:bg-secondary rounded-r-full"
+                className="h-10 sm:h-11 w-10 sm:w-11 flex items-center justify-center hover:bg-secondary rounded-r-full disabled:opacity-40"
                 aria-label="Augmenter la quantité"
+                disabled={!product.inStock}
               >
                 <Plus className="h-4 w-4" />
               </button>
             </div>
-            <div className="text-xs text-muted-foreground">
-              {product.inStock ? "En stock" : "Rupture de stock"}
+            <div className="text-xs font-medium">
+              {product.inStock ? (
+                <span className="text-emerald-700">En stock</span>
+              ) : (
+                <span className="text-amber-700">Rupture de stock</span>
+              )}
             </div>
           </div>
 
@@ -282,59 +325,63 @@ function ProductPage() {
             <button
               onClick={() => {
                 if (!product.inStock) {
-                  toast.error("Ce produit est en rupture.");
+                  toast.error("Ce produit est en rupture de stock.");
                   return;
                 }
                 addItem(product, qty);
+                trackAddToCart(product, qty);
                 toast.success(`${product.name} ajouté au panier`);
               }}
               disabled={!product.inStock}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-deep text-primary-foreground px-6 py-3.5 text-sm font-medium hover:bg-primary transition-colors shadow-soft disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-deep text-primary-foreground px-6 py-3.5 text-sm font-medium hover:bg-primary transition-colors shadow-soft disabled:opacity-50 cursor-pointer"
             >
               <ShoppingBag className="h-4 w-4" /> Ajouter au panier
             </button>
             <a
-              href={whatsappLink(waMessage)}
+              href={
+                product.inStock
+                  ? whatsappLink(waMessage)
+                  : `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(`Bonjour Al Kareem 🌸\nQuand le parfum ${product.name} sera-t-il à nouveau disponible ?`)}`
+              }
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground px-6 py-3.5 text-sm font-medium hover:opacity-90"
+              onClick={() => trackWhatsAppClick("product_detail", product.price * qty)}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground px-6 py-3.5 text-sm font-medium hover:opacity-90 cursor-pointer"
             >
-              <MessageCircle className="h-4 w-4" /> Commander sur WhatsApp
+              <MessageCircle className="h-4 w-4" />{" "}
+              {product.inStock ? "Commander sur WhatsApp" : "Demander le réapprovisionnement"}
             </a>
           </div>
 
           <div className="mt-6 sm:mt-8 border-t border-border pt-6 space-y-3 text-sm text-foreground/75">
             <div className="flex items-center gap-3">
-              <Truck className="h-4 w-4 text-primary shrink-0" /> Livraison Cotonou & Abomey-Calavi sous
-              24-48h
+              <Truck className="h-4 w-4 text-primary shrink-0" /> Livraison Cotonou & Abomey-Calavi
+              sous 24-48h
             </div>
             <div className="flex items-center gap-3">
-              <ShieldCheck className="h-4 w-4 text-primary shrink-0" /> Paiement Mobile Money ou à la
-              livraison
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" /> Paiement Mobile Money ou à
+              la livraison
             </div>
           </div>
         </div>
       </section>
 
-      {/* Barre d'action fixe en bas sur Mobile (Sticky CTA — adaptée du plus petit iPhone SE (320px) au plus grand iPhone 16 Pro Max / Android) */}
+      {/* Sticky CTA mobile */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-white/95 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))]">
         <div className="flex items-center justify-between gap-2 sm:gap-3 max-w-md mx-auto">
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] sm:text-xs text-muted-foreground truncate font-medium">{product.name}</div>
+            <div className="text-[11px] sm:text-xs text-muted-foreground truncate font-medium">
+              {product.name}
+            </div>
             <div className="font-serif text-base sm:text-lg font-semibold text-primary-deep leading-tight truncate">
               {formatFCFA(product.price * qty)}
-              {qty > 1 && (
-                <span className="text-[10px] sm:text-[11px] font-sans font-normal text-muted-foreground ml-1">
-                  ({qty}x)
-                </span>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={() => {
                 if (!product.inStock) {
-                  toast.error("Ce produit est en rupture.");
+                  toast.error("Ce produit est en rupture de stock.");
                   return;
                 }
                 addItem(product, qty);
@@ -346,7 +393,11 @@ function ProductPage() {
               <ShoppingBag className="h-3.5 w-3.5 shrink-0" /> <span>Panier</span>
             </button>
             <a
-              href={whatsappLink(waMessage)}
+              href={
+                product.inStock
+                  ? whatsappLink(waMessage)
+                  : `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(`Bonjour Al Kareem 🌸\nQuand le parfum ${product.name} sera-t-il à nouveau disponible ?`)}`
+              }
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-full bg-whatsapp text-whatsapp-foreground px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold shadow-sm hover:opacity-90 min-h-[40px]"
@@ -360,7 +411,7 @@ function ProductPage() {
       {similar.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-28 lg:pb-20">
           <h2 className="font-serif text-2xl md:text-3xl text-primary-deep mb-8">
-            Vous aimerez aussi
+            {!product.inStock ? "Alternatives olfactives disponibles" : "Vous aimerez aussi"}
           </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {similar.map((p) => (
