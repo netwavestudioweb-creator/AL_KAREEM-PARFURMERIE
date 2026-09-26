@@ -42,8 +42,35 @@ export interface Product {
   createdAt: string;
 }
 
-const PLACEHOLDER =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
+export function getOptimizedImageUrl(
+  url: string | null | undefined,
+  width = 400,
+  height = 400,
+  quality = 80,
+): string {
+  if (!url) return PLACEHOLDER;
+  if (url.startsWith("data:")) return url;
+
+  if (url.includes("/storage/v1/object/public/")) {
+    const transformed = url.replace(
+      "/storage/v1/object/public/",
+      "/storage/v1/render/image/public/",
+    );
+    const separator = transformed.includes("?") ? "&" : "?";
+    return `${transformed}${separator}width=${width}&height=${height}&quality=${quality}&resize=contain&format=webp`;
+  }
+
+  if (url.includes("/storage/v1/object/sign/")) {
+    const transformed = url.replace(
+      "/storage/v1/object/sign/",
+      "/storage/v1/render/image/authenticated/",
+    );
+    const separator = transformed.includes("?") ? "&" : "?";
+    return `${transformed}${separator}width=${width}&height=${height}&quality=${quality}&resize=contain&format=webp`;
+  }
+
+  return url;
+}
 
 export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): Product {
   const cat = p.category_id ? categoriesById.get(p.category_id) : undefined;
@@ -52,6 +79,8 @@ export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): 
     p.promo_price_fcfa < p.price_fcfa &&
     (!p.promo_end_date || new Date(p.promo_end_date) >= new Date(new Date().toDateString()));
   const effective = promoActive ? p.promo_price_fcfa! : p.price_fcfa;
+  const rawImages = p.image_urls.length ? p.image_urls : [PLACEHOLDER];
+  const optimizedImages = rawImages.map((img) => getOptimizedImageUrl(img, 400, 400, 80));
   return {
     id: p.id,
     slug: p.slug,
@@ -64,8 +93,8 @@ export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): 
     description: p.description,
     volume: p.volume,
     inStock: p.in_stock,
-    images: p.image_urls.length ? p.image_urls : [PLACEHOLDER],
-    image: p.image_urls[0] ?? PLACEHOLDER,
+    images: optimizedImages,
+    image: optimizedImages[0] ?? PLACEHOLDER,
     createdAt: p.created_at,
   };
 }

@@ -149,7 +149,7 @@ function HomePage() {
 
             <p className="text-sm sm:text-base md:text-lg text-white/95 max-w-xl leading-relaxed font-light drop-shadow-xs">
               Laissez votre sillage révéler l'élégance qui est en vous. Explorez notre sélection de{" "}
-              <strong className="text-gold font-semibold">
+              <strong className="text-gold font-semibold" suppressHydrationWarning>
                 {countText} fragrances d'exception
               </strong>
               , huiles pures concentrées et coffrets de prestige disponibles immédiatement à
@@ -212,8 +212,8 @@ function HomePage() {
             />
           </div>
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gold/30 text-xs font-semibold uppercase tracking-widest text-gold shadow-xs">
-              <Sparkles className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4B1D6E] text-[#F5E096] text-xs uppercase tracking-widest font-semibold shadow-xs border border-[#E5B842]/40">
+              <Sparkles className="h-3.5 w-3.5 text-[#F5E096]" />
               <span>Savoir-Faire & Passion</span>
             </div>
 

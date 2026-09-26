@@ -133,7 +133,7 @@ export function RotatingSelection({ products }: { products: Product[]; categorie
       </div>
 
       <div
-        className="relative rounded-3xl bg-gradient-to-br from-white via-secondary/30 to-white p-4 sm:p-6 lg:p-8 border border-gold/30 shadow-elegant"
+        className="relative rounded-3xl bg-gradient-to-br from-white via-secondary/30 to-white p-4 sm:p-6 lg:p-8 border border-gold/30 shadow-elegant min-h-[480px] sm:min-h-[520px]"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -324,8 +324,8 @@ export function ScentFinderSection({ products }: { products: Product[] }) {
     <section className="bg-gradient-to-b from-secondary/40 via-white to-white py-16 md:py-24 border-t border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white border border-gold/30 text-xs font-semibold text-gold uppercase tracking-widest shadow-xs">
-            <Compass className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4B1D6E] text-[#F5E096] text-xs uppercase tracking-widest font-semibold shadow-xs border border-[#E5B842]/40">
+            <Compass className="h-3.5 w-3.5 text-[#F5E096]" />
             <span>Guide & Diagnostic Olfactif</span>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl text-primary-deep tracking-tight">
@@ -377,9 +377,9 @@ export function ScentFinderSection({ products }: { products: Product[] }) {
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                       {product.category || "Parfum"}
                     </div>
-                    <h4 className="font-serif text-sm sm:text-base font-medium text-primary-deep line-clamp-1">
+                    <h3 className="font-serif text-sm sm:text-base font-medium text-primary-deep line-clamp-1">
                       {product.name}
-                    </h4>
+                    </h3>
                   </div>
                   <div className="mt-2 flex items-center justify-between pt-2 border-t border-border/60">
                     <span className="text-xs sm:text-sm font-bold text-primary-deep">

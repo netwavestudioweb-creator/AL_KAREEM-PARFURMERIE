@@ -10,7 +10,7 @@ export function WhatsAppFab() {
     <div className="group fixed bottom-6 right-6 z-50 flex items-center gap-2.5">
       {/* Infobulle 'Conseil Privé' au survol */}
       <div className="pointer-events-none opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 rounded-full bg-primary-deep/95 backdrop-blur-md px-3.5 py-1.5 text-xs font-medium text-white shadow-elegant border border-gold/40 whitespace-nowrap flex items-center gap-1.5">
-        <span className="h-2 w-2 rounded-full bg-whatsapp animate-pulse" />
+        <span className="h-2 w-2 rounded-full bg-whatsapp wa-pulse-dot shrink-0" />
         <span>Conseil Privé</span>
       </div>
 
