@@ -1,0 +1,50 @@
+# .github/workflows/supabase-keepalive.yml
+#
+# Déclenche le script keep-supabase-alive.mjs toutes les 6 jours
+# (en dessous du seuil de 7 jours de Supabase) pour empêcher
+# la mise en pause automatique de la base de données.
+#
+# ⚙️  Setup requis une seule fois :
+#   1. GitHub repo → Settings → Secrets and variables → Actions
+#   2. Créer les secrets :
+#      - SUPABASE_URL          = https://zoagwbhgpaslyjjsdnnv.supabase.co
+#      - SUPABASE_PUBLISHABLE_KEY = sb_publishable_HF_...
+#      (Ces valeurs sont dans votre fichier .env local)
+
+name: 🛡️ Supabase Keepalive
+
+on:
+  # Déclenchement automatique toutes les 6 jours à 08h00 UTC
+  schedule:
+    - cron: "0 8 */6 * *"
+
+  # Déclenchement manuel depuis l'onglet "Actions" de GitHub
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping la base de données Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: 📥 Checkout du code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 📦 Installer les dépendances (@supabase/supabase-js uniquement)
+        run: npm install --ignore-scripts --no-audit @supabase/supabase-js
+
+      - name: 🏓 Exécuter le script keepalive
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: node scripts/keep-supabase-alive.mjs
+
+      - name: 📅 Afficher la date du dernier ping
+        run: echo "Ping effectué le $(date -u '+%Y-%m-%d à %H:%M UTC')"

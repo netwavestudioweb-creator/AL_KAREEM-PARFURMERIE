@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "keepalive": "node scripts/keep-supabase-alive.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
