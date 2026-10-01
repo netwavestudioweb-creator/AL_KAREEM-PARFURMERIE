@@ -5,17 +5,16 @@
  * Script de "keepalive" pour éviter la mise en pause automatique
  * de la base de données Supabase (plan gratuit — inactivité > 7 jours).
  *
+ * Utilise fetch() natif (Node.js 18+) — aucune dépendance npm requise.
+ *
  * Exécution manuelle :
  *   node scripts/keep-supabase-alive.mjs
  *
- * En production, ce script est déclenché automatiquement par GitHub Actions
- * toutes les 6 jours (voir .github/workflows/supabase-keepalive.yml).
+ * En production, déclenché automatiquement par GitHub Actions toutes les 6 jours
+ * (voir .github/workflows/supabase-keepalive.yml).
  */
 
-import { createClient } from "@supabase/supabase-js";
-
 // ── Configuration ─────────────────────────────────────────────────────────────
-// Les variables sont injectées par GitHub Actions Secrets ou par .env local.
 const SUPABASE_URL =
   process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
 const SUPABASE_KEY =
@@ -30,35 +29,46 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   process.exit(1);
 }
 
-// ── Client Supabase ───────────────────────────────────────────────────────────
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// ── Ping ──────────────────────────────────────────────────────────────────────
+// ── Ping via REST API (fetch natif — zéro dépendance) ────────────────────────
 async function keepAlive() {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] 🏓  Ping Supabase — ${SUPABASE_URL}`);
 
-  try {
-    // Requête légère : on lit 1 ligne de la table "products".
-    // Adaptez le nom de la table si nécessaire.
-    const { data, error } = await supabase
-      .from("products")
-      .select("id")
-      .limit(1);
+  // Appel REST direct : GET /rest/v1/products?select=id&limit=1
+  const url = `${SUPABASE_URL}/rest/v1/products?select=id&limit=1`;
 
-    if (error) {
-      // Certaines erreurs ne sont pas fatales (RLS, table vide, etc.)
-      console.warn(`⚠️   Réponse Supabase : ${error.message}`);
-      console.warn("    La base de données est tout de même active.");
-    } else {
-      console.log(
-        `✅  Ping réussi — ${data?.length ?? 0} enregistrement(s) reçu(s).`
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const body = await res.text();
+
+    if (res.ok) {
+      console.log(`✅  Ping réussi — HTTP ${res.status} — réponse : ${body}`);
+    } else if (res.status === 401 || res.status === 403) {
+      // Erreur d'auth : la DB est active mais la clé est invalide
+      console.warn(
+        `⚠️  HTTP ${res.status} — clé invalide, mais la DB est active.`
       );
+    } else {
+      // Autres codes (404 table absente, 406, etc.) : DB toujours active
+      console.warn(
+        `⚠️  HTTP ${res.status} — réponse inattendue, mais la DB est active.`
+      );
+      console.warn(`    Corps : ${body}`);
     }
 
     console.log(`[${timestamp}] 🛡️   Base de données maintenue en vie.`);
+    process.exit(0);
   } catch (err) {
-    console.error("❌  Erreur réseau ou inattendue :", err.message);
+    // Erreur réseau réelle → on échoue
+    console.error("❌  Erreur réseau :", err.message);
     process.exit(1);
   }
 }

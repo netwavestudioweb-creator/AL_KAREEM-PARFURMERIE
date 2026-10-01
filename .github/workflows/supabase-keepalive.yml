@@ -1,20 +1,17 @@
 # .github/workflows/supabase-keepalive.yml
 #
-# Déclenche le script keep-supabase-alive.mjs toutes les 6 jours
-# (en dessous du seuil de 7 jours de Supabase) pour empêcher
-# la mise en pause automatique de la base de données.
+# Déclenche keep-supabase-alive.mjs toutes les 6 jours pour empêcher
+# la mise en pause automatique de la base de données Supabase (seuil : 7 jours).
 #
-# ⚙️  Setup requis une seule fois :
-#   1. GitHub repo → Settings → Secrets and variables → Actions
-#   2. Créer les secrets :
-#      - SUPABASE_URL          = https://zoagwbhgpaslyjjsdnnv.supabase.co
-#      - SUPABASE_PUBLISHABLE_KEY = sb_publishable_HF_...
-#      (Ces valeurs sont dans votre fichier .env local)
+# ⚙️  Setup requis une seule fois dans GitHub :
+#   Settings → Secrets and variables → Actions → New repository secret
+#   - SUPABASE_URL            = https://zoagwbhgpaslyjjsdnnv.supabase.co
+#   - SUPABASE_PUBLISHABLE_KEY = sb_publishable_HF_...
 
 name: 🛡️ Supabase Keepalive
 
 on:
-  # Déclenchement automatique toutes les 6 jours à 08h00 UTC
+  # Toutes les 6 jours à 08h00 UTC
   schedule:
     - cron: "0 8 */6 * *"
 
@@ -31,14 +28,10 @@ jobs:
       - name: 📥 Checkout du code
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js
+      - name: 🟢 Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: 📦 Installer les dépendances (@supabase/supabase-js uniquement)
-        run: npm install --ignore-scripts --no-audit @supabase/supabase-js
+          node-version: "24"
 
       - name: 🏓 Exécuter le script keepalive
         env:
@@ -46,5 +39,5 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: node scripts/keep-supabase-alive.mjs
 
-      - name: 📅 Afficher la date du dernier ping
-        run: echo "Ping effectué le $(date -u '+%Y-%m-%d à %H:%M UTC')"
+      - name: 📅 Date du dernier ping
+        run: echo "✅ Ping effectué le $(date -u '+%Y-%m-%d à %H:%M UTC')"
