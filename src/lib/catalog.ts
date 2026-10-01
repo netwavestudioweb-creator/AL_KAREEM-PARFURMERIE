@@ -72,6 +72,57 @@ export function getOptimizedImageUrl(
   return url;
 }
 
+// Cache resolved signed URLs in memory so we only request them once
+const signedUrlCache = new Map<string, string>();
+
+/**
+ * Ensures any images stored as public URLs or raw paths for the private
+ * "product-images" bucket are converted to valid 10-year signed URLs.
+ */
+async function ensureSignedUrls(products: DbProduct[]): Promise<void> {
+  const pathsToSign: string[] = [];
+
+  for (const p of products) {
+    for (const url of p.image_urls) {
+      if (url.includes("/storage/v1/object/public/product-images/")) {
+        const path = url.split("/storage/v1/object/public/product-images/")[1];
+        if (path && !signedUrlCache.has(path)) {
+          pathsToSign.push(path);
+        }
+      }
+    }
+  }
+
+  if (pathsToSign.length > 0) {
+    try {
+      const { data } = await supabase.storage
+        .from("product-images")
+        .createSignedUrls(pathsToSign, 60 * 60 * 24 * 365 * 10);
+      if (data) {
+        for (const item of data) {
+          if (item.signedUrl && item.path) {
+            signedUrlCache.set(item.path, item.signedUrl);
+          }
+        }
+      }
+    } catch {
+      // Ignore signing errors, keep original URLs
+    }
+  }
+
+  for (const p of products) {
+    p.image_urls = p.image_urls.map((url) => {
+      if (url.includes("/storage/v1/object/public/product-images/")) {
+        const path = url.split("/storage/v1/object/public/product-images/")[1];
+        if (path && signedUrlCache.has(path)) {
+          return signedUrlCache.get(path)!;
+        }
+      }
+      return url;
+    });
+  }
+}
+
 export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): Product {
   const cat = p.category_id ? categoriesById.get(p.category_id) : undefined;
   const promoActive =
@@ -119,8 +170,11 @@ export async function fetchProducts(limit?: number): Promise<Product[]> {
   const [cats, { data, error }] = await Promise.all([fetchCategories(), query]);
   if (error) throw error;
 
+  const rawProducts = (data ?? []) as DbProduct[];
+  await ensureSignedUrls(rawProducts);
+
   const map = new Map(cats.map((c) => [c.id, c]));
-  return ((data ?? []) as DbProduct[]).map((p) => toProduct(p, map));
+  return rawProducts.map((p) => toProduct(p, map));
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
@@ -131,8 +185,12 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
+
+  const rawProduct = data as DbProduct;
+  await ensureSignedUrls([rawProduct]);
+
   const cats = await fetchCategories();
-  return toProduct(data as DbProduct, new Map(cats.map((c) => [c.id, c])));
+  return toProduct(rawProduct, new Map(cats.map((c) => [c.id, c])));
 }
 
 export function slugify(input: string): string {

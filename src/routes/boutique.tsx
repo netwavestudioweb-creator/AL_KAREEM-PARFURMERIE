@@ -93,8 +93,8 @@ export const Route = createFileRoute("/boutique")({
 
     await Promise.all([
       context.queryClient.ensureQueryData({
-        queryKey: ["products", { limit: 24 }],
-        queryFn: () => fetchProducts(24),
+        queryKey: ["products"],
+        queryFn: () => fetchProducts(),
       }),
       context.queryClient.ensureQueryData({
         queryKey: ["categories"],
@@ -114,22 +114,14 @@ function BoutiquePage() {
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   const {
-    data: initialProducts = [],
+    data: products = [],
     isLoading: isInitLoading,
     isPending: isInitPending,
   } = useQuery({
-    queryKey: ["products", { limit: 24 }],
-    queryFn: () => fetchProducts(24),
-  });
-
-  const needsFull = Boolean(q || category || promo || sort !== "nouveaute" || visible > 24);
-  const { data: fullProducts, isLoading: isFullLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => fetchProducts(),
-    enabled: needsFull,
   });
 
-  const products = fullProducts ?? initialProducts;
   const isQueryLoading = (isInitLoading || isInitPending) && !products.length;
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
