@@ -42,6 +42,30 @@ export interface Product {
   createdAt: string;
 }
 
+const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
+
+/**
+ * Converts a legacy signed URL stored in the database to a stable public URL.
+ * Safe to call on public URLs or placeholders -- returns them unchanged.
+ */
+export function toPublicUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith("data:")) return url;
+  // Already a public URL -> return as-is
+  if (url.includes("/storage/v1/object/public/")) return url;
+  // Signed URL -> extract the object path and rebuild as public URL
+  if (url.includes("/storage/v1/object/sign/")) {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+    const match = url.match(/\/storage\/v1\/object\/sign\/([^/]+)\/(.+?)(\?|$)/);
+    if (match) {
+      const bucket = match[1];
+      const filePath = match[2];
+      return `${supabaseUrl}/storage/v1/object/public/${bucket}/${filePath}`;
+    }
+  }
+  return url;
+}
+
 export function getOptimizedImageUrl(
   url: string | null | undefined,
   width = 400,
@@ -55,15 +79,6 @@ export function getOptimizedImageUrl(
     const transformed = url.replace(
       "/storage/v1/object/public/",
       "/storage/v1/render/image/public/",
-    );
-    const separator = transformed.includes("?") ? "&" : "?";
-    return `${transformed}${separator}width=${width}&height=${height}&quality=${quality}&resize=contain&format=webp`;
-  }
-
-  if (url.includes("/storage/v1/object/sign/")) {
-    const transformed = url.replace(
-      "/storage/v1/object/sign/",
-      "/storage/v1/render/image/authenticated/",
     );
     const separator = transformed.includes("?") ? "&" : "?";
     return `${transformed}${separator}width=${width}&height=${height}&quality=${quality}&resize=contain&format=webp`;
@@ -99,32 +114,6 @@ export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): 
   };
 }
 
-const signedUrlCache = new Map<string, string>();
-
-async function ensureSignedUrl(url: string | null): Promise<string | null> {
-  if (!url) return null;
-  if (!url.includes("/storage/v1/object/public/product-images/")) return url;
-  if (signedUrlCache.has(url)) return signedUrlCache.get(url)!;
-  try {
-    const path = url.split("/storage/v1/object/public/product-images/")[1];
-    const { data, error } = await supabase.storage
-      .from("product-images")
-      .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-    if (!error && data?.signedUrl) {
-      signedUrlCache.set(url, data.signedUrl);
-      return data.signedUrl;
-    }
-  } catch {
-    /* fallback to url */
-  }
-  return url;
-}
-
-async function resolveProductImageUrls(image_urls: string[] | null | undefined): Promise<string[]> {
-  const urls = image_urls ?? [];
-  return Promise.all(urls.map((u) => ensureSignedUrl(u).then((res) => res ?? u)));
-}
-
 export async function fetchCategories(): Promise<Category[]> {
   const { data, error } = await supabase
     .from("categories")
@@ -132,14 +121,11 @@ export async function fetchCategories(): Promise<Category[]> {
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
-  const list = (data ?? []) as Category[];
-  const resolved = await Promise.all(
-    list.map(async (c) => ({
-      ...c,
-      image_url: await ensureSignedUrl(c.image_url),
-    })),
-  );
-  return resolved;
+  // Convert any stored signed URLs to stable public URLs
+  return (data ?? []).map((c) => ({
+    ...(c as Category),
+    image_url: toPublicUrl(c.image_url),
+  }));
 }
 
 export async function fetchProducts(limit?: number): Promise<Product[]> {
@@ -149,21 +135,17 @@ export async function fetchProducts(limit?: number): Promise<Product[]> {
     query = query.limit(limit);
   }
 
-  const [cats, prods] = await Promise.all([
-    fetchCategories(),
-    query.then(async ({ data, error }) => {
-      if (error) throw error;
-      const list = (data ?? []) as DbProduct[];
-      return Promise.all(
-        list.map(async (p) => {
-          const fixedUrls = await resolveProductImageUrls(p.image_urls);
-          return { ...p, image_urls: fixedUrls };
-        }),
-      );
-    }),
-  ]);
+  const [cats, { data, error }] = await Promise.all([fetchCategories(), query]);
+  if (error) throw error;
+
   const map = new Map(cats.map((c) => [c.id, c]));
-  return prods.map((p) => toProduct(p, map));
+  const list = (data ?? []) as DbProduct[];
+
+  return list.map((p) => {
+    // Convert any legacy signed URLs stored in DB to stable public URLs
+    const fixedUrls = (p.image_urls ?? []).map((u) => toPublicUrl(u) ?? u);
+    return toProduct({ ...p, image_urls: fixedUrls }, map);
+  });
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
@@ -175,7 +157,8 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
   if (error) throw error;
   if (!data) return null;
   const dbProd = data as DbProduct;
-  const fixedUrls = await resolveProductImageUrls(dbProd.image_urls);
+  // Convert any legacy signed URLs to stable public URLs
+  const fixedUrls = (dbProd.image_urls ?? []).map((u) => toPublicUrl(u) ?? u);
   const cats = await fetchCategories();
   return toProduct({ ...dbProd, image_urls: fixedUrls }, new Map(cats.map((c) => [c.id, c])));
 }

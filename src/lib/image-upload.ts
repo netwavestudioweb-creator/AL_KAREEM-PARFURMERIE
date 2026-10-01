@@ -79,12 +79,10 @@ export async function uploadImage(file: File, prefix = ""): Promise<string> {
   });
   if (error) throw error;
 
-  // Le bucket Supabase étant sécurisé/privé, on génère une URL signée longue durée (10 ans)
-  const { data: signData, error: signErr } = await supabase.storage
-    .from(BUCKET)
-    .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-  if (signErr || !signData?.signedUrl) throw signErr ?? new Error("URL non générée");
-  return signData.signedUrl;
+  // Le bucket étant désormais public, on retourne directement l'URL publique stable (pas d'expiration)
+  const { data: publicData } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  if (!publicData?.publicUrl) throw new Error("URL publique non générée");
+  return publicData.publicUrl;
 }
 
 export function uploadProductImage(file: File): Promise<string> {
