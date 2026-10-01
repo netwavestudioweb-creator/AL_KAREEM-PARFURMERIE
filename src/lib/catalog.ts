@@ -45,27 +45,10 @@ export interface Product {
 const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
 
 /**
- * Converts a legacy signed URL stored in the database to a stable public URL.
- * Safe to call on public URLs or placeholders -- returns them unchanged.
+ * Returns the image URL as-is if it is already usable (signed URL, public URL, data URL).
+ * For Supabase public bucket URLs, applies image transformation (resize + webp).
+ * Signed URLs are returned as-is — they are valid for years and work without changes.
  */
-export function toPublicUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  if (url.startsWith("data:")) return url;
-  // Already a public URL -> return as-is
-  if (url.includes("/storage/v1/object/public/")) return url;
-  // Signed URL -> extract the object path and rebuild as public URL
-  if (url.includes("/storage/v1/object/sign/")) {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-    const match = url.match(/\/storage\/v1\/object\/sign\/([^/]+)\/(.+?)(\?|$)/);
-    if (match) {
-      const bucket = match[1];
-      const filePath = match[2];
-      return `${supabaseUrl}/storage/v1/object/public/${bucket}/${filePath}`;
-    }
-  }
-  return url;
-}
-
 export function getOptimizedImageUrl(
   url: string | null | undefined,
   width = 400,
@@ -75,6 +58,7 @@ export function getOptimizedImageUrl(
   if (!url) return PLACEHOLDER;
   if (url.startsWith("data:")) return url;
 
+  // Public bucket URL -> apply Supabase image transform
   if (url.includes("/storage/v1/object/public/")) {
     const transformed = url.replace(
       "/storage/v1/object/public/",
@@ -84,6 +68,7 @@ export function getOptimizedImageUrl(
     return `${transformed}${separator}width=${width}&height=${height}&quality=${quality}&resize=contain&format=webp`;
   }
 
+  // Signed URL -> return as-is (valid for years, no transformation needed)
   return url;
 }
 
@@ -121,11 +106,7 @@ export async function fetchCategories(): Promise<Category[]> {
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
-  // Convert any stored signed URLs to stable public URLs
-  return (data ?? []).map((c) => ({
-    ...(c as Category),
-    image_url: toPublicUrl(c.image_url),
-  }));
+  return (data ?? []) as Category[];
 }
 
 export async function fetchProducts(limit?: number): Promise<Product[]> {
@@ -139,13 +120,7 @@ export async function fetchProducts(limit?: number): Promise<Product[]> {
   if (error) throw error;
 
   const map = new Map(cats.map((c) => [c.id, c]));
-  const list = (data ?? []) as DbProduct[];
-
-  return list.map((p) => {
-    // Convert any legacy signed URLs stored in DB to stable public URLs
-    const fixedUrls = (p.image_urls ?? []).map((u) => toPublicUrl(u) ?? u);
-    return toProduct({ ...p, image_urls: fixedUrls }, map);
-  });
+  return ((data ?? []) as DbProduct[]).map((p) => toProduct(p, map));
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
@@ -156,11 +131,8 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  const dbProd = data as DbProduct;
-  // Convert any legacy signed URLs to stable public URLs
-  const fixedUrls = (dbProd.image_urls ?? []).map((u) => toPublicUrl(u) ?? u);
   const cats = await fetchCategories();
-  return toProduct({ ...dbProd, image_urls: fixedUrls }, new Map(cats.map((c) => [c.id, c])));
+  return toProduct(data as DbProduct, new Map(cats.map((c) => [c.id, c])));
 }
 
 export function slugify(input: string): string {
