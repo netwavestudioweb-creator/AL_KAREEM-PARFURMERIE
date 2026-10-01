@@ -39,36 +39,45 @@ export interface Product {
   inStock: boolean;
   images: string[];
   image: string; // first image or placeholder
+  rawImage?: string; // original unoptimized image for fallback
   createdAt: string;
 }
 
 const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
 
 /**
- * Returns the image URL as-is if it is already usable (signed URL, public URL, data URL).
- * For Supabase public bucket URLs, applies image transformation (resize + webp).
- * Signed URLs are returned as-is — they are valid for years and work without changes.
+ * Returns an optimized Supabase CDN image URL (WebP, resized, edge-cached).
+ * Supports both signed and public bucket URLs from Supabase.
  */
 export function getOptimizedImageUrl(
   url: string | null | undefined,
   width = 400,
   height = 400,
-  quality = 80,
+  quality = 75,
 ): string {
   if (!url) return PLACEHOLDER;
   if (url.startsWith("data:")) return url;
 
-  // Public bucket URL -> apply Supabase image transform
+  // Signed storage URL -> transform via Supabase image render endpoint for edge CDN compression
+  if (url.includes("/storage/v1/object/sign/")) {
+    const transformed = url.replace(
+      "/storage/v1/object/sign/",
+      "/storage/v1/render/image/sign/",
+    );
+    const separator = transformed.includes("?") ? "&" : "?";
+    return `${transformed}${separator}width=${width}&height=${height}&quality=${quality}&resize=contain`;
+  }
+
+  // Public storage URL -> transform via Supabase image render endpoint
   if (url.includes("/storage/v1/object/public/")) {
     const transformed = url.replace(
       "/storage/v1/object/public/",
       "/storage/v1/render/image/public/",
     );
     const separator = transformed.includes("?") ? "&" : "?";
-    return `${transformed}${separator}width=${width}&height=${height}&quality=${quality}&resize=contain&format=webp`;
+    return `${transformed}${separator}width=${width}&height=${height}&quality=${quality}&resize=contain`;
   }
 
-  // Signed URL -> return as-is (valid for years, no transformation needed)
   return url;
 }
 
@@ -146,6 +155,7 @@ export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): 
     inStock: p.in_stock,
     images: optimizedImages,
     image: optimizedImages[0] ?? PLACEHOLDER,
+    rawImage: rawImages[0],
     createdAt: p.created_at,
   };
 }

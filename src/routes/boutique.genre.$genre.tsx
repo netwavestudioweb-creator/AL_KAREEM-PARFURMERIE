@@ -107,8 +107,8 @@ function GenrePage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
-            {filtered.map((p) => (
-              <ProductCard key={p.id} product={p} />
+            {filtered.map((p, idx) => (
+              <ProductCard key={p.id} product={p} priority={idx < 6} />
             ))}
           </div>
         )}

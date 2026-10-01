@@ -5,7 +5,15 @@ import { useCart } from "@/lib/cart";
 import { toast } from "sonner";
 import { ShoppingBag } from "lucide-react";
 
-export function ProductCard({ product, className }: { product: Product; className?: string }) {
+export function ProductCard({
+  product,
+  className,
+  priority = false,
+}: {
+  product: Product;
+  className?: string;
+  priority?: boolean;
+}) {
   const { addItem } = useCart();
   const [imgSrc, setImgSrc] = useState(product.image);
   const [loaded, setLoaded] = useState(false);
@@ -19,25 +27,31 @@ export function ProductCard({ product, className }: { product: Product; classNam
       <Link to="/parfum/$slug" params={{ slug: product.slug }} className="flex flex-1 flex-col">
         <div className="relative aspect-square overflow-hidden rounded-xl bg-muted/40">
           {!loaded && (
-            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-muted/30 via-muted/60 to-muted/30" />
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-muted/30 via-muted/60 to-muted/30 pointer-events-none" />
           )}
           <img
             src={imgSrc}
             alt={product.name}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             decoding="async"
             width={400}
             height={400}
             onLoad={() => setLoaded(true)}
             onError={() => {
-              setLoaded(true);
-              setImgSrc(
-                "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>",
-              );
+              // If transformed image fails, fall back to original raw image first
+              if (product.rawImage && imgSrc !== product.rawImage) {
+                setImgSrc(product.rawImage);
+              } else {
+                setLoaded(true);
+                setImgSrc(
+                  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>",
+                );
+              }
             }}
             sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
-            className={`h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
-              loaded ? "opacity-100" : "opacity-0"
+            className={`h-full w-full object-cover transition-all duration-300 ease-out group-hover:scale-105 ${
+              loaded ? "opacity-100" : "opacity-90"
             }`}
           />
           <div className="absolute top-3 left-3 flex flex-col gap-1">

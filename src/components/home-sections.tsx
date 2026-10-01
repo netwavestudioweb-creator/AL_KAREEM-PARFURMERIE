@@ -144,6 +144,8 @@ export function RotatingSelection({ products }: { products: Product[]; categorie
               alt={currentProduct.name}
               width={600}
               height={600}
+              fetchPriority="high"
+              decoding="async"
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent pointer-events-none" />

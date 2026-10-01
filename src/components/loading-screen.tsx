@@ -7,13 +7,8 @@ import { useRouterState } from "@tanstack/react-router";
  * et réaffiché si une navigation prend plus de 400 ms.
  */
 export function LoadingScreen() {
-  const [booting, setBooting] = useState(true);
   const isPending = useRouterState({ select: (s) => s.status === "pending" });
   const [slowNav, setSlowNav] = useState(false);
-
-  useEffect(() => {
-    setBooting(false);
-  }, []);
 
   useEffect(() => {
     if (!isPending) {
@@ -24,8 +19,7 @@ export function LoadingScreen() {
     return () => clearTimeout(t);
   }, [isPending]);
 
-  const visible = booting || (isPending && slowNav);
-  if (!visible) return null;
+  if (!isPending || !slowNav) return null;
 
   return (
     <div

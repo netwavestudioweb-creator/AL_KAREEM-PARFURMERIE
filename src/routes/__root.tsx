@@ -176,6 +176,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
       ],
       links: [
+        { rel: "preconnect", href: "https://zoagwbhgpaslyjjsdnnv.supabase.co", crossOrigin: "anonymous" },
+        { rel: "dns-prefetch", href: "https://zoagwbhgpaslyjjsdnnv.supabase.co" },
         { rel: "manifest", href: "/site.webmanifest" },
         { rel: "preload", as: "style", href: appCss },
         {

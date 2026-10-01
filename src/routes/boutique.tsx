@@ -308,8 +308,8 @@ function BoutiquePage() {
             ) : (
               <>
                 <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
-                  {visibleProducts.map((p) => (
-                    <ProductCard key={p.id} product={p} />
+                  {visibleProducts.map((p, idx) => (
+                    <ProductCard key={p.id} product={p} priority={idx < 6} />
                   ))}
                 </div>
                 {hasMore && (
