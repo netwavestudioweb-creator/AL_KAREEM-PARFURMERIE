@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase } from "@/integrations/supabase/lazy";
 
 export interface Category {
   id: string;
@@ -89,6 +89,7 @@ const signedUrlCache = new Map<string, string>();
  * "product-images" bucket are converted to valid 10-year signed URLs.
  */
 async function ensureSignedUrls(products: DbProduct[]): Promise<void> {
+  const supabase = await getSupabase();
   const pathsToSign: string[] = [];
 
   for (const p of products) {
@@ -153,6 +154,7 @@ export interface LiveProductInfo {
 
 /** Relit en base le prix et le stock actuels des produits d'un panier. */
 export async function fetchLiveProducts(ids: string[]): Promise<Map<string, LiveProductInfo>> {
+  const supabase = await getSupabase();
   if (ids.length === 0) return new Map();
   const { data, error } = await supabase
     .from("products")
@@ -199,6 +201,7 @@ export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): 
 }
 
 export async function fetchCategories(): Promise<Category[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("categories")
     .select("id,name,slug,sort_order,image_url")
@@ -209,6 +212,7 @@ export async function fetchCategories(): Promise<Category[]> {
 }
 
 export async function fetchProducts(limit?: number): Promise<Product[]> {
+  const supabase = await getSupabase();
   let query = supabase.from("products").select("*").order("created_at", { ascending: false });
 
   if (limit && limit > 0) {
@@ -226,6 +230,7 @@ export async function fetchProducts(limit?: number): Promise<Product[]> {
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("products")
     .select("*")

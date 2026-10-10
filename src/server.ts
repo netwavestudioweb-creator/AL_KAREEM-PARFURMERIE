@@ -81,10 +81,28 @@ const SECURITY_HEADERS: Record<string, string> = {
   "content-security-policy": CONTENT_SECURITY_POLICY,
 };
 
-function withSecurityHeaders(response: Response): Response {
+// Pages publiques mises en cache 60 s sur le CDN, puis resservies pendant leur
+// rafraîchissement en arrière-plan : réponse quasi instantanée pour la plupart des
+// visites. Le HTML ne contient aucune donnée personnelle (panier et session admin
+// vivent dans le navigateur). Une modification dans l'admin apparaît sous ~1 min.
+const PUBLIC_PAGE_CACHE = "public, max-age=0, s-maxage=60, stale-while-revalidate=600";
+const NO_CDN_CACHE_PREFIXES = ["/admin", "/reset-password", "/_serverFn", "/api"];
+
+function isCacheablePage(request: Request, response: Response): boolean {
+  if (request.method !== "GET" || response.status !== 200) return false;
+  if (!(response.headers.get("content-type") ?? "").includes("text/html")) return false;
+  if (response.headers.has("cache-control") || response.headers.has("set-cookie")) return false;
+  const { pathname } = new URL(request.url);
+  return !NO_CDN_CACHE_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
+function withSecurityHeaders(response: Response, request?: Request): Response {
   const headers = new Headers(response.headers);
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     if (!headers.has(key)) headers.set(key, value);
+  }
+  if (request && isCacheablePage(request, response)) {
+    headers.set("cache-control", PUBLIC_PAGE_CACHE);
   }
   return new Response(response.body, {
     status: response.status,
@@ -98,7 +116,7 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response));
+      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response), request);
     } catch (error) {
       console.error(error);
       return withSecurityHeaders(
