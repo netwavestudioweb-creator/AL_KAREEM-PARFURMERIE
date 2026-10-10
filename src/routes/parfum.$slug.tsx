@@ -4,17 +4,17 @@ import { SiteLayout } from "@/components/layout";
 import { ProductCard } from "@/components/product-card";
 import { fetchProductBySlug, fetchProducts, formatFCFA, whatsappLink } from "@/lib/products";
 import { useCart } from "@/lib/cart";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { trackProductView, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
 import {
+  ChevronDown,
   MessageCircle,
-  ShoppingBag,
   Minus,
   Plus,
-  ChevronRight,
-  Truck,
   ShieldCheck,
-  AlertCircle,
+  ShoppingBag,
+  Truck,
+  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -132,6 +132,11 @@ export const Route = createFileRoute("/parfum/$slug")({
   component: ProductPage,
 });
 
+const FALLBACK_IMAGE =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F5F0E8'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
+
+const LONG_DESCRIPTION = 280;
+
 function ProductPage() {
   const { slug } = Route.useParams();
   const { data: product, isLoading } = useQuery({
@@ -142,18 +147,38 @@ function ProductPage() {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
+  const [descOpen, setDescOpen] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const mainCtaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (product) {
-      trackProductView(product);
-    }
+    if (product) trackProductView(product);
+    setQty(1);
+    setActiveImg(0);
+    setDescOpen(false);
+    galleryRef.current?.scrollTo({ left: 0 });
+  }, [product]);
+
+  // La barre d'achat collante n'apparaît que lorsque le bouton principal sort de l'écran.
+  useEffect(() => {
+    const el = mainCtaRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setShowStickyBar(!entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [product]);
 
   if (isLoading) {
     return (
       <SiteLayout>
-        <div className="mx-auto max-w-7xl px-4 py-24 text-center text-muted-foreground">
-          Chargement du parfum…
+        <div className="mx-auto grid max-w-[1320px] gap-8 px-4 py-6 lg:grid-cols-2 lg:px-8">
+          <div className="aspect-square animate-pulse rounded-2xl bg-secondary" />
+          <div className="space-y-4">
+            <div className="h-4 w-1/4 animate-pulse rounded bg-secondary" />
+            <div className="h-10 w-3/4 animate-pulse rounded bg-secondary" />
+            <div className="h-6 w-1/3 animate-pulse rounded bg-secondary" />
+          </div>
         </div>
       </SiteLayout>
     );
@@ -168,7 +193,7 @@ function ProductPage() {
           </p>
           <Link
             to="/boutique"
-            className="mt-6 inline-block rounded-full bg-primary-deep text-primary-foreground px-6 py-3 text-sm font-medium hover:bg-primary transition-colors"
+            className="mt-6 inline-block rounded-full bg-primary-deep px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary"
           >
             Retour à la boutique
           </Link>
@@ -177,69 +202,116 @@ function ProductPage() {
     );
   }
 
-  const similar = all
-    .filter((p) => (p.categorySlug === product.categorySlug || p.inStock) && p.id !== product.id)
-    .slice(0, 4);
-  const waMessage = `Bonjour Al Kareem 🌸\nJe souhaite commander : ${product.name}${product.volume ? ` (${product.volume})` : ""} — ${formatFCFA(product.price)}.`;
+  const images = product.largeImages.length > 0 ? product.largeImages : [product.image];
+  const sameCategory = all.filter(
+    (p) => p.id !== product.id && p.inStock && p.categorySlug === product.categorySlug,
+  );
+  const others = all.filter(
+    (p) => p.id !== product.id && p.inStock && p.categorySlug !== product.categorySlug,
+  );
+  const related = [...sameCategory, ...others].slice(0, 4);
+
+  const waMessage = product.inStock
+    ? `Bonjour Al Kareem, je souhaite commander : ${product.name}${product.volume ? ` (${product.volume})` : ""} × ${qty} — ${formatFCFA(product.price * qty)}.`
+    : `Bonjour Al Kareem, quand le parfum ${product.name} sera-t-il à nouveau disponible ?`;
+  const isLongDescription = product.description.length > LONG_DESCRIPTION;
+
+  const addToCart = () => {
+    if (!product.inStock) return;
+    addItem(product, qty);
+    trackAddToCart(product, qty);
+    toast.success(`${product.name} ajouté au panier`, {
+      action: { label: "Voir le panier", onClick: () => (window.location.href = "/panier") },
+    });
+  };
+
+  const onGalleryScroll = () => {
+    const el = galleryRef.current;
+    if (!el) return;
+    setActiveImg(Math.round(el.scrollLeft / el.clientWidth));
+  };
+  const showImage = (i: number) => {
+    setActiveImg(i);
+    const el = galleryRef.current;
+    el?.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
+  };
+
+  const summary =
+    "flex cursor-pointer list-none items-center justify-between text-sm font-semibold uppercase tracking-[0.06em]";
+  const panelText = "mt-3 text-[14.5px] leading-relaxed text-foreground/80";
 
   return (
     <SiteLayout>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <nav className="text-xs text-muted-foreground flex items-center gap-1">
-          <Link to="/" className="hover:text-primary">
-            Accueil
-          </Link>
-          <ChevronRight className="h-3 w-3" />
-          <Link to="/boutique" className="hover:text-primary">
-            Boutique
-          </Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground truncate">{product.name}</span>
-        </nav>
-      </div>
-
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16 grid gap-8 lg:gap-12 lg:grid-cols-2">
-        <div className="space-y-4">
-          <div className="aspect-[4/3] sm:aspect-square max-h-[46vh] sm:max-h-none rounded-2xl sm:rounded-3xl bg-gradient-hero overflow-hidden flex items-center justify-center relative">
-            {!product.inStock && (
-              <div className="absolute top-4 left-4 z-10 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-destructive/90 text-white text-xs font-semibold shadow-md">
-                <AlertCircle className="h-3.5 w-3.5" /> Rupture de stock
+      <div className="mx-auto max-w-[1320px] lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14 lg:px-8 lg:pt-6">
+        {/* Galerie */}
+        <div className="lg:sticky lg:top-40 lg:self-start">
+          <div className="relative bg-secondary lg:overflow-hidden lg:rounded-2xl">
+            <div
+              ref={galleryRef}
+              onScroll={onGalleryScroll}
+              className="scrollbar-none flex aspect-square snap-x snap-mandatory overflow-x-auto"
+            >
+              {images.map((src, i) => (
+                <img
+                  key={src}
+                  src={src}
+                  alt={i === 0 ? product.name : `${product.name} — photo ${i + 1}`}
+                  width={900}
+                  height={900}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : "auto"}
+                  decoding="async"
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    const raw = product.rawImage;
+                    img.src = i === 0 && raw && img.src !== raw ? raw : FALLBACK_IMAGE;
+                  }}
+                  className={`h-full w-full shrink-0 snap-center object-cover ${product.inStock ? "" : "opacity-70 grayscale-[30%]"}`}
+                />
+              ))}
+            </div>
+            <div className="absolute left-3.5 top-3.5 flex flex-col items-start gap-1.5">
+              {product.oldPrice && (
+                <span className="rounded-full bg-primary-deep px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
+                  −{Math.round((1 - product.price / product.oldPrice) * 100)} %
+                </span>
+              )}
+              {!product.inStock && (
+                <span className="rounded-full bg-foreground/85 px-2.5 py-1 text-[11px] font-semibold text-background">
+                  Épuisé
+                </span>
+              )}
+            </div>
+            {images.length > 1 && (
+              <div
+                className="absolute inset-x-0 bottom-3.5 flex justify-center gap-1.5 lg:hidden"
+                aria-hidden
+              >
+                {images.map((src, i) => (
+                  <span
+                    key={src}
+                    className={`block h-1.5 rounded-full transition-all ${i === activeImg ? "w-[18px] bg-primary-deep" : "w-1.5 bg-primary-deep/30"}`}
+                  />
+                ))}
               </div>
             )}
-            <img
-              src={product.images[activeImg]}
-              alt={product.name}
-              width={800}
-              height={800}
-              fetchPriority="high"
-              decoding="async"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
-              }}
-              className={`w-full h-full object-contain sm:object-cover ${!product.inStock ? "opacity-80 grayscale-[30%]" : ""}`}
-            />
           </div>
-          {product.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-3">
-              {product.images.map((src, i) => (
+          {images.length > 1 && (
+            <div className="flex gap-2 px-4 pt-2.5 lg:px-0 lg:pt-3">
+              {images.map((src, i) => (
                 <button
-                  key={i}
-                  onClick={() => setActiveImg(i)}
-                  className={`aspect-square rounded-xl bg-gradient-hero overflow-hidden ${i === activeImg ? "ring-2 ring-primary" : "opacity-70 hover:opacity-100"}`}
+                  key={src}
+                  type="button"
+                  onClick={() => showImage(i)}
+                  aria-label={`Voir la photo ${i + 1}`}
+                  aria-current={i === activeImg}
+                  className={`h-[60px] w-[60px] overflow-hidden rounded-[10px] lg:h-20 lg:w-20 ${i === activeImg ? "ring-2 ring-primary-deep" : "border border-border opacity-80 hover:opacity-100"}`}
                 >
                   <img
-                    src={src}
+                    src={product.images[i] ?? src}
                     alt=""
                     loading="lazy"
-                    decoding="async"
-                    width={200}
-                    height={200}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
-                    }}
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 </button>
               ))}
@@ -247,178 +319,205 @@ function ProductPage() {
           )}
         </div>
 
-        <div>
-          {product.category && (
-            <div className="text-xs uppercase tracking-widest text-primary mb-2">
-              {product.category}
-            </div>
-          )}
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-primary-deep">
+        {/* Infos */}
+        <div className="px-4 pt-5 lg:px-0 lg:pt-0">
+          <nav
+            aria-label="Fil d'Ariane"
+            className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
+          >
+            <Link to="/boutique" className="hover:text-primary">
+              Boutique
+            </Link>
+            {product.category && (
+              <>
+                <span aria-hidden>·</span>
+                <Link
+                  to="/boutique/$category"
+                  params={{ category: product.categorySlug }}
+                  className="hover:text-primary"
+                >
+                  {product.category}
+                </Link>
+              </>
+            )}
+          </nav>
+          <h1 className="mt-2.5 font-serif text-[34px] font-medium leading-[1.05] lg:text-5xl">
             {product.name}
           </h1>
           {product.volume && (
-            <div className="text-sm text-muted-foreground mt-1.5">{product.volume}</div>
+            <p className="mt-1.5 text-[13.5px] text-muted-foreground">{product.volume}</p>
           )}
 
-          <div className="mt-4 sm:mt-6 flex items-baseline gap-3">
-            <div className="font-serif text-2xl sm:text-3xl text-primary-deep">
+          <div className="mt-4 flex items-baseline gap-3">
+            <span
+              className={`text-2xl font-semibold lg:text-[28px] ${product.oldPrice ? "text-primary" : ""}`}
+            >
               {formatFCFA(product.price)}
-            </div>
+            </span>
             {product.oldPrice && (
-              <div className="text-base sm:text-lg text-muted-foreground line-through">
+              <span className="text-base text-muted-foreground line-through">
                 {formatFCFA(product.oldPrice)}
+              </span>
+            )}
+          </div>
+          <p
+            className={`mt-2.5 flex items-center gap-2 text-[13px] font-semibold ${product.inStock ? "text-[oklch(0.45_0.12_150)]" : "text-muted-foreground"}`}
+          >
+            <span
+              className={`block h-2 w-2 rounded-full ${product.inStock ? "bg-whatsapp" : "bg-muted-foreground"}`}
+            />
+            {product.inStock ? "En stock — prêt à livrer" : "Épuisé pour le moment"}
+          </p>
+
+          <div ref={mainCtaRef} className="mt-6 flex flex-col gap-3">
+            {product.inStock && (
+              <div className="flex gap-2.5">
+                <div
+                  role="group"
+                  aria-label="Quantité"
+                  className="flex h-[52px] items-center rounded-full border border-input bg-card"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    aria-label="Diminuer la quantité"
+                    className="flex h-full w-11 items-center justify-center rounded-l-full hover:bg-secondary"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="w-7 text-center font-semibold" aria-live="polite">
+                    {qty}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => Math.min(20, q + 1))}
+                    aria-label="Augmenter la quantité"
+                    className="flex h-full w-11 items-center justify-center rounded-r-full hover:bg-secondary"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={addToCart}
+                  className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-full bg-primary-deep text-[15px] font-semibold text-primary-foreground hover:bg-primary"
+                >
+                  <ShoppingBag className="h-[18px] w-[18px]" /> Ajouter au panier
+                </button>
               </div>
             )}
-            {product.promo && (
-              <span className="px-2 py-1 rounded-md bg-primary text-primary-foreground text-[10px] font-semibold uppercase">
-                Promo
-              </span>
-            )}
-          </div>
-
-          {!product.inStock && (
-            <div className="mt-4 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
-              <span>
-                Ce flacon est temporairement en rupture de stock. Découvrez nos alternatives
-                olfactives ci-dessous.
-              </span>
-            </div>
-          )}
-
-          {product.description && (
-            <p className="text-foreground/75 leading-relaxed mt-4 sm:mt-6 whitespace-pre-line text-sm sm:text-base">
-              {product.description}
-            </p>
-          )}
-
-          <div className="mt-6 sm:mt-8 flex items-center gap-4">
-            <div className="inline-flex items-center border border-border rounded-full">
-              <button
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-                className="h-10 sm:h-11 w-10 sm:w-11 flex items-center justify-center hover:bg-secondary rounded-l-full disabled:opacity-40"
-                aria-label="Diminuer la quantité"
-                disabled={!product.inStock}
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="w-10 text-center font-medium text-sm">{qty}</span>
-              <button
-                onClick={() => setQty((q) => q + 1)}
-                className="h-10 sm:h-11 w-10 sm:w-11 flex items-center justify-center hover:bg-secondary rounded-r-full disabled:opacity-40"
-                aria-label="Augmenter la quantité"
-                disabled={!product.inStock}
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="text-xs font-medium">
-              {product.inStock ? (
-                <span className="text-emerald-700">En stock</span>
-              ) : (
-                <span className="text-amber-700">Rupture de stock</span>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <button
-              onClick={() => {
-                if (!product.inStock) {
-                  toast.error("Ce produit est en rupture de stock.");
-                  return;
-                }
-                addItem(product, qty);
-                trackAddToCart(product, qty);
-                toast.success(`${product.name} ajouté au panier`);
-              }}
-              disabled={!product.inStock}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-deep text-primary-foreground px-6 py-3.5 text-sm font-medium hover:bg-primary transition-colors shadow-soft disabled:opacity-50 cursor-pointer"
-            >
-              <ShoppingBag className="h-4 w-4" /> Ajouter au panier
-            </button>
             <a
-              href={
-                product.inStock
-                  ? whatsappLink(waMessage)
-                  : `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(`Bonjour Al Kareem 🌸\nQuand le parfum ${product.name} sera-t-il à nouveau disponible ?`)}`
-              }
+              href={whatsappLink(waMessage)}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               onClick={() => trackWhatsAppClick("product_detail", product.price * qty)}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground px-6 py-3.5 text-sm font-medium hover:opacity-90 cursor-pointer"
+              className="flex h-[50px] items-center justify-center gap-2 rounded-full border border-whatsapp text-[14.5px] font-semibold text-[oklch(0.42_0.11_150)] hover:bg-whatsapp/5"
             >
-              <MessageCircle className="h-4 w-4" />{" "}
-              {product.inStock ? "Commander sur WhatsApp" : "Demander le réapprovisionnement"}
+              <MessageCircle className="h-[18px] w-[18px]" />
+              {product.inStock
+                ? "Commander directement sur WhatsApp"
+                : "Me prévenir du retour en stock"}
             </a>
           </div>
 
-          <div className="mt-6 sm:mt-8 border-t border-border pt-6 space-y-3 text-sm text-foreground/75">
-            <div className="flex items-center gap-3">
-              <Truck className="h-4 w-4 text-primary shrink-0" /> Livraison Cotonou & Abomey-Calavi
-              sous 24-48h
-            </div>
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="h-4 w-4 text-primary shrink-0" /> Paiement Mobile Money ou à
-              la livraison
-            </div>
-          </div>
-        </div>
-      </section>
+          <ul className="mt-5 flex flex-col gap-3 rounded-[14px] border border-border bg-card p-4 text-[13.5px]">
+            <li className="flex gap-2.5">
+              <ShieldCheck className="h-[18px] w-[18px] shrink-0 text-primary" />
+              Flacon 100 % authentique, vérifié en boutique
+            </li>
+            <li className="flex gap-2.5">
+              <Wallet className="h-[18px] w-[18px] shrink-0 text-primary" />
+              Payé à la réception : espèces, MTN MoMo, Moov Money
+            </li>
+            <li className="flex gap-2.5">
+              <Truck className="h-[18px] w-[18px] shrink-0 text-primary" />
+              Livraison Cotonou &amp; Abomey-Calavi sous 24-48 h
+            </li>
+          </ul>
 
-      {/* Sticky CTA mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-white/95 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))]">
-        <div className="flex items-center justify-between gap-2 sm:gap-3 max-w-md mx-auto">
-          <div className="min-w-0 flex-1">
-            <div className="text-[11px] sm:text-xs text-muted-foreground truncate font-medium">
-              {product.name}
-            </div>
-            <div className="font-serif text-base sm:text-lg font-semibold text-primary-deep leading-tight truncate">
-              {formatFCFA(product.price * qty)}
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <button
-              onClick={() => {
-                if (!product.inStock) {
-                  toast.error("Ce produit est en rupture de stock.");
-                  return;
-                }
-                addItem(product, qty);
-                toast.success(`${product.name} ajouté au panier`);
-              }}
-              disabled={!product.inStock}
-              className="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-full border border-primary text-primary-deep px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 min-h-[40px]"
-            >
-              <ShoppingBag className="h-3.5 w-3.5 shrink-0" /> <span>Panier</span>
-            </button>
-            <a
-              href={
-                product.inStock
-                  ? whatsappLink(waMessage)
-                  : `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(`Bonjour Al Kareem 🌸\nQuand le parfum ${product.name} sera-t-il à nouveau disponible ?`)}`
-              }
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-full bg-whatsapp text-whatsapp-foreground px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold shadow-sm hover:opacity-90 min-h-[40px]"
-            >
-              <MessageCircle className="h-3.5 w-3.5 shrink-0" /> <span>WhatsApp</span>
-            </a>
+          <div className="mt-5 border-t border-border">
+            {product.description && (
+              <details open className="group border-b border-border py-4">
+                <summary className={summary}>
+                  Description
+                  <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+                </summary>
+                <p
+                  className={`${panelText} whitespace-pre-line ${isLongDescription && !descOpen ? "line-clamp-4" : ""}`}
+                >
+                  {product.description}
+                </p>
+                {isLongDescription && (
+                  <button
+                    type="button"
+                    onClick={() => setDescOpen((o) => !o)}
+                    className="mt-2 text-[13px] font-semibold text-primary-deep underline underline-offset-4"
+                  >
+                    {descOpen ? "Réduire" : "Lire la suite"}
+                  </button>
+                )}
+              </details>
+            )}
+            <details className="group border-b border-border py-4">
+              <summary className={summary}>
+                Livraison &amp; paiement
+                <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+              </summary>
+              <p className={panelText}>
+                Votre commande est confirmée avec vous sur WhatsApp. Livraison à Cotonou et
+                Abomey-Calavi sous 24-48 h, expédition possible dans tout le Bénin. Vous payez à la
+                réception, en espèces ou par Mobile Money (MTN MoMo, Moov Money).
+              </p>
+            </details>
+            <details className="group border-b border-border py-4">
+              <summary className={summary}>
+                Garantie d'authenticité
+                <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+              </summary>
+              <p className={panelText}>
+                Chaque flacon est contrôlé avant la mise en vente. Vous pouvez demander des photos
+                du produit réel avant la livraison sur WhatsApp.
+              </p>
+            </details>
           </div>
         </div>
       </div>
 
-      {similar.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-28 lg:pb-20">
-          <h2 className="font-serif text-2xl md:text-3xl text-primary-deep mb-8">
-            {!product.inStock ? "Alternatives olfactives disponibles" : "Vous aimerez aussi"}
+      {related.length > 0 && (
+        <section className="mx-auto mt-10 max-w-[1320px] px-4 pb-28 lg:mt-20 lg:px-8 lg:pb-20">
+          <h2 className="mb-4 font-serif text-[26px] font-medium text-primary-deep lg:mb-6 lg:text-4xl">
+            {product.inStock ? "Vous aimerez aussi" : "Alternatives disponibles"}
           </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {similar.map((p) => (
+          <div className="grid grid-cols-2 gap-x-3 gap-y-6 lg:grid-cols-4 lg:gap-6">
+            {related.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </section>
+      )}
+
+      {/* Barre d'achat collante (mobile), visible quand le bouton principal est hors écran */}
+      {product.inStock && (
+        <div
+          className={`fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border bg-card/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] shadow-[0_-8px_24px_rgba(42,24,56,0.08)] backdrop-blur-md transition-transform duration-300 lg:hidden ${showStickyBar ? "translate-y-0" : "translate-y-full"}`}
+          aria-hidden={!showStickyBar}
+        >
+          <span className="flex min-w-0 flex-1 flex-col leading-tight">
+            <span className="truncate text-xs text-muted-foreground">
+              {product.name}
+              {product.volume ? ` · ${product.volume}` : ""}
+            </span>
+            <span className="text-base font-semibold">{formatFCFA(product.price * qty)}</span>
+          </span>
+          <button
+            type="button"
+            onClick={addToCart}
+            tabIndex={showStickyBar ? 0 : -1}
+            className="h-[50px] shrink-0 rounded-full bg-primary-deep px-6 text-[15px] font-semibold text-primary-foreground"
+          >
+            Ajouter au panier
+          </button>
+        </div>
       )}
     </SiteLayout>
   );

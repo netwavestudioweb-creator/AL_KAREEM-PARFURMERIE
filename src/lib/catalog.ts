@@ -38,6 +38,8 @@ export interface Product {
   volume: string | null;
   inStock: boolean;
   images: string[];
+  /** Mêmes images en 900 px pour la fiche produit. */
+  largeImages: string[];
   image: string; // first image or placeholder
   rawImage?: string; // original unoptimized image for fallback
   createdAt: string;
@@ -152,6 +154,7 @@ export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): 
     volume: p.volume,
     inStock: p.in_stock,
     images: optimizedImages,
+    largeImages: rawImages.map((img) => getOptimizedImageUrl(img, 900, 900, 80)),
     image: optimizedImages[0] ?? PLACEHOLDER,
     rawImage: rawImages[0],
     createdAt: p.created_at,
