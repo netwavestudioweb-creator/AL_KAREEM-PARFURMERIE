@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase } from "@/integrations/supabase/lazy";
 
 export interface AuthenticityProof {
   id: string;
@@ -16,6 +16,7 @@ export interface Testimonial {
 }
 
 export async function fetchProofs(): Promise<AuthenticityProof[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("authenticity_proofs")
     .select("id,image_url,caption,sort_order")
@@ -43,6 +44,7 @@ export async function fetchProofs(): Promise<AuthenticityProof[]> {
 }
 
 export async function fetchTestimonials(): Promise<Testimonial[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("testimonials")
     .select("id,name,message,rating,sort_order")

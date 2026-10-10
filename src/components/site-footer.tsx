@@ -4,7 +4,7 @@ import { whatsappLink } from "@/lib/products";
 
 export function SiteFooter() {
   return (
-    <footer className="bg-primary-deep text-primary-foreground mt-20 pb-[max(2rem,env(safe-area-inset-bottom,0px))]">
+    <footer className="bg-[#2A1838] text-[#D9CFE2] mt-16 pb-[max(2rem,env(safe-area-inset-bottom,0px))]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 grid gap-10 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-3 mb-4">
@@ -34,22 +34,22 @@ export function SiteFooter() {
           </div>
           <ul className="space-y-2 text-sm opacity-90">
             <li>
-              <Link to="/boutique" search={{ genre: "Femme" }}>
+              <Link to="/boutique/genre/$genre" params={{ genre: "femme" }}>
                 Femme
               </Link>
             </li>
             <li>
-              <Link to="/boutique" search={{ genre: "Homme" }}>
+              <Link to="/boutique/genre/$genre" params={{ genre: "homme" }}>
                 Homme
               </Link>
             </li>
             <li>
-              <Link to="/boutique" search={{ genre: "Unisexe" }}>
+              <Link to="/boutique/genre/$genre" params={{ genre: "unisexe" }}>
                 Unisexe
               </Link>
             </li>
             <li>
-              <Link to="/boutique" search={{ genre: "Coffret" }}>
+              <Link to="/boutique/$category" params={{ category: "coffrets-cadeaux" }}>
                 Coffrets
               </Link>
             </li>
@@ -73,7 +73,7 @@ export function SiteFooter() {
             </li>
             <li>
               <a
-                href={whatsappLink("Bonjour Al Kareem 👋")}
+                href={whatsappLink("Bonjour Al Kareem")}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 hover:opacity-100"

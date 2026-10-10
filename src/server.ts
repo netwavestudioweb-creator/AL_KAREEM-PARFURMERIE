@@ -44,24 +44,65 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+// Politique de sécurité du contenu : le navigateur ne charge et n'envoie des données
+// qu'aux domaines listés. Même si un script malveillant était injecté, il ne pourrait
+// pas exfiltrer la session admin vers un serveur tiers (connect-src).
+// 'unsafe-inline' reste nécessaire pour les scripts d'hydratation de TanStack Start.
+const SUPABASE = "https://*.supabase.co wss://*.supabase.co";
+const ANALYTICS =
+  "https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://*.clarity.ms";
+
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.clarity.ms`,
+  `connect-src 'self' ${SUPABASE} ${ANALYTICS}`,
+  `img-src 'self' data: blob: https://*.supabase.co ${ANALYTICS}`,
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "media-src 'self'",
+  "frame-src 'none'",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  "frame-ancestors 'self'",
+  "base-uri 'self'",
+  "form-action 'self' https://wa.me https://api.whatsapp.com",
+  "object-src 'none'",
+  "upgrade-insecure-requests",
+].join("; ");
+
 // En-têtes de sécurité appliqués à toutes les réponses.
-// `frame-ancestors` autorise uniquement le site lui-même pour bloquer le clickjacking.
 const SECURITY_HEADERS: Record<string, string> = {
   "x-content-type-options": "nosniff",
   "referrer-policy": "strict-origin-when-cross-origin",
-  "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=()",
+  "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
   "strict-transport-security": "max-age=31536000; includeSubDomains",
   "cross-origin-opener-policy": "same-origin-allow-popups",
-  "content-security-policy":
-    "frame-ancestors 'self'; " +
-    "base-uri 'self'; form-action 'self' https://wa.me https://api.whatsapp.com; " +
-    "object-src 'none'",
+  "x-frame-options": "SAMEORIGIN",
+  "content-security-policy": CONTENT_SECURITY_POLICY,
 };
 
-function withSecurityHeaders(response: Response): Response {
+// Pages publiques mises en cache 60 s sur le CDN, puis resservies pendant leur
+// rafraîchissement en arrière-plan : réponse quasi instantanée pour la plupart des
+// visites. Le HTML ne contient aucune donnée personnelle (panier et session admin
+// vivent dans le navigateur). Une modification dans l'admin apparaît sous ~1 min.
+const PUBLIC_PAGE_CACHE = "public, max-age=0, s-maxage=60, stale-while-revalidate=600";
+const NO_CDN_CACHE_PREFIXES = ["/admin", "/reset-password", "/_serverFn", "/api"];
+
+function isCacheablePage(request: Request, response: Response): boolean {
+  if (request.method !== "GET" || response.status !== 200) return false;
+  if (!(response.headers.get("content-type") ?? "").includes("text/html")) return false;
+  if (response.headers.has("cache-control") || response.headers.has("set-cookie")) return false;
+  const { pathname } = new URL(request.url);
+  return !NO_CDN_CACHE_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
+function withSecurityHeaders(response: Response, request?: Request): Response {
   const headers = new Headers(response.headers);
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     if (!headers.has(key)) headers.set(key, value);
+  }
+  if (request && isCacheablePage(request, response)) {
+    headers.set("cache-control", PUBLIC_PAGE_CACHE);
   }
   return new Response(response.body, {
     status: response.status,
@@ -75,7 +116,7 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response));
+      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response), request);
     } catch (error) {
       console.error(error);
       return withSecurityHeaders(

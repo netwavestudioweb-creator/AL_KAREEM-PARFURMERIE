@@ -15,16 +15,13 @@
  */
 
 // ── Configuration ─────────────────────────────────────────────────────────────
-const SUPABASE_URL =
-  process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
 const SUPABASE_KEY =
-  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.SUPABASE_PUBLISHABLE_KEY ||
-  "";
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "";
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error(
-    "❌  Variables d'environnement manquantes : SUPABASE_URL et/ou SUPABASE_PUBLISHABLE_KEY"
+    "❌  Variables d'environnement manquantes : SUPABASE_URL et/ou SUPABASE_PUBLISHABLE_KEY",
   );
   process.exit(1);
 }
@@ -53,14 +50,10 @@ async function keepAlive() {
       console.log(`✅  Ping réussi — HTTP ${res.status} — réponse : ${body}`);
     } else if (res.status === 401 || res.status === 403) {
       // Erreur d'auth : la DB est active mais la clé est invalide
-      console.warn(
-        `⚠️  HTTP ${res.status} — clé invalide, mais la DB est active.`
-      );
+      console.warn(`⚠️  HTTP ${res.status} — clé invalide, mais la DB est active.`);
     } else {
       // Autres codes (404 table absente, 406, etc.) : DB toujours active
-      console.warn(
-        `⚠️  HTTP ${res.status} — réponse inattendue, mais la DB est active.`
-      );
+      console.warn(`⚠️  HTTP ${res.status} — réponse inattendue, mais la DB est active.`);
       console.warn(`    Corps : ${body}`);
     }
 

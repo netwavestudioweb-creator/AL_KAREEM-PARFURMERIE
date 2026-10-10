@@ -83,7 +83,10 @@ function CategoriesPage() {
     queryKey: ["categories"],
     queryFn: fetchCategories,
   });
-  const { data: products = [] } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
+  const { data: products = [] } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => fetchProducts(),
+  });
 
   const [newName, setNewName] = useState("");
   const [newImage, setNewImage] = useState<string | null>(null);

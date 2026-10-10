@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase } from "@/integrations/supabase/lazy";
 
 export interface Category {
   id: string;
@@ -38,12 +38,15 @@ export interface Product {
   volume: string | null;
   inStock: boolean;
   images: string[];
+  /** Mêmes images en 900 px pour la fiche produit. */
+  largeImages: string[];
   image: string; // first image or placeholder
   rawImage?: string; // original unoptimized image for fallback
   createdAt: string;
 }
 
-const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
+const PLACEHOLDER =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
 
 /**
  * Returns an optimized Supabase CDN image URL (WebP, resized, edge-cached).
@@ -60,10 +63,7 @@ export function getOptimizedImageUrl(
 
   // Signed storage URL -> transform via Supabase image render endpoint for edge CDN compression
   if (url.includes("/storage/v1/object/sign/")) {
-    const transformed = url.replace(
-      "/storage/v1/object/sign/",
-      "/storage/v1/render/image/sign/",
-    );
+    const transformed = url.replace("/storage/v1/object/sign/", "/storage/v1/render/image/sign/");
     const separator = transformed.includes("?") ? "&" : "?";
     return `${transformed}${separator}width=${width}&height=${height}&quality=${quality}&resize=contain`;
   }
@@ -89,6 +89,7 @@ const signedUrlCache = new Map<string, string>();
  * "product-images" bucket are converted to valid 10-year signed URLs.
  */
 async function ensureSignedUrls(products: DbProduct[]): Promise<void> {
+  const supabase = await getSupabase();
   const pathsToSign: string[] = [];
 
   for (const p of products) {
@@ -132,13 +133,51 @@ async function ensureSignedUrls(products: DbProduct[]): Promise<void> {
   }
 }
 
-export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): Product {
-  const cat = p.category_id ? categoriesById.get(p.category_id) : undefined;
+type PricingFields = Pick<DbProduct, "price_fcfa" | "promo_price_fcfa" | "promo_end_date">;
+
+/** Même règle que le trigger SQL validate_new_order : promo valide si inférieure et non expirée. */
+export function computePricing(p: PricingFields): { price: number; promoActive: boolean } {
   const promoActive =
     p.promo_price_fcfa != null &&
     p.promo_price_fcfa < p.price_fcfa &&
     (!p.promo_end_date || new Date(p.promo_end_date) >= new Date(new Date().toDateString()));
-  const effective = promoActive ? p.promo_price_fcfa! : p.price_fcfa;
+  return { price: promoActive ? p.promo_price_fcfa! : p.price_fcfa, promoActive };
+}
+
+export interface LiveProductInfo {
+  id: string;
+  name: string;
+  volume: string | null;
+  price: number;
+  inStock: boolean;
+}
+
+/** Relit en base le prix et le stock actuels des produits d'un panier. */
+export async function fetchLiveProducts(ids: string[]): Promise<Map<string, LiveProductInfo>> {
+  const supabase = await getSupabase();
+  if (ids.length === 0) return new Map();
+  const { data, error } = await supabase
+    .from("products")
+    .select("id,name,volume,price_fcfa,promo_price_fcfa,promo_end_date,in_stock")
+    .in("id", ids);
+  if (error) throw error;
+  return new Map(
+    (data ?? []).map((p) => [
+      p.id,
+      {
+        id: p.id,
+        name: p.name,
+        volume: p.volume,
+        price: computePricing(p).price,
+        inStock: p.in_stock,
+      },
+    ]),
+  );
+}
+
+export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): Product {
+  const cat = p.category_id ? categoriesById.get(p.category_id) : undefined;
+  const { price: effective, promoActive } = computePricing(p);
   const rawImages = p.image_urls.length ? p.image_urls : [PLACEHOLDER];
   const optimizedImages = rawImages.map((img) => getOptimizedImageUrl(img, 400, 400, 80));
   return {
@@ -154,6 +193,7 @@ export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): 
     volume: p.volume,
     inStock: p.in_stock,
     images: optimizedImages,
+    largeImages: rawImages.map((img) => getOptimizedImageUrl(img, 900, 900, 80)),
     image: optimizedImages[0] ?? PLACEHOLDER,
     rawImage: rawImages[0],
     createdAt: p.created_at,
@@ -161,6 +201,7 @@ export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): 
 }
 
 export async function fetchCategories(): Promise<Category[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("categories")
     .select("id,name,slug,sort_order,image_url")
@@ -171,6 +212,7 @@ export async function fetchCategories(): Promise<Category[]> {
 }
 
 export async function fetchProducts(limit?: number): Promise<Product[]> {
+  const supabase = await getSupabase();
   let query = supabase.from("products").select("*").order("created_at", { ascending: false });
 
   if (limit && limit > 0) {
@@ -188,6 +230,7 @@ export async function fetchProducts(limit?: number): Promise<Product[]> {
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("products")
     .select("*")
@@ -210,4 +253,78 @@ export function slugify(input: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+export type Genre = "femme" | "homme" | "unisexe";
+
+export function normalizeSearch(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function searchableText(p: Product): string {
+  return normalizeSearch(`${p.name} ${p.description} ${p.category}`);
+}
+
+/** Le genre n'est pas une colonne en base : on le déduit du nom, de la description et de la catégorie. */
+export function matchesGenre(p: Product, genre: Genre): boolean {
+  return searchableText(p).includes(genre);
+}
+
+/** Familles olfactives du quiz, reconnues par mots-clés dans la fiche produit. */
+export const SCENT_FAMILIES = {
+  boise: {
+    label: "Boisé & oud",
+    keywords: ["oud", "bois", "wood", "cuir", "leather", "ambre", "amber", "encens"],
+  },
+  frais: {
+    label: "Frais & agrumes",
+    keywords: [
+      "frais",
+      "fresh",
+      "agrume",
+      "citron",
+      "citrus",
+      "bergamote",
+      "marin",
+      "aqua",
+      "menthe",
+    ],
+  },
+  gourmand: {
+    label: "Gourmand & vanillé",
+    keywords: [
+      "vanille",
+      "vanilla",
+      "caramel",
+      "gourmand",
+      "chocolat",
+      "miel",
+      "praline",
+      "sucre",
+      "brulee",
+    ],
+  },
+  floral: {
+    label: "Floral",
+    keywords: [
+      "fleur",
+      "floral",
+      "rose",
+      "jasmin",
+      "musc blanc",
+      "white",
+      "iris",
+      "fleur d'oranger",
+    ],
+  },
+} as const;
+
+export type ScentFamily = keyof typeof SCENT_FAMILIES;
+
+export function matchesFamily(p: Product, family: ScentFamily): boolean {
+  const text = searchableText(p);
+  return SCENT_FAMILIES[family].keywords.some((k) => text.includes(k));
 }

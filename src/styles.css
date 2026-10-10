@@ -37,43 +37,47 @@
   --color-whatsapp: var(--whatsapp);
   --color-whatsapp-foreground: var(--whatsapp-foreground);
   --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
 }
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.99 0.005 300);
-  --foreground: oklch(0.22 0.08 300);
+  /* Ivoire chaud : plus luxueux et plus lisible en plein soleil que le blanc lavande */
+  --background: oklch(0.985 0.006 85);
+  --foreground: oklch(0.21 0.05 300);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.08 300);
+  --card-foreground: oklch(0.21 0.05 300);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.08 300);
+  --popover-foreground: oklch(0.21 0.05 300);
 
-  /* Violet Al Kareem */
+  /* Violet Al Kareem — réservé aux actions et aux titres */
   --primary: oklch(0.38 0.18 305); /* #6B2FA0 */
-  --primary-foreground: oklch(0.99 0.005 300);
-  --primary-deep: oklch(0.28 0.16 305); /* #4B1D6E */
+  --primary-foreground: oklch(0.99 0.005 85);
+  --primary-deep: oklch(0.26 0.13 305); /* #3F1A5E */
   --primary-soft: oklch(0.85 0.07 305); /* lavande */
 
-  --secondary: oklch(0.96 0.02 305);
-  --secondary-foreground: oklch(0.28 0.16 305);
+  --secondary: oklch(0.96 0.012 80); /* sable */
+  --secondary-foreground: oklch(0.26 0.13 305);
 
-  --muted: oklch(0.96 0.015 305);
-  --muted-foreground: oklch(0.5 0.04 300);
+  --muted: oklch(0.955 0.01 80);
+  --muted-foreground: oklch(0.47 0.03 300);
 
-  --accent: oklch(0.92 0.05 305);
-  --accent-foreground: oklch(0.28 0.16 305);
+  --accent: oklch(0.94 0.03 305);
+  --accent-foreground: oklch(0.26 0.13 305);
 
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.9 0.02 305);
-  --input: oklch(0.92 0.02 305);
+  --border: oklch(0.9 0.012 80);
+  --input: oklch(0.88 0.015 80);
   --ring: oklch(0.38 0.18 305);
 
-  --whatsapp: oklch(0.65 0.16 148);
+  --whatsapp: oklch(0.53 0.13 150); /* assez foncé pour du texte blanc (AA) */
   --whatsapp-foreground: oklch(1 0 0);
+  /* Or : décoratif sur fond sombre ; --gold-ink pour du texte sur fond clair (contraste AA) */
   --gold: oklch(0.78 0.13 80);
+  --gold-ink: oklch(0.5 0.1 70);
 
   --gradient-hero: linear-gradient(
     135deg,
@@ -82,8 +86,8 @@
     oklch(0.78 0.12 305) 100%
   );
   --gradient-primary: linear-gradient(135deg, var(--primary-deep), var(--primary));
-  --shadow-elegant: 0 20px 60px -20px oklch(0.38 0.18 305 / 0.35);
-  --shadow-soft: 0 4px 20px -8px oklch(0.38 0.18 305 / 0.15);
+  --shadow-elegant: 0 20px 60px -20px oklch(0.38 0.18 305 / 0.3);
+  --shadow-soft: 0 4px 20px -8px oklch(0.38 0.18 305 / 0.12);
 }
 
 .dark {
@@ -105,7 +109,7 @@
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   body {
     background-color: var(--color-background);
@@ -114,7 +118,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
-    overflow-x: hidden;
+    overflow-x: clip;
     min-height: 100dvh;
   }
   h1,

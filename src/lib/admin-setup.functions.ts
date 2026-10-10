@@ -10,9 +10,9 @@ export const checkAdminExists = createServerFn({ method: "GET" }).handler(async 
       .eq("role", "admin");
     if (error) throw new Error(error.message);
     return { exists: (count ?? 0) > 0 };
-  } catch (err) {
-    // If no service key, we assume admin exists to show the login form,
-    // or we can fallback to false. Let's return true so the user can login.
+  } catch {
+    // Clé service absente ou erreur : on affiche le formulaire de connexion,
+    // jamais celui de création (fail-closed).
     return { exists: true };
   }
 });

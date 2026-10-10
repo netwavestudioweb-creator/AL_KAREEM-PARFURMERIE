@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -15,6 +16,8 @@ import { CartProvider } from "../lib/cart";
 import { SiteLayout } from "../components/layout";
 import { LoadingScreen } from "../components/loading-screen";
 import { SITE_CONFIG } from "../lib/site-config";
+import { ConsentBanner } from "../components/consent-banner";
+import { jsonLd } from "@/lib/json-ld";
 
 function NotFoundComponent() {
   return (
@@ -46,7 +49,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
 
@@ -83,40 +86,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => {
     const scripts = [];
 
-    if (import.meta.env.VITE_CLARITY_ID) {
-      scripts.push({
-        type: "text/javascript",
-        children: `
-          (function(c,l,a,r,i,t,y){
-              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-          })(window, document, "clarity", "script", "${import.meta.env.VITE_CLARITY_ID}");
-        `,
-      });
-    }
-
-    if (import.meta.env.VITE_GA_ID) {
-      scripts.push(
-        {
-          src: `https://www.googletagmanager.com/gtag/js?id=${import.meta.env.VITE_GA_ID}`,
-          async: true,
-        },
-        {
-          type: "text/javascript",
-          children: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${import.meta.env.VITE_GA_ID}');
-          `,
-        },
-      );
-    }
-
+    // Mesures d'audience : chargées seulement après consentement (ConsentBanner).
     scripts.push({
       type: "application/ld+json",
-      children: JSON.stringify({
+      children: jsonLd({
         "@context": "https://schema.org",
         "@type": ["Organization", "Store", "PerfumeStore"],
         "@id": `${SITE_CONFIG.url}/#organization`,
@@ -176,7 +149,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
       ],
       links: [
-        { rel: "preconnect", href: "https://zoagwbhgpaslyjjsdnnv.supabase.co", crossOrigin: "anonymous" },
+        {
+          rel: "preconnect",
+          href: "https://zoagwbhgpaslyjjsdnnv.supabase.co",
+          crossOrigin: "anonymous",
+        },
         { rel: "dns-prefetch", href: "https://zoagwbhgpaslyjjsdnnv.supabase.co" },
         { rel: "manifest", href: "/site.webmanifest" },
         { rel: "preload", as: "style", href: appCss },
@@ -228,6 +205,7 @@ function RootComponent() {
       <CartProvider>
         <Outlet />
         <Toaster position="top-center" richColors />
+        <ConsentBanner />
         <LoadingScreen />
       </CartProvider>
     </QueryClientProvider>
