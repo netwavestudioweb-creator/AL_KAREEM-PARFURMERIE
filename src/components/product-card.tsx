@@ -2,8 +2,12 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { formatFCFA, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import { trackAddToCart } from "@/lib/analytics";
 import { toast } from "sonner";
-import { ShoppingBag } from "lucide-react";
+import { Plus } from "lucide-react";
+
+const FALLBACK_IMAGE =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F5F0E8'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
 
 export function ProductCard({
   product,
@@ -16,98 +20,105 @@ export function ProductCard({
 }) {
   const { addItem } = useCart();
   const [imgSrc, setImgSrc] = useState(product.image);
-  const [loaded, setLoaded] = useState(false);
+
+  const discount =
+    product.oldPrice && product.oldPrice > product.price
+      ? Math.round((1 - product.price / product.oldPrice) * 100)
+      : 0;
+
+  const add = () => {
+    if (!product.inStock) return;
+    addItem(product);
+    trackAddToCart(product);
+    toast.success(`${product.name} ajouté au panier`, {
+      action: { label: "Voir le panier", onClick: () => (window.location.href = "/panier") },
+    });
+  };
 
   return (
-    <div
-      className={`group relative flex h-full flex-col rounded-2xl bg-card p-2.5 sm:p-3.5 border border-border/60 shadow-xs transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-lg ${
-        className ?? ""
-      }`}
-    >
-      <Link to="/parfum/$slug" params={{ slug: product.slug }} className="flex flex-1 flex-col">
-        <div className="relative aspect-square overflow-hidden rounded-xl bg-muted/40">
-          {!loaded && (
-            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-muted/30 via-muted/60 to-muted/30 pointer-events-none" />
-          )}
-          <img
-            src={imgSrc}
-            alt={product.name}
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-            decoding="async"
-            width={400}
-            height={400}
-            onLoad={() => setLoaded(true)}
-            onError={() => {
-              // If transformed image fails, fall back to original raw image first
-              if (product.rawImage && imgSrc !== product.rawImage) {
-                setImgSrc(product.rawImage);
-              } else {
-                setLoaded(true);
-                setImgSrc(
-                  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>",
-                );
-              }
-            }}
-            sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
-            className={`h-full w-full object-cover transition-all duration-300 ease-out group-hover:scale-105 ${
-              loaded ? "opacity-100" : "opacity-90"
-            }`}
-          />
-          <div className="absolute top-3 left-3 flex flex-col gap-1">
-            {product.promo && (
-              <span className="px-2 py-1 rounded-md bg-primary text-primary-foreground text-[10px] font-semibold uppercase tracking-wider">
-                Promo
-              </span>
-            )}
-            {!product.inStock && (
-              <span className="px-2 py-1 rounded-md bg-foreground/70 text-primary-foreground text-[10px] font-semibold uppercase tracking-wider">
-                Rupture
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="mt-2.5 sm:mt-4 flex flex-1 flex-col">
-          {/* Hauteurs fixes : les cartes de la grille restent alignées quelle
-              que soit la longueur du titre ou l'absence de catégorie/volume. */}
-          <div className="h-3.5 sm:h-4 text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground truncate">
-            {product.category}
-          </div>
-          <h3 className="mt-0.5 sm:mt-1 font-serif text-sm sm:text-lg font-normal leading-snug text-foreground line-clamp-2 min-h-[2.5rem] sm:min-h-[3.25rem] group-hover:text-primary transition-colors">
-            {product.name}
-          </h3>
-          <div className="h-3.5 sm:h-4 text-[11px] sm:text-xs text-muted-foreground truncate">
-            {product.volume ?? ""}
-          </div>
-          <div className="mt-auto flex flex-wrap items-baseline gap-1.5 sm:gap-2 pt-1.5 sm:pt-2">
-            <span className="text-sm sm:text-base font-semibold text-primary-deep">
-              {formatFCFA(product.price)}
+    <article className={`group relative flex h-full flex-col ${className ?? ""}`}>
+      <Link
+        to="/parfum/$slug"
+        params={{ slug: product.slug }}
+        className="relative block aspect-square overflow-hidden rounded-xl bg-secondary"
+      >
+        <img
+          src={imgSrc}
+          alt={product.name}
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
+          decoding="async"
+          width={400}
+          height={400}
+          onError={() => {
+            // Image transformée indisponible : on retombe sur l'originale, puis sur un visuel neutre.
+            if (product.rawImage && imgSrc !== product.rawImage) setImgSrc(product.rawImage);
+            else setImgSrc(FALLBACK_IMAGE);
+          }}
+          className={`h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] ${
+            product.inStock ? "" : "opacity-60 grayscale-[30%]"
+          }`}
+        />
+        <div className="absolute left-2 top-2 flex flex-col items-start gap-1">
+          {discount > 0 && (
+            <span className="rounded-full bg-primary-deep px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary-foreground">
+              −{discount} %
             </span>
+          )}
+          {!product.inStock && (
+            <span className="rounded-full bg-foreground/80 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-background">
+              Épuisé
+            </span>
+          )}
+        </div>
+      </Link>
+
+      <div className="flex flex-1 flex-col pt-2.5 sm:pt-3">
+        <div className="h-4 truncate text-[10px] uppercase tracking-[0.16em] text-muted-foreground sm:text-[11px]">
+          {product.category}
+          {product.volume ? ` · ${product.volume}` : ""}
+        </div>
+        <h3 className="mt-1 line-clamp-2 min-h-[2.5rem] font-serif text-[15px] leading-tight text-foreground sm:min-h-[2.75rem] sm:text-lg">
+          <Link
+            to="/parfum/$slug"
+            params={{ slug: product.slug }}
+            className="hover:text-primary focus-visible:text-primary"
+          >
+            {product.name}
+          </Link>
+        </h3>
+
+        {/* Mobile : prix puis bouton pleine largeur ; à partir de sm : côte à côte. */}
+        <div className="mt-auto flex flex-col gap-2 pt-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex min-w-0 flex-col leading-tight">
             {product.oldPrice && (
-              <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
+              <span className="text-[11px] text-muted-foreground line-through sm:text-xs">
                 {formatFCFA(product.oldPrice)}
               </span>
             )}
+            <span
+              className={`text-sm font-semibold sm:text-base ${
+                product.oldPrice ? "text-primary" : "text-foreground"
+              }`}
+            >
+              {formatFCFA(product.price)}
+            </span>
           </div>
+          <button
+            type="button"
+            onClick={add}
+            disabled={!product.inStock}
+            aria-label={
+              product.inStock ? `Ajouter ${product.name} au panier` : `${product.name} épuisé`
+            }
+            className="inline-flex h-10 w-full shrink-0 items-center justify-center gap-1 rounded-full bg-primary-deep pl-2.5 pr-3 text-[13px] font-semibold sm:w-auto text-primary-foreground transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground sm:h-10 sm:text-sm"
+          >
+            <Plus className="h-4 w-4" />
+            <span>{product.inStock ? "Ajouter" : "Épuisé"}</span>
+          </button>
         </div>
-      </Link>
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          if (!product.inStock) {
-            toast.error("Ce produit est en rupture.");
-            return;
-          }
-          addItem(product);
-          toast.success(`${product.name} ajouté au panier`);
-        }}
-        disabled={!product.inStock}
-        className="mt-2 sm:mt-3 w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full border border-primary/20 bg-white py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-primary-deep hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-primary-deep min-h-[36px] sm:min-h-[40px]"
-      >
-        <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />{" "}
-        <span>{product.inStock ? "Ajouter" : "Rupture"}</span>
-      </button>
-    </div>
+      </div>
+    </article>
   );
 }
 

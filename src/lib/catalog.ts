@@ -209,3 +209,73 @@ export function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
+
+export type Genre = "femme" | "homme" | "unisexe";
+
+function searchableText(p: Product): string {
+  return `${p.name} ${p.description} ${p.category}`
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+/** Le genre n'est pas une colonne en base : on le déduit du nom, de la description et de la catégorie. */
+export function matchesGenre(p: Product, genre: Genre): boolean {
+  return searchableText(p).includes(genre);
+}
+
+/** Familles olfactives du quiz, reconnues par mots-clés dans la fiche produit. */
+export const SCENT_FAMILIES = {
+  boise: {
+    label: "Boisé & oud",
+    keywords: ["oud", "bois", "wood", "cuir", "leather", "ambre", "amber", "encens"],
+  },
+  frais: {
+    label: "Frais & agrumes",
+    keywords: [
+      "frais",
+      "fresh",
+      "agrume",
+      "citron",
+      "citrus",
+      "bergamote",
+      "marin",
+      "aqua",
+      "menthe",
+    ],
+  },
+  gourmand: {
+    label: "Gourmand & vanillé",
+    keywords: [
+      "vanille",
+      "vanilla",
+      "caramel",
+      "gourmand",
+      "chocolat",
+      "miel",
+      "praline",
+      "sucre",
+      "brulee",
+    ],
+  },
+  floral: {
+    label: "Floral",
+    keywords: [
+      "fleur",
+      "floral",
+      "rose",
+      "jasmin",
+      "musc blanc",
+      "white",
+      "iris",
+      "fleur d'oranger",
+    ],
+  },
+} as const;
+
+export type ScentFamily = keyof typeof SCENT_FAMILIES;
+
+export function matchesFamily(p: Product, family: ScentFamily): boolean {
+  const text = searchableText(p);
+  return SCENT_FAMILIES[family].keywords.some((k) => text.includes(k));
+}

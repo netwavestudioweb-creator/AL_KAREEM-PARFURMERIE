@@ -1,571 +1,580 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import type { Category, Product } from "@/lib/catalog";
-import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
-import { formatFCFA, whatsappLink } from "@/lib/products";
-import { useCart } from "@/lib/cart";
-import { toast } from "sonner";
 import {
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  BadgeCheck,
-  Sparkles,
-  HeartHandshake,
-  Star,
-  Quote,
-  Flame,
-  ShieldCheck,
-  Truck,
   MessageCircle,
-  ShoppingBag,
-  CheckCircle2,
-  Crown,
-  Compass,
+  ShieldCheck,
+  Wallet,
+  Truck,
+  Sparkles,
+  Star,
 } from "lucide-react";
+import {
+  getOptimizedImageUrl,
+  matchesFamily,
+  matchesGenre,
+  SCENT_FAMILIES,
+  type Category,
+  type Genre,
+  type Product,
+  type ScentFamily,
+} from "@/lib/catalog";
+import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
+import { whatsappLink } from "@/lib/products";
+import { ProductCard } from "./product-card";
+import { CONSEIL_MESSAGE, GENRES } from "./site-header";
+import heroImg from "@/assets/perfume-woman-hero.webp";
+import boutiqueImg from "@/assets/boutique.webp";
+import femmeImg from "@/assets/product-femme.jpg";
+import hommeImg from "@/assets/product-homme.jpg";
+import unisexeImg from "@/assets/product-unisexe.jpg";
+import oudImg from "@/assets/product-oud.jpg";
+import citrusImg from "@/assets/product-citrus.jpg";
+import coffretImg from "@/assets/product-coffret.jpg";
 
-/** Vrai si l'utilisateur a demandé moins d'animations au niveau système. */
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = () => setReduced(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return reduced;
-}
+const CONTAINER = "mx-auto w-full max-w-[1320px] px-4 lg:px-8";
+const H2 = "font-serif text-[28px] font-medium leading-tight text-primary-deep lg:text-4xl";
+const EYEBROW = "text-[10.5px] font-semibold uppercase tracking-[0.22em] lg:text-xs";
 
-const AUTOPLAY_MS = 4500;
+/* ------------------------------------------------------------------ */
+/* Puces catégories (mobile)                                          */
+/* ------------------------------------------------------------------ */
 
-/**
- * 1. CARROUSEL ÉLITE DES COUPS DE CŒUR (Inspiration Creed & Kilian Paris)
- */
-export function RotatingSelection({ products }: { products: Product[]; categories: Category[] }) {
-  const { addItem } = useCart();
-  const reduced = usePrefersReducedMotion();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+const CHIP =
+  "shrink-0 rounded-full border border-input px-4 py-2 text-[13px] font-medium text-foreground";
 
-  const featuredItems = useMemo(() => {
-    if (!products || products.length === 0) return [];
-    const withRealImages = products.filter(
-      (p) => p.inStock && p.image && !p.image.includes("data:image/svg"),
-    );
-    return withRealImages.length >= 4 ? withRealImages.slice(0, 6) : products.slice(0, 4);
-  }, [products]);
-
-  const totalSlides = featuredItems.length;
-
-  useEffect(() => {
-    if (reduced || isPaused || totalSlides <= 1) return;
-    const timer = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % totalSlides);
-    }, AUTOPLAY_MS);
-    return () => clearInterval(timer);
-  }, [reduced, isPaused, totalSlides]);
-
-  if (totalSlides === 0) {
-    return (
-      <div className="rounded-3xl bg-gradient-to-br from-white/95 via-secondary/40 to-white/95 p-8 border border-gold/20 shadow-elegant min-h-[350px] flex items-center justify-center">
-        <div className="font-serif text-lg text-primary-deep/60 animate-pulse">
-          Chargement de la sélection Al Kareem...
-        </div>
-      </div>
-    );
-  }
-
-  const currentProduct = featuredItems[activeIndex] ?? featuredItems[0];
-
-  const goToPrev = () => {
-    setActiveIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
-  };
-
-  const goToNext = () => {
-    setActiveIndex((prev) => (prev + 1) % totalSlides);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX - touchEndX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) goToNext();
-      else goToPrev();
-    }
-    setTouchStartX(null);
-  };
-
+export function CategoryChips() {
   return (
-    <div
-      className="relative mx-auto max-w-7xl overflow-hidden pt-2"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+    <nav
+      aria-label="Catégories"
+      className="scrollbar-none flex gap-2 overflow-x-auto px-4 py-3 lg:hidden"
     >
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6 md:mb-8">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4B1D6E] text-[#F5E096] text-xs uppercase tracking-widest font-semibold mb-2 shadow-xs border border-[#E5B842]/40">
-            <Crown className="h-3.5 w-3.5 text-[#F5E096]" />
-            <span>Sélection d'Exception à Cotonou</span>
-          </div>
-          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-primary-deep tracking-tight">
-            Les Incontournables de la Maison
-          </h2>
-          <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-xl">
-            Flacons authentiques en stock immédiatement en boutique à Cotonou.
-          </p>
-        </div>
-
-        <Link
-          to="/boutique"
-          className="hidden sm:inline-flex items-center gap-2 self-start md:self-end rounded-full bg-primary-deep text-primary-foreground px-5 py-2.5 text-xs sm:text-sm font-semibold hover:bg-primary transition-all shadow-md hover:scale-105 whitespace-nowrap"
-        >
-          <span>Parcourir toute la boutique</span>
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      </div>
-
-      <div
-        className="relative rounded-3xl bg-gradient-to-br from-white via-secondary/30 to-white p-4 sm:p-6 lg:p-8 border border-gold/30 shadow-elegant min-h-[480px] sm:min-h-[520px]"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+      <Link
+        to="/boutique"
+        className={`${CHIP} border-primary-deep bg-primary-deep font-semibold text-primary-foreground`}
       >
-        <div className="grid gap-6 lg:grid-cols-12 items-center min-h-[380px] sm:min-h-[420px]">
-          <div className="lg:col-span-5 relative group overflow-hidden rounded-2xl aspect-square bg-muted/20 border border-gold/20 shadow-soft">
-            <img
-              src={currentProduct.image}
-              alt={currentProduct.name}
-              width={600}
-              height={600}
-              fetchPriority="high"
-              decoding="async"
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent pointer-events-none" />
-
-            <button
-              type="button"
-              onClick={goToPrev}
-              aria-label="Article précédent"
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/20 flex items-center justify-center shadow-lg hover:bg-black/75 hover:scale-110 active:scale-90 transition-all cursor-pointer"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={goToNext}
-              aria-label="Article suivant"
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/20 flex items-center justify-center shadow-lg hover:bg-black/75 hover:scale-110 active:scale-90 transition-all cursor-pointer"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-
-            <div className="absolute top-4 left-4 flex flex-wrap gap-1.5 pointer-events-none z-10">
-              {currentProduct.promo ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-destructive text-white text-xs font-semibold shadow-sm">
-                  <Flame className="h-3 w-3" /> Offre Spéciale
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-deep/90 backdrop-blur-md text-white text-xs font-medium border border-gold/40 shadow-sm">
-                  <Sparkles className="h-3 w-3 text-gold" /> Flacon Authentique
-                </span>
-              )}
-            </div>
-
-            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white pointer-events-none z-10">
-              <span className="text-xs uppercase tracking-widest text-white/80 font-medium">
-                {currentProduct.volume ? currentProduct.volume : "Prix boutique"}
-              </span>
-              <div className="flex items-baseline gap-2 bg-black/60 px-3.5 py-1.5 rounded-full backdrop-blur-md border border-white/20 shadow-md">
-                <span className="text-base sm:text-lg font-bold text-white">
-                  {formatFCFA(currentProduct.price)}
-                </span>
-                {currentProduct.oldPrice && (
-                  <span className="text-xs text-white/70 line-through">
-                    {formatFCFA(currentProduct.oldPrice)}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-7 flex flex-col justify-center px-1 sm:px-6 space-y-4 sm:space-y-6">
-            <div className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-primary font-semibold">
-              <span>{currentProduct.category || "Parfumerie d'Exception"}</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-              <span className="text-muted-foreground">Disponible à Cotonou</span>
-            </div>
-
-            <h3 className="font-serif text-2xl sm:text-3xl md:text-4xl text-primary-deep leading-tight font-medium">
-              {currentProduct.name}
-            </h3>
-
-            {currentProduct.description ? (
-              <p className="text-sm sm:text-base text-foreground/85 leading-relaxed line-clamp-3">
-                {currentProduct.description}
-              </p>
-            ) : (
-              <p className="text-sm sm:text-base text-foreground/85 leading-relaxed">
-                Création emblématique sélectionnée avec exigence pour révéler votre présence et
-                laisser un sillage inoubliable.
-              </p>
-            )}
-
-            <div className="pt-2 space-y-3">
-              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary-deep font-medium">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> Testé en boutique
-                </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary-deep font-medium">
-                  <Truck className="h-3.5 w-3.5 text-primary" /> Livraison Express Cotonou
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    addItem(currentProduct);
-                    toast.success(`${currentProduct.name} ajouté à votre panier ✨`);
-                  }}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary-deep text-primary-foreground px-6 py-3.5 text-sm font-semibold hover:bg-primary transition-all shadow-md active:scale-95 text-center cursor-pointer"
-                >
-                  <ShoppingBag className="h-4 w-4 text-gold shrink-0" />
-                  <span>Ajouter au panier</span>
-                </button>
-
-                <a
-                  href={whatsappLink(
-                    `Bonjour Al Kareem Parfumerie, je souhaite commander le parfum "${currentProduct.name}" à ${formatFCFA(currentProduct.price)} 🌸`,
-                  )}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground px-6 py-3.5 text-sm font-semibold hover:opacity-90 transition-opacity shadow-md active:scale-95 text-center cursor-pointer"
-                >
-                  <MessageCircle className="h-4 w-4 shrink-0" />
-                  <span>Commander sur WhatsApp</span>
-                </a>
-              </div>
-            </div>
-
-            <div className="pt-1">
-              <Link
-                to="/parfum/$slug"
-                params={{ slug: currentProduct.slug }}
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary-deep transition-colors group"
-              >
-                <span>Fiche détaillée du parfum</span>
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-4">
-          <span className="text-xs font-medium text-muted-foreground">
-            Modèle {activeIndex + 1} sur {totalSlides}
-          </span>
-          <div className="flex items-center gap-2">
-            {featuredItems.map((item, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveIndex(idx)}
-                aria-label={`Aller au parfum ${idx + 1} : ${item.name}`}
-                className="min-h-[28px] min-w-[28px] p-1 flex items-center justify-center transition-all cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <span
-                  className={`h-3 rounded-full transition-all duration-300 ${
-                    idx === activeIndex
-                      ? "w-8 bg-primary-deep"
-                      : "w-3 bg-primary/25 hover:bg-primary/50"
-                  }`}
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+        Nouveautés
+      </Link>
+      {GENRES.map((g) => (
+        <Link
+          key={g.genre}
+          to="/boutique/genre/$genre"
+          params={{ genre: g.genre }}
+          className={CHIP}
+        >
+          {g.label}
+        </Link>
+      ))}
+      <Link to="/boutique/$category" params={{ category: "huiles-concentrees" }} className={CHIP}>
+        Huiles
+      </Link>
+      <Link to="/boutique/$category" params={{ category: "coffrets-cadeaux" }} className={CHIP}>
+        Coffrets
+      </Link>
+      <Link to="/boutique" search={{ promo: true }} className={CHIP}>
+        Offres
+      </Link>
+    </nav>
   );
 }
 
-/**
- * 2. DIAGNOSTIC OLFACTIF INTERACTIF (Inspiration Le Labo & Byredo)
- */
-export function ScentFinderSection({ products }: { products: Product[] }) {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+/* ------------------------------------------------------------------ */
+/* Hero compact                                                       */
+/* ------------------------------------------------------------------ */
 
-  const categoryOptions = [
-    { id: "all", label: "Toutes les créations", slug: "" },
-    { id: "parfums", label: "Parfums d'Exception", slug: "parfums" },
-    { id: "deodorants", label: "Déodorants de Luxe", slug: "deodorants" },
-    { id: "huiles", label: "Huiles Concentrées", slug: "huiles-concentrees" },
-    { id: "unisexe", label: "Senteurs Unisexe", slug: "senteurs-unisexe" },
-    { id: "brumes", label: "Brumes & Sprays", slug: "brumes-sprays-corporels" },
-    { id: "coffrets", label: "Coffrets Cadeaux", slug: "coffrets-cadeaux" },
+export function HomeHero({ productCount }: { productCount: number }) {
+  return (
+    <section className={`${CONTAINER} mt-1 lg:mt-6`}>
+      <div className="relative grid overflow-hidden rounded-[18px] bg-[#2D1244] text-white lg:min-h-[460px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:rounded-[20px]">
+        <div className="relative h-[300px] lg:order-2 lg:h-auto">
+          <img
+            src={heroImg}
+            alt="Femme se parfumant — Al Kareem Parfumerie Cotonou"
+            width={1200}
+            height={900}
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover object-[70%_20%] lg:object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#240c38]/95 via-[#240c38]/35 to-transparent lg:hidden" />
+        </div>
+        <div className="absolute inset-x-5 bottom-5 flex flex-col gap-2.5 lg:static lg:order-1 lg:justify-center lg:gap-5 lg:px-14 lg:py-16">
+          <span className={`${EYEBROW} text-gold`}>Parfumerie d'exception · Cotonou</span>
+          <h1 className="font-serif text-[38px] font-medium leading-none lg:text-[64px] lg:leading-[1.02]">
+            Sublimez votre aura.
+          </h1>
+          <p className="hidden max-w-[440px] text-base leading-relaxed text-[#E4DAEC] lg:block">
+            {productCount > 0
+              ? `Plus de ${Math.floor(productCount / 10) * 10} fragrances`
+              : "Des fragrances"}{" "}
+            authentiques — parfums orientaux, huiles concentrées et coffrets — livrées chez vous,
+            payées à la réception.
+          </p>
+          <div className="mt-1 flex flex-wrap gap-3">
+            <Link
+              to="/boutique"
+              className="inline-flex h-[46px] items-center gap-2 rounded-full bg-gold px-6 text-[14.5px] font-semibold text-[#2A1838] transition-transform hover:-translate-y-0.5 lg:h-[52px] lg:px-7 lg:text-[15px]"
+            >
+              Découvrir la collection <ArrowRight className="h-[18px] w-[18px]" />
+            </Link>
+            <a
+              href="#quiz"
+              className="hidden h-[52px] items-center rounded-full border border-white/45 px-6 text-[15px] font-medium text-white hover:bg-white/10 lg:inline-flex"
+            >
+              Trouver mon parfum
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Réassurance                                                        */
+/* ------------------------------------------------------------------ */
+
+const PERKS = [
+  { icon: ShieldCheck, title: "100 % authentique", desc: "Flacons vérifiés avant vente" },
+  { icon: Wallet, title: "Payé à la réception", desc: "Espèces, MTN MoMo, Moov Money" },
+  { icon: Truck, title: "Livraison rapide", desc: "Cotonou, Calavi, Porto-Novo & Bénin" },
+  { icon: MessageCircle, title: "Conseil privé", desc: "Un parfumeur sur WhatsApp" },
+];
+
+export function PerksStrip() {
+  return (
+    <section className={`${CONTAINER} mt-7 lg:mt-14`}>
+      <ul className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-0 lg:rounded-2xl lg:border lg:border-border lg:bg-card">
+        {PERKS.map((p) => (
+          <li
+            key={p.title}
+            className="flex flex-col gap-1 rounded-[14px] border border-border bg-card p-3.5 lg:flex-row lg:items-center lg:gap-3.5 lg:rounded-none lg:border-0 lg:bg-transparent lg:px-6 lg:py-5"
+          >
+            <span className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-primary lg:flex">
+              <p.icon className="h-5 w-5" />
+            </span>
+            <span className="flex flex-col gap-0.5">
+              <span className="text-[13px] font-semibold lg:text-sm">{p.title}</span>
+              <span className="text-[11.5px] leading-snug text-muted-foreground lg:text-[12.5px]">
+                {p.desc}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Univers en cercles                                                 */
+/* ------------------------------------------------------------------ */
+
+const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
+  "huiles-concentrees": oudImg,
+  "brumes-sprays-corporels": citrusImg,
+  deodorants: citrusImg,
+  "coffrets-cadeaux": coffretImg,
+  "diffuseurs-de-parfum": boutiqueImg,
+};
+
+const HIDDEN_UNIVERSE_SLUGS = new Set(["parfums", "senteurs-unisexe"]);
+
+export function UniverseCircles({ categories }: { categories: Category[] }) {
+  const genreItems = [
+    { key: "femme", label: "Femme", img: femmeImg, genre: "femme" as const },
+    { key: "homme", label: "Homme", img: hommeImg, genre: "homme" as const },
+    { key: "unisexe", label: "Unisexe", img: unisexeImg, genre: "unisexe" as const },
   ];
+  const catItems = categories
+    .filter((c) => !HIDDEN_UNIVERSE_SLUGS.has(c.slug))
+    .map((c) => ({
+      key: c.id,
+      label: c.name,
+      slug: c.slug,
+      img: c.image_url
+        ? getOptimizedImageUrl(c.image_url, 264, 264, 75)
+        : (CATEGORY_FALLBACK_IMAGES[c.slug] ?? boutiqueImg),
+    }));
 
-  const filteredProducts = useMemo(() => {
-    if (selectedCategory === "all") return products.slice(0, 4);
-    const opt = categoryOptions.find((c) => c.id === selectedCategory);
-    if (!opt || !opt.slug) return products.slice(0, 4);
-    const matches = products.filter(
-      (p) => p.categorySlug === opt.slug || p.category.toLowerCase().includes(opt.id),
-    );
-    return matches.length > 0 ? matches.slice(0, 4) : products.slice(0, 4);
-  }, [products, selectedCategory]);
+  const circle =
+    "block h-[82px] w-[82px] overflow-hidden rounded-full border border-border bg-secondary lg:h-[132px] lg:w-[132px]";
+  const label = "text-xs font-semibold text-foreground lg:text-sm";
+  const item = "flex w-[82px] shrink-0 flex-col items-center gap-2 text-center lg:w-auto lg:gap-3";
 
   return (
-    <section className="bg-gradient-to-b from-secondary/40 via-white to-white py-16 md:py-24 border-t border-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4B1D6E] text-[#F5E096] text-xs uppercase tracking-widest font-semibold shadow-xs border border-[#E5B842]/40">
-            <Compass className="h-3.5 w-3.5 text-[#F5E096]" />
-            <span>Guide & Diagnostic Olfactif</span>
-          </div>
-          <h2 className="font-serif text-3xl sm:text-4xl text-primary-deep tracking-tight">
-            Trouvez la Fragrance qui Répond à votre Aura
-          </h2>
-          <p className="text-sm text-foreground/80 leading-relaxed">
-            Filtrez nos références en boutique pour découvrir le parfum qui vous correspond.
-          </p>
-        </div>
+    <section className="mt-8 lg:mt-14">
+      <div className={`${CONTAINER} mb-3.5 flex items-baseline justify-between lg:mb-6`}>
+        <h2 className={H2}>Explorer par univers</h2>
+        <Link
+          to="/boutique"
+          className="hidden text-sm font-semibold text-primary-deep hover:text-primary lg:inline"
+        >
+          Tout voir →
+        </Link>
+      </div>
+      <div
+        className={`${CONTAINER} scrollbar-none flex gap-3.5 overflow-x-auto lg:justify-between lg:gap-5 lg:overflow-visible`}
+      >
+        {genreItems.map((g) => (
+          <Link
+            key={g.key}
+            to="/boutique/genre/$genre"
+            params={{ genre: g.genre }}
+            className={item}
+          >
+            <span className={circle}>
+              <img
+                src={g.img}
+                alt=""
+                loading="lazy"
+                width={132}
+                height={132}
+                className="h-full w-full object-cover"
+              />
+            </span>
+            <span className={label}>{g.label}</span>
+          </Link>
+        ))}
+        {catItems.map((c) => (
+          <Link key={c.key} to="/boutique/$category" params={{ category: c.slug }} className={item}>
+            <span className={circle}>
+              <img
+                src={c.img}
+                alt=""
+                loading="lazy"
+                width={132}
+                height={132}
+                className="h-full w-full object-cover"
+              />
+            </span>
+            <span className={label}>{c.label}</span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-        {/* Boutons de filtres interactifs */}
-        <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto mb-10">
-          {categoryOptions.map((opt) => (
+/* ------------------------------------------------------------------ */
+/* Sélection (grille principale)                                      */
+/* ------------------------------------------------------------------ */
+
+type GenreTab = "tous" | Genre;
+
+/** Articles d'entretien (désodorisants, diffuseurs) : vendus en boutique, mais pas mis en vitrine. */
+const NON_SHOWCASE_SLUGS = new Set(["diffuseurs-de-parfum", "deodorants"]);
+
+function showcaseable(products: Product[]): Product[] {
+  const inStock = products.filter((p) => p.inStock);
+  const fragrances = inStock.filter((p) => !NON_SHOWCASE_SLUGS.has(p.categorySlug));
+  return fragrances.length > 0 ? fragrances : inStock;
+}
+
+export function SelectionGrid({ products }: { products: Product[] }) {
+  const [tab, setTab] = useState<GenreTab>("tous");
+  const shown = useMemo(() => {
+    const inStock = showcaseable(products);
+    const pool = tab === "tous" ? inStock : inStock.filter((p) => matchesGenre(p, tab));
+    return pool.slice(0, 10);
+  }, [products, tab]);
+
+  const tabs: { id: GenreTab; label: string }[] = [
+    { id: "tous", label: "Tous" },
+    ...GENRES.map((g) => ({ id: g.genre, label: g.label })),
+  ];
+
+  return (
+    <section className={`${CONTAINER} mt-7 lg:mt-16`}>
+      <div className="mb-3.5 flex flex-col gap-3 lg:mb-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex items-baseline justify-between">
+          <div>
+            <h2 className={H2}>Notre sélection</h2>
+            <p className="mt-1.5 hidden text-sm text-muted-foreground lg:block">
+              Les fragrances disponibles tout de suite en boutique.
+            </p>
+          </div>
+          <Link to="/boutique" className="text-[13px] font-semibold text-primary-deep lg:hidden">
+            Tout voir
+          </Link>
+        </div>
+        <div
+          role="tablist"
+          aria-label="Filtrer la sélection"
+          className="scrollbar-none flex gap-2 overflow-x-auto"
+        >
+          {tabs.map((t) => (
             <button
-              key={opt.id}
-              onClick={() => setSelectedCategory(opt.id)}
-              className={`px-4 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                selectedCategory === opt.id
-                  ? "bg-primary-deep text-white shadow-sm ring-2 ring-gold/40"
-                  : "bg-white text-foreground/80 border border-border hover:border-primary/40 hover:bg-secondary/60"
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+              className={`shrink-0 rounded-full px-4 py-2 text-[13px] transition-colors ${
+                tab === t.id
+                  ? "bg-primary-deep font-semibold text-primary-foreground"
+                  : "border border-input font-medium hover:border-primary/40"
               }`}
             >
-              {opt.label}
+              {t.label}
             </button>
           ))}
         </div>
-
-        {/* Grille de 4 cartes recommandées */}
-        <div className="mt-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="group relative flex flex-col rounded-2xl bg-white p-3 border border-border/80 shadow-xs hover:shadow-md transition-all"
-              >
-                <Link
-                  to="/parfum/$slug"
-                  params={{ slug: product.slug }}
-                  className="block aspect-square overflow-hidden rounded-xl bg-muted/30"
-                >
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </Link>
-                <div className="mt-3 flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {product.category || "Parfum"}
-                    </div>
-                    <h3 className="font-serif text-sm sm:text-base font-medium text-primary-deep line-clamp-1">
-                      {product.name}
-                    </h3>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between pt-2 border-t border-border/60">
-                    <span className="text-xs sm:text-sm font-bold text-primary-deep">
-                      {formatFCFA(product.price)}
-                    </span>
-                    <Link
-                      to="/parfum/$slug"
-                      params={{ slug: product.slug }}
-                      aria-label={`Voir ${product.name}`}
-                      className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5"
-                    >
-                      Voir <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 text-center">
-            <Link
-              to="/boutique"
-              search={
-                selectedCategory !== "all"
-                  ? { category: categoryOptions.find((c) => c.id === selectedCategory)?.slug }
-                  : undefined
-              }
-              className="inline-flex items-center gap-2 rounded-full bg-primary-deep text-white px-7 py-3 text-xs sm:text-sm font-semibold hover:bg-primary transition-all shadow-md hover:scale-105"
-            >
-              <span>Voir tous ces modèles dans la boutique</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+      </div>
+      {shown.length > 0 ? (
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-5 lg:gap-6">
+          {shown.map((p, i) => (
+            <ProductCard key={p.id} product={p} priority={i < 2} />
+          ))}
         </div>
+      ) : (
+        <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+          Aucun parfum dans cette sélection pour le moment.
+        </p>
+      )}
+      <div className="mt-6 hidden justify-center lg:flex">
+        <Link
+          to="/boutique"
+          className="inline-flex h-12 items-center gap-2 rounded-full border border-primary-deep px-8 text-sm font-semibold text-primary-deep hover:bg-primary-deep hover:text-primary-foreground"
+        >
+          Voir toute la boutique <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
     </section>
   );
 }
 
-/**
- * 3. GRILLE DES UNIVERS OLFACTIFS & CATÉGORIES (VRAIS LIENS FONCTIONNELS VERS LA BOUTIQUE)
- */
-export function CategoryShowcaseSection({ categories }: { categories: Category[] }) {
-  // Liste officielle des univers olfactifs avec leurs slugs correspondant en base de données
-  const defaultCategories = [
-    {
-      name: "Parfums d'Exception",
-      slug: "parfums",
-      desc: "Grandes créations de marques renommées & jus rares",
-      badge: "Incontournables",
-    },
-    {
-      name: "Huiles Concentrées & Attars",
-      slug: "huiles-concentrees",
-      desc: "Huiles pures sans alcool à la tenue intense et raffinée",
-      badge: "Pureté",
-    },
-    {
-      name: "Senteurs Unisexe",
-      slug: "senteurs-unisexe",
-      desc: "Notes mixtes audacieuses et équilibrées",
-      badge: "Tendance",
-    },
-    {
-      name: "Brumes & Sprays Corporels",
-      slug: "brumes-sprays-corporels",
-      desc: "Fraîcheur quotidienne légère et captivante",
-      badge: "Fraîcheur",
-    },
-    {
-      name: "Déodorants de Luxe",
-      slug: "deodorants",
-      desc: "Protection parfumée haut de gamme au quotidien",
-      badge: "Soin",
-    },
-    {
-      name: "Coffrets Cadeaux",
-      slug: "coffrets-cadeaux",
-      desc: "L'art d'offrir dans des écrins de prestige",
-      badge: "Exclusif",
-    },
-  ];
+/* ------------------------------------------------------------------ */
+/* Nouveaux arrivages                                                 */
+/* ------------------------------------------------------------------ */
 
-  const catsToDisplay = categories.length > 0 ? categories : defaultCategories;
+export function NewArrivals({ products }: { products: Product[] }) {
+  // fetchProducts trie déjà par date d'ajout décroissante.
+  const newest = showcaseable(products).slice(0, 3);
+  if (newest.length === 0) return null;
 
   return (
-    <section className="py-16 md:py-24 bg-white border-t border-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-          <div>
-            <div className="text-xs uppercase tracking-widest text-gold font-semibold mb-2">
-              Explorez nos Univers
+    <section className="mt-9 lg:mt-[72px]">
+      <div className={`${CONTAINER} mb-3.5 flex items-baseline justify-between lg:hidden`}>
+        <h2 className={H2}>Nouveaux arrivages</h2>
+        <Link to="/boutique" className="text-[13px] font-semibold text-primary-deep">
+          Tout voir
+        </Link>
+      </div>
+      <div
+        className={`${CONTAINER} lg:grid lg:grid-cols-[minmax(0,1.25fr)_repeat(3,minmax(0,1fr))] lg:gap-6`}
+      >
+        <Link
+          to="/boutique"
+          className="relative hidden min-h-[400px] overflow-hidden rounded-2xl bg-[#2D1244] text-white lg:block"
+        >
+          <img
+            src={boutiqueImg}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <span className="absolute inset-0 bg-gradient-to-t from-[#1e0a2d]/90 to-[#1e0a2d]/10" />
+          <span className="absolute inset-x-8 bottom-8 flex flex-col gap-2.5">
+            <span className={`${EYEBROW} text-gold`}>Nouveaux arrivages</span>
+            <span className="font-serif text-[38px] leading-[1.05]">
+              Fraîchement arrivés en boutique.
+            </span>
+            <span className="text-sm font-semibold">Voir toutes les nouveautés →</span>
+          </span>
+        </Link>
+        <div className="scrollbar-none -mx-4 flex gap-3 overflow-x-auto px-4 lg:contents">
+          {newest.map((p) => (
+            <div key={p.id} className="w-[150px] shrink-0 lg:w-auto">
+              <ProductCard product={p} />
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl text-primary-deep tracking-tight">
-              Nos Catégories Olfactives
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Cliquez sur une catégorie pour afficher directement ses parfums dans la boutique.
-            </p>
-          </div>
-          <Link
-            to="/boutique"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-deep"
-          >
-            <span>Toute la boutique</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {catsToDisplay.map((cat, idx) => {
-            const catSlug = cat.slug || defaultCategories[idx % defaultCategories.length].slug;
-            const catBadge =
-              "badge" in cat && typeof (cat as Record<string, unknown>).badge === "string"
-                ? ((cat as Record<string, unknown>).badge as string)
-                : "Collection";
-            const catDesc =
-              "desc" in cat && typeof (cat as Record<string, unknown>).desc === "string"
-                ? ((cat as Record<string, unknown>).desc as string)
-                : "Sélection soignée de parfums et senteurs authentiques.";
-
-            return (
-              <Link
-                key={cat.slug || idx}
-                to="/boutique"
-                search={{ category: catSlug }}
-                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-secondary/80 via-white to-secondary/30 p-7 border border-gold/25 shadow-xs hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between min-h-[210px] cursor-pointer"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
-
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-primary-deep text-[11px] font-semibold border border-gold/30 shadow-xs">
-                      {catBadge}
-                    </span>
-                    <Sparkles className="h-4 w-4 text-gold opacity-60 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <h3 className="font-serif text-2xl text-primary-deep group-hover:text-primary transition-colors font-medium">
-                    {cat.name}
-                  </h3>
-                  <p className="mt-2 text-xs sm:text-sm text-foreground/75 leading-relaxed">
-                    {catDesc}
-                  </p>
-                </div>
-
-                <div className="mt-6 flex items-center gap-2 text-xs font-bold text-primary group-hover:text-primary-deep">
-                  <span>Découvrir les parfums de cette catégorie</span>
-                  <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1.5 transition-transform" />
-                </div>
-              </Link>
-            );
-          })}
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-const ENGAGEMENTS = [
-  {
-    icon: Sparkles,
-    title: "Parfums Sélectionnés avec Exigence",
-    desc: "Chaque référence est minutieusement choisie, sentie et testée en boutique avant d'être proposée.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "100% Qualité & Authenticité",
-    desc: "Flacons scellés et garantis d'origine. Packagings officiels contrôlés.",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Conseil Privé Olfactif",
-    desc: "Notre équipe vous oriente selon vos préférences pour trouver votre signature unique.",
-  },
-  {
-    icon: Truck,
-    title: "Livraison Express Bénin",
-    desc: "Expédition rapide à Cotonou, Calavi, Porto-Novo et dans toutes les communes du Bénin.",
-  },
-];
+/* ------------------------------------------------------------------ */
+/* Quiz « Trouver mon parfum » + Coffrets                             */
+/* ------------------------------------------------------------------ */
 
-/**
- * 4. SECTION CONFIANCE, AVIS & PREUVES D'AUTHENTICITÉ (Inspiration Chanel & Creed)
- */
+type QuizGenre = Genre | "peu-importe";
+
+export function ScentQuizAndGifts({ products }: { products: Product[] }) {
+  const [step, setStep] = useState<"intro" | "genre" | "family" | "result">("intro");
+  const [genre, setGenre] = useState<QuizGenre>("peu-importe");
+  const [family, setFamily] = useState<ScentFamily | null>(null);
+
+  const results = useMemo(() => {
+    if (step !== "result" || !family) return [];
+    const inStock = products.filter((p) => p.inStock);
+    const byGenre =
+      genre === "peu-importe" ? inStock : inStock.filter((p) => matchesGenre(p, genre));
+    const exact = byGenre.filter((p) => matchesFamily(p, family));
+    // Si aucun parfum ne correspond exactement, on élargit au genre puis à toute la boutique.
+    const pool = exact.length > 0 ? exact : byGenre.length > 0 ? byGenre : inStock;
+    return pool.slice(0, 4);
+  }, [products, step, genre, family]);
+
+  const choice =
+    "rounded-full border border-[#E2D6EC] bg-card px-4 py-2.5 text-[13.5px] font-medium transition-colors hover:border-primary hover:text-primary";
+
+  return (
+    <section
+      id="quiz"
+      className={`${CONTAINER} mt-9 grid scroll-mt-40 gap-4 lg:mt-[72px] lg:grid-cols-2 lg:gap-6`}
+    >
+      <div className="flex min-h-[260px] flex-col justify-center gap-3 rounded-[18px] bg-accent p-6 lg:min-h-[340px] lg:gap-4 lg:rounded-[20px] lg:p-12">
+        <span className={`${EYEBROW} text-primary`}>
+          Trouver mon parfum{step === "intro" ? " · 30 secondes" : ""}
+        </span>
+
+        {step === "intro" && (
+          <>
+            <h3 className="font-serif text-[28px] font-medium leading-[1.05] text-primary-deep lg:text-[40px]">
+              Vous ne savez pas quoi choisir ?
+            </h3>
+            <p className="max-w-[420px] text-[15px] leading-relaxed text-foreground/80">
+              Deux questions — pour qui, et l'ambiance recherchée — et nous vous proposons les
+              fragrances qui vous ressemblent.
+            </p>
+            <button
+              type="button"
+              onClick={() => setStep("genre")}
+              className="mt-1 self-start rounded-full bg-primary-deep px-6 py-3.5 text-sm font-semibold text-primary-foreground hover:bg-primary"
+            >
+              Commencer le quiz
+            </button>
+          </>
+        )}
+
+        {step === "genre" && (
+          <>
+            <h3 className="font-serif text-[26px] font-medium text-primary-deep lg:text-[34px]">
+              1 · C'est pour qui ?
+            </h3>
+            <div className="flex flex-wrap gap-2.5">
+              {[
+                ...GENRES.map((g) => ({ id: g.genre as QuizGenre, label: g.label })),
+                { id: "peu-importe" as QuizGenre, label: "Peu importe" },
+              ].map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  className={choice}
+                  onClick={() => {
+                    setGenre(g.id);
+                    setStep("family");
+                  }}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === "family" && (
+          <>
+            <h3 className="font-serif text-[26px] font-medium text-primary-deep lg:text-[34px]">
+              2 · Quelle ambiance ?
+            </h3>
+            <div className="flex flex-wrap gap-2.5">
+              {(Object.keys(SCENT_FAMILIES) as ScentFamily[]).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  className={choice}
+                  onClick={() => {
+                    setFamily(f);
+                    setStep("result");
+                  }}
+                >
+                  {SCENT_FAMILIES[f].label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setStep("genre")}
+              className="self-start text-sm font-medium text-primary-deep underline underline-offset-4"
+            >
+              ← Retour
+            </button>
+          </>
+        )}
+
+        {step === "result" && (
+          <>
+            <h3 className="font-serif text-[24px] font-medium text-primary-deep lg:text-[30px]">
+              Nos suggestions pour vous
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {results.map((p) => (
+                <Link
+                  key={p.id}
+                  to="/parfum/$slug"
+                  params={{ slug: p.slug }}
+                  className="flex items-center gap-2.5 rounded-xl bg-card p-2 hover:ring-1 hover:ring-primary/30"
+                >
+                  <img
+                    src={p.image}
+                    alt=""
+                    loading="lazy"
+                    width={56}
+                    height={56}
+                    className="h-14 w-14 shrink-0 rounded-lg object-cover"
+                  />
+                  <span className="line-clamp-2 font-serif text-[15px] leading-tight">
+                    {p.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setFamily(null);
+                setStep("genre");
+              }}
+              className="self-start text-sm font-medium text-primary-deep underline underline-offset-4"
+            >
+              Recommencer
+            </button>
+          </>
+        )}
+      </div>
+
+      <Link
+        to="/boutique/$category"
+        params={{ category: "coffrets-cadeaux" }}
+        className="relative block h-[220px] overflow-hidden rounded-[18px] text-white lg:h-auto lg:min-h-[340px] lg:rounded-[20px]"
+      >
+        <img
+          src={coffretImg}
+          alt="Coffret cadeau Al Kareem"
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <span className="absolute inset-0 bg-gradient-to-t from-[#1e0a2d]/90 to-[#1e0a2d]/5" />
+        <span className="absolute inset-x-5 bottom-5 flex flex-col gap-1.5 lg:inset-x-10 lg:bottom-9 lg:gap-2.5">
+          <span className={`${EYEBROW} text-gold`}>Coffrets cadeaux</span>
+          <span className="font-serif text-[26px] leading-[1.05] lg:text-[40px]">
+            L'attention qui marque les esprits.
+          </span>
+          <span className="hidden text-sm font-semibold lg:inline">Offrir un coffret →</span>
+        </span>
+      </Link>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Confiance : preuves d'authenticité + avis                          */
+/* ------------------------------------------------------------------ */
+
 export function TrustSection() {
   const { data: proofs = [] } = useQuery({
     queryKey: ["authenticity-proofs"],
@@ -575,123 +584,103 @@ export function TrustSection() {
     queryKey: ["testimonials"],
     queryFn: fetchTestimonials,
   });
+  const photos =
+    proofs.length > 0
+      ? proofs
+          .slice(0, 3)
+          .map((p) => ({ src: p.image_url, alt: p.caption || "Preuve d'authenticité Al Kareem" }))
+      : [{ src: boutiqueImg, alt: "Boutique Al Kareem à Cotonou" }];
 
   return (
-    <section className="bg-white border-y border-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24 space-y-16">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4B1D6E] text-[#F5E096] text-xs uppercase tracking-widest font-semibold mb-2 shadow-xs border border-[#E5B842]/40">
-            <ShieldCheck className="h-3.5 w-3.5 text-[#F5E096]" />
-            <span>La Garantie Al Kareem</span>
-          </div>
-          <h2 className="font-serif text-3xl md:text-4xl text-primary-deep">
-            L'Excellence & la Confiance
+    <section className={`${CONTAINER} mt-9 lg:mt-[72px]`}>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-start lg:gap-12">
+        <div className="flex flex-col gap-2 lg:gap-4">
+          <span className={`${EYEBROW} text-gold-ink`}>La garantie Al Kareem</span>
+          <h2 className={`${H2} lg:text-[40px]`}>
+            Authentique, vérifié, photographié en boutique.
           </h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {ENGAGEMENTS.map((e) => (
-              <div
-                key={e.title}
-                className="rounded-2xl bg-secondary/60 p-6 border border-primary/5 hover:border-gold/30 hover:shadow-soft transition-all"
-              >
-                <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center text-primary-deep shadow-sm">
-                  <e.icon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="mt-4 font-semibold text-foreground text-sm sm:text-base">
-                  {e.title}
-                </div>
-                <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  {e.desc}
-                </p>
-              </div>
-            ))}
-          </div>
+          <p className="hidden text-[15px] leading-relaxed text-foreground/80 lg:block">
+            Chaque flacon est contrôlé avant la mise en vente. Voici de vraies photos de nos
+            arrivages et de nos emballages scellés.
+          </p>
         </div>
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3 lg:gap-4">
+          {photos.map((p) => (
+            <img
+              key={p.src}
+              src={p.src}
+              alt={p.alt}
+              loading="lazy"
+              className="aspect-square w-full rounded-xl object-cover lg:aspect-[3/4] lg:rounded-[14px]"
+            />
+          ))}
+          {testimonials.slice(0, 1).map((t) => (
+            <figure
+              key={t.id}
+              className="col-span-2 flex flex-col justify-between gap-3 rounded-[14px] border border-border bg-card p-5 lg:col-span-1"
+            >
+              {t.rating ? (
+                <span className="flex gap-0.5" aria-label={`${t.rating} sur 5`}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${i < t.rating! ? "fill-gold text-gold" : "text-border"}`}
+                    />
+                  ))}
+                </span>
+              ) : null}
+              <blockquote className="font-serif text-xl leading-snug">« {t.message} »</blockquote>
+              <figcaption className="text-[13px] font-semibold text-primary-deep">
+                {t.name}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+      {testimonials.length > 1 && (
+        <div className="scrollbar-none mt-4 flex gap-3 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-4">
+          {testimonials.slice(1, 4).map((t) => (
+            <figure
+              key={t.id}
+              className="w-[280px] shrink-0 rounded-[14px] border border-border bg-card p-5 lg:w-auto"
+            >
+              <blockquote className="font-serif text-lg leading-snug">« {t.message} »</blockquote>
+              <figcaption className="mt-3 text-[13px] font-semibold text-primary-deep">
+                {t.name}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
 
-        {proofs.length > 0 && (
-          <div>
-            <div className="flex items-end justify-between mb-6">
-              <div>
-                <h3 className="font-serif text-2xl sm:text-3xl text-primary-deep">
-                  Preuves d'Authenticité
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Photos réelles de nos flacons, emballages scellés et étiquettes officielles.
-                </p>
-              </div>
-              <Link
-                to="/boutique"
-                className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary-deep"
-              >
-                Commander ces modèles <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-              {proofs.slice(0, 8).map((p) => (
-                <figure
-                  key={p.id}
-                  className="group relative overflow-hidden rounded-2xl bg-gradient-hero border border-border"
-                >
-                  <img
-                    src={p.image_url}
-                    alt={p.caption || "Preuve d'authenticité Al Kareem"}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {p.caption && (
-                    <figcaption className="px-3 py-2 text-xs text-muted-foreground bg-white border-t border-border">
-                      {p.caption}
-                    </figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
-          </div>
-        )}
+/* ------------------------------------------------------------------ */
+/* Bandeau WhatsApp                                                   */
+/* ------------------------------------------------------------------ */
 
-        {testimonials.length > 0 && (
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-              <div>
-                <div className="text-xs uppercase tracking-widest text-gold font-semibold mb-1">
-                  Avis Vérifiés
-                </div>
-                <h3 className="font-serif text-2xl sm:text-3xl text-primary-deep">
-                  Ce que nos clients disent
-                </h3>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-primary-deep text-xs font-semibold">
-                <ShieldCheck className="h-4 w-4 text-whatsapp" /> 4.9/5 satisfaction client
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {testimonials.map((t) => (
-                <blockquote
-                  key={t.id}
-                  className="rounded-2xl border border-border bg-white p-6 shadow-sm hover:shadow-md transition-shadow relative"
-                >
-                  <Quote className="h-6 w-6 text-primary/20 mb-2" />
-                  <p className="text-sm text-foreground/80 leading-relaxed italic">"{t.message}"</p>
-                  <footer className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-primary-deep">{t.name}</span>
-                    {t.rating ? (
-                      <span className="flex items-center gap-0.5" aria-label={`${t.rating} sur 5`}>
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3.5 w-3.5 ${
-                              i < t.rating! ? "fill-gold text-gold" : "text-muted-foreground/30"
-                            }`}
-                          />
-                        ))}
-                      </span>
-                    ) : null}
-                  </footer>
-                </blockquote>
-              ))}
-            </div>
-          </div>
-        )}
+export function WhatsAppBand() {
+  return (
+    <section className={`${CONTAINER} mt-9 lg:mt-[72px]`}>
+      <div className="flex flex-col gap-5 rounded-[18px] bg-primary-deep p-6 text-white lg:flex-row lg:items-center lg:justify-between lg:rounded-[20px] lg:px-12 lg:py-10">
+        <div className="flex flex-col gap-2">
+          <Sparkles className="h-5 w-5 text-gold" />
+          <span className="font-serif text-[26px] leading-tight lg:text-[34px]">
+            Un doute ? Notre parfumeur vous répond.
+          </span>
+          <span className="text-[15px] text-[#E4DAEC]">
+            Conseil gratuit et personnalisé sur WhatsApp.
+          </span>
+        </div>
+        <a
+          href={whatsappLink(CONSEIL_MESSAGE)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-[52px] shrink-0 items-center justify-center gap-2.5 rounded-full bg-whatsapp px-7 text-[15px] font-semibold text-whatsapp-foreground hover:brightness-110"
+        >
+          <MessageCircle className="h-5 w-5" /> Écrire sur WhatsApp
+        </a>
       </div>
     </section>
   );

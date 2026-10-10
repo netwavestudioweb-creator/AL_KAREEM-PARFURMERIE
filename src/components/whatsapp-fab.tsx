@@ -1,11 +1,7 @@
 import { MessageCircle } from "lucide-react";
 import { whatsappLink } from "@/lib/products";
-import { useRouterState } from "@tanstack/react-router";
 
 export function WhatsAppFab() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isProductPage = pathname.startsWith("/parfum/");
-
   const content = (
     <div className="group fixed bottom-6 right-6 z-50 flex items-center gap-2.5">
       {/* Infobulle 'Conseil Privé' au survol */}
@@ -28,10 +24,6 @@ export function WhatsAppFab() {
     </div>
   );
 
-  // Sur la fiche produit mobile, la barre sticky en bas intègre déjà le bouton WhatsApp direct.
-  if (isProductPage) {
-    return <div className="hidden lg:block">{content}</div>;
-  }
-
-  return content;
+  // Sur mobile, la barre d'onglets contient déjà WhatsApp : le bouton flottant est réservé au desktop.
+  return <div className="hidden lg:block">{content}</div>;
 }
