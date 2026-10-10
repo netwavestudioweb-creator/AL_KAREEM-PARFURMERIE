@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Product } from "./products";
+import type { LiveProductInfo } from "./catalog";
 
 export interface CartItem {
   productId: string;
@@ -16,8 +17,15 @@ interface CartContextValue {
   removeItem: (productId: string) => void;
   updateQty: (productId: string, qty: number) => void;
   clear: () => void;
+  /** Aligne prix, noms et volumes sur la base ; retourne les changements à signaler. */
+  syncWithLive: (live: Map<string, LiveProductInfo>) => CartSyncReport;
   total: number;
   count: number;
+}
+
+export interface CartSyncReport {
+  priceChanged: { name: string; before: number; after: number }[];
+  unavailable: string[];
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -72,11 +80,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
 
   const clear = () => setItems([]);
+
+  const syncWithLive = (live: Map<string, LiveProductInfo>): CartSyncReport => {
+    const report: CartSyncReport = { priceChanged: [], unavailable: [] };
+    const next = items.map((i) => {
+      const l = live.get(i.productId);
+      if (!l || !l.inStock) {
+        report.unavailable.push(i.name);
+        return i;
+      }
+      if (l.price !== i.price)
+        report.priceChanged.push({ name: l.name, before: i.price, after: l.price });
+      return { ...i, name: l.name, volume: l.volume ?? "", price: l.price };
+    });
+    setItems(next);
+    return report;
+  };
   const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
   const count = items.reduce((s, i) => s + i.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQty, clear, total, count }}>
+    <CartContext.Provider
+      value={{ items, addItem, removeItem, updateQty, clear, syncWithLive, total, count }}
+    >
       {children}
     </CartContext.Provider>
   );

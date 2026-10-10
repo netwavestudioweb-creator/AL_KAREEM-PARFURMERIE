@@ -132,13 +132,50 @@ async function ensureSignedUrls(products: DbProduct[]): Promise<void> {
   }
 }
 
-export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): Product {
-  const cat = p.category_id ? categoriesById.get(p.category_id) : undefined;
+type PricingFields = Pick<DbProduct, "price_fcfa" | "promo_price_fcfa" | "promo_end_date">;
+
+/** Même règle que le trigger SQL validate_new_order : promo valide si inférieure et non expirée. */
+export function computePricing(p: PricingFields): { price: number; promoActive: boolean } {
   const promoActive =
     p.promo_price_fcfa != null &&
     p.promo_price_fcfa < p.price_fcfa &&
     (!p.promo_end_date || new Date(p.promo_end_date) >= new Date(new Date().toDateString()));
-  const effective = promoActive ? p.promo_price_fcfa! : p.price_fcfa;
+  return { price: promoActive ? p.promo_price_fcfa! : p.price_fcfa, promoActive };
+}
+
+export interface LiveProductInfo {
+  id: string;
+  name: string;
+  volume: string | null;
+  price: number;
+  inStock: boolean;
+}
+
+/** Relit en base le prix et le stock actuels des produits d'un panier. */
+export async function fetchLiveProducts(ids: string[]): Promise<Map<string, LiveProductInfo>> {
+  if (ids.length === 0) return new Map();
+  const { data, error } = await supabase
+    .from("products")
+    .select("id,name,volume,price_fcfa,promo_price_fcfa,promo_end_date,in_stock")
+    .in("id", ids);
+  if (error) throw error;
+  return new Map(
+    (data ?? []).map((p) => [
+      p.id,
+      {
+        id: p.id,
+        name: p.name,
+        volume: p.volume,
+        price: computePricing(p).price,
+        inStock: p.in_stock,
+      },
+    ]),
+  );
+}
+
+export function toProduct(p: DbProduct, categoriesById: Map<string, Category>): Product {
+  const cat = p.category_id ? categoriesById.get(p.category_id) : undefined;
+  const { price: effective, promoActive } = computePricing(p);
   const rawImages = p.image_urls.length ? p.image_urls : [PLACEHOLDER];
   const optimizedImages = rawImages.map((img) => getOptimizedImageUrl(img, 400, 400, 80));
   return {

@@ -3,17 +3,11 @@ import { SiteLayout } from "@/components/layout";
 import { useCart } from "@/lib/cart";
 import { SITE_CONFIG } from "@/lib/site-config";
 import { formatFCFA, whatsappLink, WHATSAPP_NUMBER } from "@/lib/products";
-import { buildOrderMessage } from "@/lib/order-message";
+import { buildOrderMessage, type OrderMessageItem } from "@/lib/order-message";
+import { fetchLiveProducts, type LiveProductInfo } from "@/lib/catalog";
+import { formatBeninPhone, normalizeBeninPhone } from "@/lib/phone";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Minus,
-  Plus,
-  Trash2,
-  MessageCircle,
-  ShoppingBag,
-  ArrowLeft,
-  CheckCircle2,
-} from "lucide-react";
+import { CheckCircle2, MessageCircle, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { trackWhatsAppClick } from "@/lib/analytics";
@@ -46,66 +40,24 @@ const CUSTOMER_KEY = "alkareem_customer_v1";
 const CUSTOMER_FORM_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 type ZoneKey = "Cotonou" | "Abomey-Calavi" | "Porto-Novo" | "Autre";
-const ZONE_OPTIONS: ZoneKey[] = ["Cotonou", "Abomey-Calavi", "Porto-Novo", "Autre"];
+const ZONE_OPTIONS: { value: ZoneKey; label: string }[] = [
+  { value: "Cotonou", label: "Cotonou" },
+  { value: "Abomey-Calavi", label: "Abomey-Calavi" },
+  { value: "Porto-Novo", label: "Porto-Novo" },
+  { value: "Autre", label: "Autre ville" },
+];
 
-/** Normalise et valide un numéro béninois (10 chiffres avec 01, ou ancien 8 chiffres, avec ou sans +229/00229). */
-function normalizeBeninPhone(input: string): string | null {
-  let digits = input.replace(/[^\d]/g, "");
-
-  if (digits.startsWith("00229")) {
-    digits = digits.slice(5);
-  } else if (digits.startsWith("229")) {
-    digits = digits.slice(3);
-  }
-
-  // Nouveau format officiel Bénin : 10 chiffres commençant par 01
-  if (digits.length === 10 && digits.startsWith("01")) {
-    return digits;
-  }
-
-  // Ancien format local : 8 chiffres -> on préfixe automatiquement '01'
-  if (digits.length === 8) {
-    return `01${digits}`;
-  }
-
-  // Numéro tapé avec un seul 0 au début (ex : 061888987 -> 9 chiffres)
-  if (digits.length === 9 && digits.startsWith("0")) {
-    return `01${digits.slice(1)}`;
-  }
-
-  // Si 10 chiffres (autres préfixes d'opérateurs)
-  if (digits.length === 10) {
-    return digits;
-  }
-
-  // Numéros internationaux ou autres formats (entre 8 et 15 chiffres)
-  if (digits.length >= 8 && digits.length <= 15) {
-    return digits;
-  }
-
-  return null;
-}
-
-function formatBeninPhone(digits: string): string {
-  if (digits.length === 10 && digits.startsWith("01")) {
-    return `${digits.slice(0, 2)} ${digits.slice(2, 4)} ${digits.slice(4, 6)} ${digits.slice(6, 8)} ${digits.slice(8, 10)}`;
-  }
-  if (digits.length === 8) {
-    return `${digits.slice(0, 2)} ${digits.slice(2, 4)} ${digits.slice(4, 6)} ${digits.slice(6, 8)}`;
-  }
-  return digits;
-}
-
-function isValidBeninPhone(input: string): boolean {
-  return normalizeBeninPhone(input) !== null;
-}
+const INPUT =
+  "h-[50px] w-full rounded-xl border border-input bg-card px-3.5 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/15";
+const LABEL = "flex flex-col gap-1.5 text-[13px] font-semibold";
 
 function CartPage() {
   const navigate = useNavigate();
-  const { items, updateQty, removeItem, total, clear } = useCart();
-  const [step, setStep] = useState<"cart" | "form" | "confirm">("cart");
+  const { items, updateQty, removeItem, total, clear, syncWithLive } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
+  const [unavailable, setUnavailable] = useState<string[]>([]);
+  const [pricesChecked, setPricesChecked] = useState(false);
   const [form, setForm] = useState({
     nom: "",
     tel: "",
@@ -130,61 +82,66 @@ function CartPage() {
     }
   }, []);
 
+  /** Relit prix et stock en base ; signale les changements au client. */
+  const refreshPrices = async () => {
+    const live = await fetchLiveProducts(items.map((i) => i.productId));
+    const report = syncWithLive(live);
+    setUnavailable(report.unavailable);
+    for (const c of report.priceChanged) {
+      toast.info(`Prix mis à jour : ${c.name} est maintenant à ${formatFCFA(c.after)}.`);
+    }
+    setPricesChecked(true);
+    return { live, report };
+  };
+
+  // Vérification à l'ouverture du panier (une fois).
+  useEffect(() => {
+    if (items.length === 0 || pricesChecked) return;
+    refreshPrices().catch(() => setPricesChecked(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
+
   const zoneLabel =
     form.zone === "Autre" && form.autreVille.trim() ? form.autreVille.trim() : form.zone;
 
-  const goToConfirm = (e: React.FormEvent) => {
+  const buildMessage = (lines: OrderMessageItem[], sum: number, phone: string) =>
+    buildOrderMessage({
+      items: lines,
+      total: sum,
+      name: form.nom.trim(),
+      phone,
+      zone: zoneLabel,
+      address: form.adresse,
+    });
+
+  const [lastMessage, setLastMessage] = useState("");
+
+  const openWhatsApp = () => {
+    trackWhatsAppClick("cart_checkout", total);
+    const popup = window.open(whatsappLink(lastMessage), "_blank");
+    if (popup) popup.opener = null;
+    else toast.error("WhatsApp ne s'est pas ouvert. Autorisez les fenêtres pop-up puis réessayez.");
+  };
+
+  const submitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nom.trim()) {
+    if (items.length === 0) return;
+    if (form.nom.trim().length < 2) {
       toast.error("Merci d'indiquer votre nom.");
       return;
     }
     const normalized = normalizeBeninPhone(form.tel);
     if (!normalized) {
-      toast.error(
-        "Numéro de téléphone invalide. Merci d'indiquer un numéro joignable (ex : 01 61 88 89 87 ou 61 88 89 87).",
-      );
+      toast.error("Numéro invalide. Exemple : 01 61 88 89 87.");
       return;
     }
-    // Formate joliment pour la prévisualisation et la transmission WhatsApp
-    const formatted = formatBeninPhone(normalized);
-    setForm((f) => ({ ...f, tel: formatted }));
-
     if (form.zone === "Autre" && !form.autreVille.trim()) {
       toast.error("Merci de préciser votre ville.");
       return;
     }
-    setStep("confirm");
-    setOrderCreated(false);
-  };
+    const phone = formatBeninPhone(normalized);
 
-  const orderMessage = () =>
-    buildOrderMessage({
-      items,
-      total,
-      name: form.nom,
-      phone: form.tel,
-      zone: zoneLabel,
-      address: form.adresse,
-    });
-
-  const openWhatsApp = () => {
-    trackWhatsAppClick("cart_checkout", total);
-    const popup = window.open(whatsappLink(orderMessage()), "_blank");
-    if (popup) {
-      popup.opener = null;
-      toast.info("WhatsApp est ouvert : envoyez le message pour contacter la boutique.");
-    } else {
-      toast.error("WhatsApp ne s'est pas ouvert. Autorisez les fenêtres pop-up puis réessayez.");
-    }
-  };
-
-  const createOrderAndOpenWhatsApp = async () => {
-    if (items.length === 0) {
-      toast.error("Votre panier est vide.");
-      return;
-    }
-    // Ouvre la fenêtre pendant le geste utilisateur : sinon un navigateur mobile peut bloquer
+    // Fenêtre ouverte pendant le geste utilisateur : sinon un navigateur mobile peut bloquer
     // WhatsApp une fois l'enregistrement asynchrone terminé.
     const whatsappWindow = window.open("about:blank", "_blank");
     if (!whatsappWindow) {
@@ -193,51 +150,72 @@ function CartPage() {
     }
     whatsappWindow.opener = null;
     setSubmitting(true);
+    const abort = (message: string) => {
+      whatsappWindow.close();
+      setSubmitting(false);
+      toast.error(message);
+    };
 
-    const orderItems = items.map((i) => ({
-      product_id: i.productId,
-      name: i.name,
-      volume: i.volume,
-      unit_price_fcfa: i.price,
-      quantity: i.quantity,
-      line_total_fcfa: i.price * i.quantity,
-    }));
+    // Prix et stock relus juste avant l'envoi : le message WhatsApp affiche les prix de la base.
+    let live: Map<string, LiveProductInfo>;
+    try {
+      ({ live } = await refreshPrices());
+    } catch {
+      abort("Connexion interrompue. Vérifiez votre réseau puis réessayez.");
+      return;
+    }
+    const lines = items.map((i) => {
+      const l = live.get(i.productId);
+      return {
+        productId: i.productId,
+        name: l?.name ?? i.name,
+        volume: l?.volume ?? i.volume,
+        price: l?.price ?? i.price,
+        quantity: i.quantity,
+        available: !!l?.inStock,
+      };
+    });
+    if (lines.some((l) => !l.available)) {
+      abort("Un article n'est plus disponible. Retirez-le du panier puis réessayez.");
+      return;
+    }
+    const sum = lines.reduce((s, l) => s + l.price * l.quantity, 0);
 
     let error: { message: string } | null = null;
     try {
       const res = await supabase.from("orders").insert({
         customer_name: form.nom.trim(),
-        customer_phone: form.tel.trim(),
+        customer_phone: phone,
         zone: zoneLabel,
         address: form.adresse.trim(),
-        items: orderItems,
-        subtotal_fcfa: total,
-        total_fcfa: total,
+        items: lines.map((l) => ({
+          product_id: l.productId,
+          name: l.name,
+          volume: l.volume,
+          unit_price_fcfa: l.price,
+          quantity: l.quantity,
+          line_total_fcfa: l.price * l.quantity,
+        })),
+        subtotal_fcfa: sum,
+        total_fcfa: sum,
         status: "envoyee",
       });
       error = res.error;
     } catch {
-      // Coupure réseau ou requête interrompue
-      whatsappWindow.close();
-      setSubmitting(false);
-      toast.error("Connexion interrompue. Vérifiez votre réseau puis réessayez.");
+      abort("Connexion interrompue. Vérifiez votre réseau puis réessayez.");
       return;
     }
 
     if (error) {
-      whatsappWindow.close();
-      setSubmitting(false);
       const m = error.message ?? "";
-      toast.error(
+      abort(
         /Trop de commandes/i.test(m)
           ? "Plusieurs commandes ont déjà été envoyées avec ce numéro. Merci de patienter un moment ou de nous écrire sur WhatsApp."
           : /indisponible/i.test(m)
             ? "Un article de votre panier est en rupture de stock. Retirez-le puis réessayez."
             : /introuvable|inconnu/i.test(m)
               ? "Un article de votre panier n'est plus disponible à la vente. Retirez-le puis réessayez."
-              : /Failed to fetch|NetworkError/i.test(m)
-                ? "Connexion interrompue. Vérifiez votre réseau puis réessayez."
-                : "Impossible d'enregistrer la commande. Réessayez ou écrivez-nous sur WhatsApp.",
+              : "Impossible d'enregistrer la commande. Réessayez ou écrivez-nous sur WhatsApp.",
       );
       return;
     }
@@ -247,7 +225,7 @@ function CartPage() {
         CUSTOMER_KEY,
         JSON.stringify({
           nom: form.nom,
-          tel: form.tel,
+          tel: phone,
           zone: form.zone,
           autreVille: form.autreVille,
           adresse: form.adresse,
@@ -258,10 +236,13 @@ function CartPage() {
       /* ignore */
     }
 
+    const message = buildMessage(lines, sum, phone);
+    setLastMessage(message);
+    setForm((f) => ({ ...f, tel: phone }));
     setOrderCreated(true);
     setSubmitting(false);
-    whatsappWindow.location.href = whatsappLink(orderMessage());
-    toast.info("WhatsApp est ouvert : envoyez le message pour contacter la boutique.");
+    trackWhatsAppClick("cart_checkout", sum);
+    whatsappWindow.location.href = whatsappLink(message);
   };
 
   const finishOrder = () => {
@@ -272,286 +253,289 @@ function CartPage() {
   if (items.length === 0) {
     return (
       <SiteLayout>
-        <section className="mx-auto max-w-3xl px-4 py-24 text-center">
-          <div className="h-20 w-20 mx-auto rounded-full bg-accent flex items-center justify-center text-primary-deep mb-6">
+        <section className="mx-auto max-w-xl px-4 py-24 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent text-primary-deep">
             <ShoppingBag className="h-8 w-8" />
           </div>
           <h1 className="font-serif text-3xl text-primary-deep">Votre panier est vide</h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="mt-2 text-muted-foreground">
             Découvrez nos fragrances et laissez-vous séduire.
           </p>
           <Link
             to="/boutique"
-            className="inline-flex mt-6 rounded-full bg-primary-deep text-primary-foreground px-6 py-3 text-sm font-medium hover:bg-primary transition-colors"
+            className="mt-6 inline-flex rounded-full bg-primary-deep px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary"
           >
-            Aller à la boutique
+            Découvrir la boutique
           </Link>
         </section>
       </SiteLayout>
     );
   }
 
+  const steps = [
+    { label: "Panier", done: true },
+    { label: "Livraison", done: true },
+    { label: "WhatsApp", done: orderCreated },
+  ];
+  const count = items.reduce((s, i) => s + i.quantity, 0);
+
   return (
     <SiteLayout>
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="font-serif text-4xl text-primary-deep mb-8">Votre panier</h1>
+      <div className="mx-auto max-w-[1180px] px-4 pb-16 pt-5 lg:px-8 lg:pt-8">
+        <h1 className="font-serif text-[30px] font-medium text-primary-deep lg:text-[44px]">
+          Votre panier ({count})
+        </h1>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
-          <div className="space-y-4">
-            {items.map((i) => (
-              <div
-                key={i.productId}
-                className="flex gap-4 p-4 rounded-2xl bg-white border border-border"
-              >
-                <img
-                  src={i.image}
-                  alt={i.name}
-                  className="h-24 w-24 rounded-xl object-cover shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="font-serif text-lg text-primary-deep">{i.name}</div>
-                  <div className="text-xs text-muted-foreground">{i.volume}</div>
-                  <div className="mt-2 font-medium text-primary-deep">{formatFCFA(i.price)}</div>
-                </div>
-                <div className="flex flex-col items-end justify-between">
-                  <button
-                    onClick={() => removeItem(i.productId)}
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label={`Retirer ${i.name} du panier`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                  <div className="inline-flex items-center border border-border rounded-full">
-                    <button
-                      onClick={() => updateQty(i.productId, i.quantity - 1)}
-                      className="h-8 w-8 flex items-center justify-center hover:bg-secondary rounded-l-full"
-                      aria-label={`Diminuer la quantité de ${i.name}`}
-                    >
-                      <Minus className="h-3 w-3" />
-                    </button>
-                    <span className="w-8 text-center text-sm font-medium">{i.quantity}</span>
-                    <button
-                      onClick={() => updateQty(i.productId, i.quantity + 1)}
-                      className="h-8 w-8 flex items-center justify-center hover:bg-secondary rounded-r-full"
-                      aria-label={`Augmenter la quantité de ${i.name}`}
-                    >
-                      <Plus className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <button
-              onClick={clear}
-              className="text-xs text-muted-foreground hover:text-destructive"
+        <ol
+          aria-label="Étapes de la commande"
+          className="mt-4 grid grid-cols-3 gap-1.5 text-center text-[11.5px] font-semibold lg:max-w-md lg:text-xs"
+        >
+          {steps.map((s, i) => (
+            <li
+              key={s.label}
+              className={`border-t-[3px] pt-2 ${s.done ? "border-primary text-primary-deep" : "border-border text-muted-foreground"}`}
             >
-              Vider le panier
-            </button>
-          </div>
+              {i + 1} · {s.label}
+            </li>
+          ))}
+        </ol>
 
-          <div className="p-6 rounded-2xl bg-white border border-border h-fit space-y-5 shadow-soft">
-            <div className="flex justify-between font-medium">
-              <span>Sous-total</span>
-              <span className="font-serif text-2xl text-primary-deep">{formatFCFA(total)}</span>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Frais de livraison confirmés sur WhatsApp selon votre zone.
-            </div>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-10">
+          {/* Articles */}
+          <section aria-label="Articles">
+            <ul className="divide-y divide-border border-y border-border">
+              {items.map((i) => {
+                const isUnavailable = unavailable.includes(i.name);
+                return (
+                  <li
+                    key={i.productId}
+                    className="grid grid-cols-[84px_minmax(0,1fr)] gap-3 py-3.5"
+                  >
+                    <img
+                      src={i.image}
+                      alt=""
+                      width={84}
+                      height={84}
+                      className={`h-[84px] w-[84px] rounded-[10px] bg-secondary object-cover ${isUnavailable ? "opacity-50" : ""}`}
+                    />
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-serif text-lg leading-tight">{i.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeItem(i.productId)}
+                          aria-label={`Retirer ${i.name} du panier`}
+                          className="-mr-2 -mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      {i.volume && (
+                        <span className="text-[12.5px] text-muted-foreground">{i.volume}</span>
+                      )}
+                      {isUnavailable && (
+                        <span className="text-[12.5px] font-semibold text-destructive">
+                          Plus disponible — retirez-le pour commander
+                        </span>
+                      )}
+                      <div className="mt-1.5 flex items-center justify-between">
+                        <div
+                          role="group"
+                          aria-label={`Quantité de ${i.name}`}
+                          className="flex h-9 items-center rounded-full border border-input bg-card"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => updateQty(i.productId, i.quantity - 1)}
+                            aria-label="Diminuer"
+                            className="flex h-full w-9 items-center justify-center rounded-l-full hover:bg-secondary"
+                          >
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <span className="w-6 text-center text-sm font-semibold">
+                            {i.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => updateQty(i.productId, Math.min(20, i.quantity + 1))}
+                            aria-label="Augmenter"
+                            className="flex h-full w-9 items-center justify-center rounded-r-full hover:bg-secondary"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        <span className="text-[15px] font-semibold">
+                          {formatFCFA(i.price * i.quantity)}
+                        </span>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <Link
+              to="/boutique"
+              className="mt-4 inline-block text-sm font-semibold text-primary-deep hover:text-primary"
+            >
+              ← Continuer mes achats
+            </Link>
+          </section>
 
-            {step === "cart" && (
-              <button
-                onClick={() => setStep("form")}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary-deep text-primary-foreground py-3.5 text-sm font-medium hover:bg-primary transition-colors"
+          {/* Récapitulatif + livraison */}
+          <div className="flex flex-col gap-5 lg:sticky lg:top-40 lg:self-start">
+            <section
+              aria-label="Récapitulatif"
+              className="flex flex-col gap-2.5 rounded-[14px] border border-border bg-card p-4 text-sm"
+            >
+              <div className="flex justify-between">
+                <span>Sous-total</span>
+                <span className="font-semibold">{formatFCFA(total)}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Livraison</span>
+                <span>Confirmée sur WhatsApp</span>
+              </div>
+              <div className="h-px bg-border" />
+              <div className="flex justify-between text-[17px]">
+                <span className="font-semibold">Total articles</span>
+                <span className="font-bold">{formatFCFA(total)}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {pricesChecked ? "Prix vérifiés à l'instant · " : ""}Rien à payer maintenant
+              </span>
+            </section>
+
+            {orderCreated ? (
+              <section
+                role="status"
+                className="flex flex-col gap-3 rounded-[14px] border border-primary/30 bg-accent p-5"
               >
-                <MessageCircle className="h-4 w-4" /> Finaliser ma commande
-              </button>
-            )}
-
-            {step === "form" && (
-              <form onSubmit={goToConfirm} className="space-y-4">
+                <span className="flex items-center gap-2 font-serif text-xl text-primary-deep">
+                  <CheckCircle2 className="h-5 w-5 text-primary" /> Commande enregistrée
+                </span>
+                <p className="text-sm leading-relaxed text-foreground/85">
+                  Envoyez maintenant le message préparé dans WhatsApp. Votre panier reste disponible
+                  jusqu'à votre confirmation.
+                </p>
                 <button
                   type="button"
-                  onClick={() => setStep("cart")}
-                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary-deep"
+                  onClick={openWhatsApp}
+                  className="flex h-12 items-center justify-center gap-2 rounded-full border border-primary-deep text-sm font-semibold text-primary-deep hover:bg-primary-deep hover:text-primary-foreground"
                 >
-                  <ArrowLeft className="h-3 w-3" /> Retour
+                  <MessageCircle className="h-4 w-4" /> Rouvrir WhatsApp
                 </button>
-
-                <div className="grid gap-3">
-                  <label className="block">
-                    <span className="text-xs font-medium text-foreground/70">Nom complet</span>
-                    <input
-                      required
-                      value={form.nom}
-                      onChange={(e) => setForm({ ...form, nom: e.target.value })}
-                      className="mt-1 w-full h-11 rounded-lg border border-border px-3 text-sm outline-none focus:border-primary"
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="text-xs font-medium text-foreground/70">
-                      Téléphone (Bénin)
+                <button
+                  type="button"
+                  onClick={finishOrder}
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-full bg-whatsapp text-[15px] font-semibold text-whatsapp-foreground"
+                >
+                  <CheckCircle2 className="h-4 w-4" /> J'ai envoyé mon message
+                </button>
+              </section>
+            ) : (
+              <form onSubmit={submitOrder} className="flex flex-col gap-3.5" noValidate>
+                <h2 className="font-serif text-2xl font-medium text-primary-deep">Où livrer ?</h2>
+                <label className={LABEL}>
+                  Nom complet
+                  <input
+                    required
+                    autoComplete="name"
+                    maxLength={100}
+                    value={form.nom}
+                    onChange={(e) => setForm({ ...form, nom: e.target.value })}
+                    className={INPUT}
+                  />
+                </label>
+                <label className={LABEL}>
+                  Téléphone (WhatsApp)
+                  <span className="flex gap-2">
+                    <span className="flex h-[50px] items-center rounded-xl border border-input bg-secondary px-3 text-[15px] font-medium">
+                      +229
                     </span>
                     <input
                       required
                       type="tel"
                       inputMode="tel"
-                      placeholder="Ex : 01 61 88 89 87 ou 61 88 89 87"
+                      autoComplete="tel-national"
+                      maxLength={20}
+                      placeholder="01 61 88 89 87"
                       value={form.tel}
                       onChange={(e) => setForm({ ...form, tel: e.target.value })}
-                      className="mt-1 w-full h-11 rounded-lg border border-border px-3 text-sm outline-none focus:border-primary"
+                      className={`${INPUT} min-w-0 flex-1`}
                     />
-                    <span className="text-[11px] text-muted-foreground">
-                      Format : 10 chiffres (avec 01) ou 8 chiffres locaux, avec ou sans +229.
-                    </span>
-                  </label>
-                  <label className="block">
-                    <span className="text-xs font-medium text-foreground/70">
-                      Zone de livraison
-                    </span>
-                    <select
-                      value={form.zone}
-                      onChange={(e) => setForm({ ...form, zone: e.target.value as ZoneKey })}
-                      className="mt-1 w-full h-11 rounded-lg border border-border bg-white px-3 text-sm outline-none focus:border-primary"
-                    >
-                      {ZONE_OPTIONS.map((z) => (
-                        <option key={z} value={z}>
-                          {z === "Autre" ? "Autre — préciser la ville" : z}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  {form.zone === "Autre" && (
-                    <label className="block">
-                      <span className="text-xs font-medium text-foreground/70">Ville</span>
-                      <input
-                        required
-                        value={form.autreVille}
-                        onChange={(e) => setForm({ ...form, autreVille: e.target.value })}
-                        placeholder="Ex : Parakou"
-                        className="mt-1 w-full h-11 rounded-lg border border-border px-3 text-sm outline-none focus:border-primary"
-                      />
-                    </label>
-                  )}
-                  <label className="block">
-                    <span className="text-xs font-medium text-foreground/70">
-                      Adresse ou point de repère{" "}
-                      <span className="text-muted-foreground">(facultatif)</span>
-                    </span>
-                    <textarea
-                      value={form.adresse}
-                      onChange={(e) => setForm({ ...form, adresse: e.target.value })}
-                      rows={2}
-                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary"
+                  </span>
+                </label>
+                <fieldset className="flex flex-col gap-2">
+                  <legend className="mb-2 text-[13px] font-semibold">Zone de livraison</legend>
+                  <div className="grid grid-cols-2 gap-2">
+                    {ZONE_OPTIONS.map((z) => (
+                      <label
+                        key={z.value}
+                        className={`flex h-[46px] cursor-pointer items-center justify-center gap-2 rounded-xl text-sm ${form.zone === z.value ? "border-2 border-primary bg-accent font-semibold text-primary-deep" : "border border-input bg-card"}`}
+                      >
+                        <input
+                          type="radio"
+                          name="zone"
+                          value={z.value}
+                          checked={form.zone === z.value}
+                          onChange={() => setForm({ ...form, zone: z.value })}
+                          className="accent-[var(--color-primary)]"
+                        />
+                        {z.label}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                {form.zone === "Autre" && (
+                  <label className={LABEL}>
+                    Ville
+                    <input
+                      required
+                      maxLength={60}
+                      placeholder="Ex : Parakou"
+                      value={form.autreVille}
+                      onChange={(e) => setForm({ ...form, autreVille: e.target.value })}
+                      className={INPUT}
                     />
                   </label>
-                </div>
+                )}
+                <label className={LABEL}>
+                  <span>
+                    Adresse ou point de repère{" "}
+                    <span className="font-normal text-muted-foreground">(facultatif)</span>
+                  </span>
+                  <input
+                    maxLength={300}
+                    autoComplete="street-address"
+                    placeholder="Ex : Fidjrossè, près de la pharmacie…"
+                    value={form.adresse}
+                    onChange={(e) => setForm({ ...form, adresse: e.target.value })}
+                    className={INPUT}
+                  />
+                </label>
 
                 <button
                   type="submit"
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary-deep text-primary-foreground py-3.5 text-sm font-medium hover:bg-primary transition-colors"
+                  disabled={submitting || unavailable.length > 0}
+                  className="mt-2 flex h-14 items-center justify-center gap-2.5 rounded-full bg-whatsapp text-base font-semibold text-whatsapp-foreground hover:brightness-110 disabled:opacity-60"
                 >
-                  Vérifier ma commande
+                  <MessageCircle className="h-5 w-5" />
+                  {submitting ? "Enregistrement…" : "Valider et envoyer sur WhatsApp"}
                 </button>
-              </form>
-            )}
-
-            {step === "confirm" && (
-              <div className="space-y-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOrderCreated(false);
-                    setStep("form");
-                  }}
-                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary-deep"
-                >
-                  <ArrowLeft className="h-3 w-3" /> Modifier
-                </button>
-
-                <div className="rounded-xl bg-secondary/40 border border-border p-4 space-y-3 text-sm">
-                  <div className="font-serif text-lg text-primary-deep flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-primary" /> Récapitulatif
-                  </div>
-                  <ul className="space-y-1">
-                    {items.map((i) => (
-                      <li key={i.productId} className="flex justify-between gap-3">
-                        <span className="text-foreground/80">
-                          {i.name}
-                          {i.volume ? ` (${i.volume})` : ""} × {i.quantity}
-                        </span>
-                        <span className="text-foreground/70">
-                          {formatFCFA(i.price * i.quantity)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex justify-between border-t border-border pt-2 font-medium">
-                    <span>Total</span>
-                    <span>{formatFCFA(total)}</span>
-                  </div>
-                  <div className="border-t border-border pt-2 space-y-0.5 text-foreground/80">
-                    <div>
-                      <span className="text-muted-foreground">Nom : </span>
-                      {form.nom}
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Téléphone : </span>
-                      {form.tel}
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Zone : </span>
-                      {zoneLabel}
-                    </div>
-                    {form.adresse.trim() && (
-                      <div>
-                        <span className="text-muted-foreground">Adresse : </span>
-                        {form.adresse}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {orderCreated ? (
-                  <div
-                    className="rounded-xl border border-primary/30 bg-secondary/40 p-4 space-y-3"
-                    role="status"
-                  >
-                    <p className="text-sm text-foreground/85">
-                      Votre demande est enregistrée. Envoyez maintenant le message WhatsApp ; votre
-                      panier reste disponible jusqu'à votre confirmation.
-                    </p>
-                    <button
-                      onClick={openWhatsApp}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-primary text-primary-deep py-3 text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
-                    >
-                      <MessageCircle className="h-4 w-4" /> Rouvrir WhatsApp
-                    </button>
-                    <button
-                      onClick={finishOrder}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground py-3.5 text-sm font-medium hover:opacity-90 transition-opacity"
-                    >
-                      <CheckCircle2 className="h-4 w-4" /> J'ai envoyé mon message
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={createOrderAndOpenWhatsApp}
-                    disabled={submitting}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground py-3.5 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    {submitting ? "Enregistrement…" : "Enregistrer et ouvrir WhatsApp"}
-                  </button>
-                )}
-                <p className="text-[11px] text-muted-foreground text-center">
-                  La commande est finalisée lorsque vous envoyez le message à Al Kareem (+229{" "}
-                  {WHATSAPP_NUMBER.slice(3)}).
+                <p className="text-center text-[12.5px] leading-relaxed text-muted-foreground">
+                  Votre commande est enregistrée, puis WhatsApp s'ouvre avec le récapitulatif prêt à
+                  envoyer au +229 {WHATSAPP_NUMBER.slice(3).replace(/(\d{2})(?=\d)/g, "$1 ")}. Nous
+                  confirmons la livraison et le paiement avec vous.
                 </p>
-              </div>
+                <div className="flex justify-center gap-4 text-xs font-semibold text-foreground/75">
+                  <span>✓ Paiement à la réception</span>
+                  <span>✓ 100 % authentique</span>
+                </div>
+              </form>
             )}
           </div>
         </div>
-      </section>
+      </div>
     </SiteLayout>
   );
 }
