@@ -1,6 +1,6 @@
 import { Link, Outlet, createFileRoute, useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { checkAdminExists, createInitialAdmin } from "@/lib/admin-setup.functions";
@@ -227,18 +227,12 @@ function AuthScreen() {
   return data?.exists ? <LoginForm /> : <SetupForm />;
 }
 
-function SetupForm({ onBack }: { onBack?: () => void } = {}) {
+function SetupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const mut = useMutation({
-    mutationFn: async (input: { email: string; password: string }) => {
-      const { data, error } = await supabase.auth.signUp({
-        email: input.email,
-        password: input.password,
-      });
-      if (error) throw new Error(error.message);
-      return data;
-    },
+    // Création côté serveur (clé service) : refusée si un admin existe déjà.
+    mutationFn: (input: { email: string; password: string }) => createInitialAdmin({ data: input }),
     onSuccess: async () => {
       toast.success("Compte administrateur créé ✨. Vous pouvez vous connecter.");
       window.location.reload();
@@ -293,15 +287,6 @@ function SetupForm({ onBack }: { onBack?: () => void } = {}) {
           {mut.isPending ? "Création…" : "Créer mon compte"}
         </button>
       </form>
-      {onBack && (
-        <button
-          type="button"
-          onClick={onBack}
-          className="mt-4 w-full text-sm text-gray-600 underline underline-offset-4 hover:text-gray-900"
-        >
-          Retour à la connexion
-        </button>
-      )}
     </FullScreen>
   );
 }
@@ -311,16 +296,6 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sending, setSending] = useState(false);
-  const [showSetup, setShowSetup] = useState(false);
-
-  useEffect(() => {
-    /* focus first field is nice-to-have */
-  }, []);
-
-  if (showSetup) {
-    return <SetupForm onBack={() => setShowSetup(false)} />;
-  }
-
   return (
     <FullScreen>
       <div className="text-center mb-6">
@@ -391,13 +366,6 @@ function LoginForm() {
           className="w-full text-sm text-gray-600 underline underline-offset-4 hover:text-gray-900 disabled:opacity-60"
         >
           {sending ? "Envoi…" : "Mot de passe oublié ?"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setShowSetup(true)}
-          className="w-full text-sm text-gray-600 underline underline-offset-4 hover:text-gray-900"
-        >
-          Créer un compte administrateur
         </button>
       </div>
     </FullScreen>

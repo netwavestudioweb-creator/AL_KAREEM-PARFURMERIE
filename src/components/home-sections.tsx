@@ -257,7 +257,7 @@ export function RotatingSelection({ products }: { products: Product[]; categorie
 
             <div className="pt-1">
               <Link
-                to="/produit/$slug"
+                to="/parfum/$slug"
                 params={{ slug: currentProduct.slug }}
                 className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary-deep transition-colors group"
               >
@@ -364,7 +364,7 @@ export function ScentFinderSection({ products }: { products: Product[] }) {
                 className="group relative flex flex-col rounded-2xl bg-white p-3 border border-border/80 shadow-xs hover:shadow-md transition-all"
               >
                 <Link
-                  to="/produit/$slug"
+                  to="/parfum/$slug"
                   params={{ slug: product.slug }}
                   className="block aspect-square overflow-hidden rounded-xl bg-muted/30"
                 >
@@ -388,7 +388,7 @@ export function ScentFinderSection({ products }: { products: Product[] }) {
                       {formatFCFA(product.price)}
                     </span>
                     <Link
-                      to="/produit/$slug"
+                      to="/parfum/$slug"
                       params={{ slug: product.slug }}
                       aria-label={`Voir ${product.name}`}
                       className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5"
@@ -505,7 +505,7 @@ export function CategoryShowcaseSection({ categories }: { categories: Category[]
 
             return (
               <Link
-                key={cat.id || cat.slug || idx}
+                key={cat.slug || idx}
                 to="/boutique"
                 search={{ category: catSlug }}
                 className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-secondary/80 via-white to-secondary/30 p-7 border border-gold/25 shadow-xs hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between min-h-[210px] cursor-pointer"

@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -46,7 +47,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
 
@@ -176,7 +177,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
       ],
       links: [
-        { rel: "preconnect", href: "https://zoagwbhgpaslyjjsdnnv.supabase.co", crossOrigin: "anonymous" },
+        {
+          rel: "preconnect",
+          href: "https://zoagwbhgpaslyjjsdnnv.supabase.co",
+          crossOrigin: "anonymous",
+        },
         { rel: "dns-prefetch", href: "https://zoagwbhgpaslyjjsdnnv.supabase.co" },
         { rel: "manifest", href: "/site.webmanifest" },
         { rel: "preload", as: "style", href: appCss },

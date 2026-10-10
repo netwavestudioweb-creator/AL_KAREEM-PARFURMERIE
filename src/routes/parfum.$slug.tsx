@@ -138,7 +138,7 @@ function ProductPage() {
     queryKey: ["product", slug],
     queryFn: () => fetchProductBySlug(slug),
   });
-  const { data: all = [] } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
+  const { data: all = [] } = useQuery({ queryKey: ["products"], queryFn: () => fetchProducts() });
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);

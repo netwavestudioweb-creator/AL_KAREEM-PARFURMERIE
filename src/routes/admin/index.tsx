@@ -11,7 +11,7 @@ export const Route = createFileRoute("/admin/")({
 function AdminProductsList() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
-    queryFn: fetchProducts,
+    queryFn: () => fetchProducts(),
   });
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],

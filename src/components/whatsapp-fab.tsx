@@ -4,7 +4,7 @@ import { useRouterState } from "@tanstack/react-router";
 
 export function WhatsAppFab() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isProductPage = pathname.startsWith("/produit/");
+  const isProductPage = pathname.startsWith("/parfum/");
 
   const content = (
     <div className="group fixed bottom-6 right-6 z-50 flex items-center gap-2.5">
