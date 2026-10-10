@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
-import { Route as BoutiqueRouteImport } from './routes/boutique'
 import { Route as CgvRouteImport } from './routes/cgv'
 import { Route as CommandeEnvoyeeRouteImport } from './routes/commande-envoyee'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
@@ -26,6 +25,7 @@ import { Route as AdminCategoriesRouteImport } from './routes/admin/categories'
 import { Route as AdminCommandesRouteImport } from './routes/admin/commandes'
 import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
 import { Route as AdminVitrineRouteImport } from './routes/admin/vitrine'
+import { Route as BoutiqueIndexRouteImport } from './routes/boutique.index'
 import { Route as BoutiqueCategoryRouteImport } from './routes/boutique.$category'
 import { Route as ParfumSlugRouteImport } from './routes/parfum.$slug'
 import { Route as AdminProduitsIdRouteImport } from './routes/admin/produits.$id'
@@ -45,11 +45,6 @@ const AProposRoute = AProposRouteImport.update({
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BoutiqueRoute = BoutiqueRouteImport.update({
-  id: '/boutique',
-  path: '/boutique',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CgvRoute = CgvRouteImport.update({
@@ -117,10 +112,15 @@ const AdminVitrineRoute = AdminVitrineRouteImport.update({
   path: '/vitrine',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const BoutiqueIndexRoute = BoutiqueIndexRouteImport.update({
+  id: '/boutique/',
+  path: '/boutique/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BoutiqueCategoryRoute = BoutiqueCategoryRouteImport.update({
-  id: '/$category',
-  path: '/$category',
-  getParentRoute: () => BoutiqueRoute,
+  id: '/boutique/$category',
+  path: '/boutique/$category',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ParfumSlugRoute = ParfumSlugRouteImport.update({
   id: '/parfum/$slug',
@@ -138,16 +138,15 @@ const AdminProduitsNouveauRoute = AdminProduitsNouveauRouteImport.update({
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const BoutiqueGenreGenreRoute = BoutiqueGenreGenreRouteImport.update({
-  id: '/genre/$genre',
-  path: '/genre/$genre',
-  getParentRoute: () => BoutiqueRoute,
+  id: '/boutique/genre/$genre',
+  path: '/boutique/genre/$genre',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/a-propos': typeof AProposRoute
-  '/boutique': typeof BoutiqueRouteWithChildren
   '/cgv': typeof CgvRoute
   '/commande-envoyee': typeof CommandeEnvoyeeRoute
   '/confidentialite': typeof ConfidentialiteRoute
@@ -163,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/boutique/$category': typeof BoutiqueCategoryRoute
   '/parfum/$slug': typeof ParfumSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/boutique/': typeof BoutiqueIndexRoute
   '/admin/produits/$id': typeof AdminProduitsIdRoute
   '/admin/produits/nouveau': typeof AdminProduitsNouveauRoute
   '/boutique/genre/$genre': typeof BoutiqueGenreGenreRoute
@@ -170,7 +170,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
-  '/boutique': typeof BoutiqueRouteWithChildren
   '/cgv': typeof CgvRoute
   '/commande-envoyee': typeof CommandeEnvoyeeRoute
   '/confidentialite': typeof ConfidentialiteRoute
@@ -186,6 +185,7 @@ export interface FileRoutesByTo {
   '/boutique/$category': typeof BoutiqueCategoryRoute
   '/parfum/$slug': typeof ParfumSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/boutique': typeof BoutiqueIndexRoute
   '/admin/produits/$id': typeof AdminProduitsIdRoute
   '/admin/produits/nouveau': typeof AdminProduitsNouveauRoute
   '/boutique/genre/$genre': typeof BoutiqueGenreGenreRoute
@@ -195,7 +195,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/a-propos': typeof AProposRoute
-  '/boutique': typeof BoutiqueRouteWithChildren
   '/cgv': typeof CgvRoute
   '/commande-envoyee': typeof CommandeEnvoyeeRoute
   '/confidentialite': typeof ConfidentialiteRoute
@@ -211,6 +210,7 @@ export interface FileRoutesById {
   '/boutique/$category': typeof BoutiqueCategoryRoute
   '/parfum/$slug': typeof ParfumSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/boutique/': typeof BoutiqueIndexRoute
   '/admin/produits/$id': typeof AdminProduitsIdRoute
   '/admin/produits/nouveau': typeof AdminProduitsNouveauRoute
   '/boutique/genre/$genre': typeof BoutiqueGenreGenreRoute
@@ -221,7 +221,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/a-propos'
-    | '/boutique'
     | '/cgv'
     | '/commande-envoyee'
     | '/confidentialite'
@@ -237,6 +236,7 @@ export interface FileRouteTypes {
     | '/boutique/$category'
     | '/parfum/$slug'
     | '/admin/'
+    | '/boutique/'
     | '/admin/produits/$id'
     | '/admin/produits/nouveau'
     | '/boutique/genre/$genre'
@@ -244,7 +244,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/a-propos'
-    | '/boutique'
     | '/cgv'
     | '/commande-envoyee'
     | '/confidentialite'
@@ -260,6 +259,7 @@ export interface FileRouteTypes {
     | '/boutique/$category'
     | '/parfum/$slug'
     | '/admin'
+    | '/boutique'
     | '/admin/produits/$id'
     | '/admin/produits/nouveau'
     | '/boutique/genre/$genre'
@@ -268,7 +268,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/a-propos'
-    | '/boutique'
     | '/cgv'
     | '/commande-envoyee'
     | '/confidentialite'
@@ -284,6 +283,7 @@ export interface FileRouteTypes {
     | '/boutique/$category'
     | '/parfum/$slug'
     | '/admin/'
+    | '/boutique/'
     | '/admin/produits/$id'
     | '/admin/produits/nouveau'
     | '/boutique/genre/$genre'
@@ -293,7 +293,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AProposRoute: typeof AProposRoute
-  BoutiqueRoute: typeof BoutiqueRouteWithChildren
   CgvRoute: typeof CgvRoute
   CommandeEnvoyeeRoute: typeof CommandeEnvoyeeRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
@@ -302,7 +301,10 @@ export interface RootRouteChildren {
   PanierRoute: typeof PanierRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  BoutiqueCategoryRoute: typeof BoutiqueCategoryRoute
   ParfumSlugRoute: typeof ParfumSlugRoute
+  BoutiqueIndexRoute: typeof BoutiqueIndexRoute
+  BoutiqueGenreGenreRoute: typeof BoutiqueGenreGenreRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -326,13 +328,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/boutique': {
-      id: '/boutique'
-      path: '/boutique'
-      fullPath: '/boutique'
-      preLoaderRoute: typeof BoutiqueRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cgv': {
@@ -426,12 +421,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminVitrineRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/boutique/': {
+      id: '/boutique/'
+      path: '/boutique'
+      fullPath: '/boutique/'
+      preLoaderRoute: typeof BoutiqueIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/boutique/$category': {
       id: '/boutique/$category'
-      path: '/$category'
+      path: '/boutique/$category'
       fullPath: '/boutique/$category'
       preLoaderRoute: typeof BoutiqueCategoryRouteImport
-      parentRoute: typeof BoutiqueRoute
+      parentRoute: typeof rootRouteImport
     }
     '/parfum/$slug': {
       id: '/parfum/$slug'
@@ -456,10 +458,10 @@ declare module '@tanstack/react-router' {
     }
     '/boutique/genre/$genre': {
       id: '/boutique/genre/$genre'
-      path: '/genre/$genre'
+      path: '/boutique/genre/$genre'
       fullPath: '/boutique/genre/$genre'
       preLoaderRoute: typeof BoutiqueGenreGenreRouteImport
-      parentRoute: typeof BoutiqueRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -488,25 +490,10 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
-interface BoutiqueRouteChildren {
-  BoutiqueCategoryRoute: typeof BoutiqueCategoryRoute
-  BoutiqueGenreGenreRoute: typeof BoutiqueGenreGenreRoute
-}
-
-const BoutiqueRouteChildren: BoutiqueRouteChildren = {
-  BoutiqueCategoryRoute: BoutiqueCategoryRoute,
-  BoutiqueGenreGenreRoute: BoutiqueGenreGenreRoute,
-}
-
-const BoutiqueRouteWithChildren = BoutiqueRoute._addFileChildren(
-  BoutiqueRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AProposRoute: AProposRoute,
-  BoutiqueRoute: BoutiqueRouteWithChildren,
   CgvRoute: CgvRoute,
   CommandeEnvoyeeRoute: CommandeEnvoyeeRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
@@ -515,7 +502,10 @@ const rootRouteChildren: RootRouteChildren = {
   PanierRoute: PanierRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  BoutiqueCategoryRoute: BoutiqueCategoryRoute,
   ParfumSlugRoute: ParfumSlugRoute,
+  BoutiqueIndexRoute: BoutiqueIndexRoute,
+  BoutiqueGenreGenreRoute: BoutiqueGenreGenreRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
