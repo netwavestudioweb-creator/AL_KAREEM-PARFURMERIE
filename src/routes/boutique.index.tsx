@@ -10,6 +10,7 @@ import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/layout";
 import { ShopListing } from "@/components/shop-listing";
+import { normalizeSearch } from "@/lib/catalog";
 import { fetchProducts, fetchCategories } from "@/lib/products";
 import { useMemo } from "react";
 import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
@@ -118,9 +119,9 @@ function BoutiquePage() {
 
   const matching = useMemo(() => {
     if (!q) return products;
-    const needle = normalize(q);
+    const needle = normalizeSearch(q);
     return products.filter((p) =>
-      normalize(`${p.name} ${p.category} ${p.description}`).includes(needle),
+      normalizeSearch(`${p.name} ${p.category} ${p.description}`).includes(needle),
     );
   }, [products, q]);
 
@@ -145,9 +146,4 @@ function BoutiquePage() {
       />
     </SiteLayout>
   );
-}
-
-/** Recherche insensible à la casse et aux accents (« creme » trouve « Crème »). */
-function normalize(s: string): string {
-  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }

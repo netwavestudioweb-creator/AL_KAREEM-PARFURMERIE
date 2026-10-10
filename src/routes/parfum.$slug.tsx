@@ -2,7 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/layout";
 import { ProductCard } from "@/components/product-card";
-import { fetchProductBySlug, fetchProducts, formatFCFA, whatsappLink } from "@/lib/products";
+import {
+  fetchCategories,
+  fetchProductBySlug,
+  fetchProducts,
+  formatFCFA,
+  whatsappLink,
+} from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useEffect, useRef, useState } from "react";
 import { trackProductView, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
@@ -19,13 +25,18 @@ import {
 import { toast } from "sonner";
 
 import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { jsonLd } from "@/lib/json-ld";
 
 export const Route = createFileRoute("/parfum/$slug")({
   loader: async ({ params, context }) => {
-    await context.queryClient.ensureQueryData({
-      queryKey: ["product", params.slug],
-      queryFn: () => fetchProductBySlug(params.slug),
-    });
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["product", params.slug],
+        queryFn: () => fetchProductBySlug(params.slug),
+      }),
+      // Utilisées par l'en-tête : évite un appel supplémentaire côté navigateur.
+      context.queryClient.ensureQueryData({ queryKey: ["categories"], queryFn: fetchCategories }),
+    ]);
     return (
       context.queryClient.getQueryData<Awaited<ReturnType<typeof fetchProductBySlug>>>([
         "product",
@@ -66,7 +77,7 @@ export const Route = createFileRoute("/parfum/$slug")({
     if (p) {
       scripts.push({
         type: "application/ld+json",
-        children: JSON.stringify({
+        children: jsonLd({
           "@context": "https://schema.org",
           "@type": "Product",
           name: p.name,
@@ -96,7 +107,7 @@ export const Route = createFileRoute("/parfum/$slug")({
 
       scripts.push({
         type: "application/ld+json",
-        children: JSON.stringify({
+        children: jsonLd({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [

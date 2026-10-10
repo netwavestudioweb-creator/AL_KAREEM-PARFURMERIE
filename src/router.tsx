@@ -1,5 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
+import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
@@ -27,6 +28,10 @@ export const getRouter = () => {
     // cache SWR du router pour éviter les doubles caches.
     defaultPreloadStaleTime: 0,
   });
+
+  // Transmet au navigateur les données déjà chargées par le serveur : sans cela, le client
+  // repartait d'un cache vide, réaffichait « Chargement… » et retéléchargeait tout le catalogue.
+  setupRouterSsrQueryIntegration({ router, queryClient });
 
   return router;
 };

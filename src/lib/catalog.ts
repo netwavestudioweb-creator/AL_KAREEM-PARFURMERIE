@@ -252,11 +252,15 @@ export function slugify(input: string): string {
 
 export type Genre = "femme" | "homme" | "unisexe";
 
-function searchableText(p: Product): string {
-  return `${p.name} ${p.description} ${p.category}`
+export function normalizeSearch(s: string): string {
+  return s
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+}
+
+function searchableText(p: Product): string {
+  return normalizeSearch(`${p.name} ${p.description} ${p.category}`);
 }
 
 /** Le genre n'est pas une colonne en base : on le déduit du nom, de la description et de la catégorie. */

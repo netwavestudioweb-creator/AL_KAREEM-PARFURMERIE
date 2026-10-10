@@ -16,10 +16,16 @@ export const Route = createFileRoute("/boutique/genre/$genre")({
       throw notFound();
     }
 
-    await context.queryClient.ensureQueryData({
-      queryKey: ["products"],
-      queryFn: () => fetchProducts(),
-    });
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["products"],
+        queryFn: () => fetchProducts(),
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["categories"],
+        queryFn: fetchCategories,
+      }),
+    ]);
   },
   head: ({ params }) => {
     const genreCapitalized =

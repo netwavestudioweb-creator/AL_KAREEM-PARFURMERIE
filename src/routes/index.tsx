@@ -15,6 +15,7 @@ import {
 import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
 import { fetchProducts, fetchCategories } from "@/lib/products";
 import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { jsonLd } from "@/lib/json-ld";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/")({
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
+        children: jsonLd({
           "@context": "https://schema.org",
           "@type": ["Store", "PerfumeStore"],
           name: SITE_CONFIG.name,
@@ -62,7 +63,7 @@ export const Route = createFileRoute("/")({
       },
       {
         type: "application/ld+json",
-        children: JSON.stringify({
+        children: jsonLd({
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: SITE_CONFIG.name,

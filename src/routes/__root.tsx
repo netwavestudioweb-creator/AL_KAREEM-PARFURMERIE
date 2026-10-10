@@ -16,6 +16,8 @@ import { CartProvider } from "../lib/cart";
 import { SiteLayout } from "../components/layout";
 import { LoadingScreen } from "../components/loading-screen";
 import { SITE_CONFIG } from "../lib/site-config";
+import { ConsentBanner } from "../components/consent-banner";
+import { jsonLd } from "@/lib/json-ld";
 
 function NotFoundComponent() {
   return (
@@ -84,40 +86,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => {
     const scripts = [];
 
-    if (import.meta.env.VITE_CLARITY_ID) {
-      scripts.push({
-        type: "text/javascript",
-        children: `
-          (function(c,l,a,r,i,t,y){
-              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-          })(window, document, "clarity", "script", "${import.meta.env.VITE_CLARITY_ID}");
-        `,
-      });
-    }
-
-    if (import.meta.env.VITE_GA_ID) {
-      scripts.push(
-        {
-          src: `https://www.googletagmanager.com/gtag/js?id=${import.meta.env.VITE_GA_ID}`,
-          async: true,
-        },
-        {
-          type: "text/javascript",
-          children: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${import.meta.env.VITE_GA_ID}');
-          `,
-        },
-      );
-    }
-
+    // Mesures d'audience : chargées seulement après consentement (ConsentBanner).
     scripts.push({
       type: "application/ld+json",
-      children: JSON.stringify({
+      children: jsonLd({
         "@context": "https://schema.org",
         "@type": ["Organization", "Store", "PerfumeStore"],
         "@id": `${SITE_CONFIG.url}/#organization`,
@@ -233,6 +205,7 @@ function RootComponent() {
       <CartProvider>
         <Outlet />
         <Toaster position="top-center" richColors />
+        <ConsentBanner />
         <LoadingScreen />
       </CartProvider>
     </QueryClientProvider>
