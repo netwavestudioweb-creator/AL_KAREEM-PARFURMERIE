@@ -120,8 +120,8 @@ function AboutPage() {
           </p>
           <p className="text-[15.5px] leading-relaxed text-foreground/80">
             De la boutique physique de Cotonou aux commandes WhatsApp qui nous parviennent depuis
-            tout le Bénin, notre priorité reste la même : le conseil sincère et l'attention portée à
-            chaque détail.
+            tout le Bénin et la sous-région, notre priorité reste la même : le conseil sincère et
+            l'attention portée à chaque détail.
           </p>
         </div>
       </section>

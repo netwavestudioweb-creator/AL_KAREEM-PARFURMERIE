@@ -138,7 +138,7 @@ export function HomeHero({ productCount }: { productCount: number }) {
 const PERKS = [
   { icon: ShieldCheck, title: "100 % authentique", desc: "Flacons vérifiés avant vente" },
   { icon: Wallet, title: "Payé à la réception", desc: "Espèces, MTN MoMo, Moov Money" },
-  { icon: Truck, title: "Livraison rapide", desc: "Cotonou, Calavi, Porto-Novo & Bénin" },
+  { icon: Truck, title: "Livraison rapide", desc: "Bénin & sous-région" },
   { icon: MessageCircle, title: "Conseil privé", desc: "Un parfumeur sur WhatsApp" },
 ];
 

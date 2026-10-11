@@ -92,7 +92,7 @@ function CategoryPage() {
     <SiteLayout>
       <ShopListing
         title={catName}
-        subtitle="Livraison à Cotonou et partout au Bénin"
+        subtitle="Livraison au Bénin et dans la sous-région"
         crumbs={[
           { label: "Accueil", to: "/" },
           { label: "Boutique", to: "/boutique" },
