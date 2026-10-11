@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SiteLayout } from "@/components/layout";
+import { LegalPage } from "@/components/legal-page";
 import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/mentions-legales")({
@@ -28,37 +28,58 @@ export const Route = createFileRoute("/mentions-legales")({
 
 function MentionsLegales() {
   return (
-    <SiteLayout>
-      <article className="mx-auto max-w-3xl px-4 py-16 prose prose-neutral">
-        <h1 className="font-serif text-4xl text-primary-deep">Mentions légales</h1>
-        <p className="text-sm text-muted-foreground">Dernière mise à jour : septembre 2026</p>
-
-        <h2>Éditeur du site</h2>
-        <p>
-          Al Kareem Parfumerie — Cotonou, Bénin.
-          <br />
-          Contact : +229 01 61 88 89 87 · Instagram : @khadisidibehassan
-        </p>
-
-        <h2>Responsable de la publication</h2>
-        <p>La direction d'Al Kareem Parfumerie.</p>
-
-        <h2>Hébergement</h2>
-        <p>Le site est hébergé sur une infrastructure cloud sécurisée.</p>
-
-        <h2>Propriété intellectuelle</h2>
-        <p>
-          L'ensemble des contenus (textes, photos, marques, logos) présents sur ce site sont la
-          propriété d'Al Kareem Parfumerie ou de ses partenaires. Toute reproduction sans
-          autorisation écrite préalable est interdite.
-        </p>
-
-        <h2>Signalement</h2>
-        <p>
-          Pour toute question ou demande relative à ces mentions, contactez-nous via WhatsApp au
-          +229 01 61 88 89 87.
-        </p>
-      </article>
-    </SiteLayout>
+    <LegalPage
+      title="Mentions légales"
+      updated="octobre 2026"
+      sections={[
+        {
+          id: "editeur",
+          title: "Éditeur du site",
+          content: (
+            <p>
+              Al Kareem Parfumerie — Cotonou, Bénin.
+              <br />
+              Téléphone et WhatsApp : +229 01 61 88 89 87 · Instagram : @khadisidibehassan
+            </p>
+          ),
+        },
+        {
+          id: "publication",
+          title: "Responsable de la publication",
+          content: <p>La direction d'Al Kareem Parfumerie.</p>,
+        },
+        {
+          id: "hebergement",
+          title: "Hébergement",
+          content: (
+            <p>
+              Site hébergé par Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.
+              Données de la boutique hébergées par Supabase.
+            </p>
+          ),
+        },
+        {
+          id: "propriete",
+          title: "Propriété intellectuelle",
+          content: (
+            <p>
+              L'ensemble des contenus (textes, photos, marques, logos) présents sur ce site sont la
+              propriété d'Al Kareem Parfumerie ou de ses partenaires. Toute reproduction sans
+              autorisation écrite préalable est interdite.
+            </p>
+          ),
+        },
+        {
+          id: "signalement",
+          title: "Signalement",
+          content: (
+            <p>
+              Pour toute question relative à ces mentions, contactez-nous sur WhatsApp au +229 01 61
+              88 89 87.
+            </p>
+          ),
+        },
+      ]}
+    />
   );
 }
