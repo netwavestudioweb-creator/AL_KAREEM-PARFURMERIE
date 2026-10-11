@@ -86,8 +86,9 @@ function CGV() {
           content: (
             <>
               <p>
-                Livraison à Cotonou, Abomey-Calavi, Porto-Novo et, sur demande, partout au Bénin.
-                Les délais et frais sont confirmés sur WhatsApp avant validation définitive.
+                Livraison à Cotonou, Abomey-Calavi, Porto-Novo, partout au Bénin et dans la
+                sous-région (pays voisins). Les délais et frais sont confirmés sur WhatsApp avant
+                validation définitive.
               </p>
               <p>
                 À réception, vérifiez l'état du colis avant de l'accepter et contactez-nous

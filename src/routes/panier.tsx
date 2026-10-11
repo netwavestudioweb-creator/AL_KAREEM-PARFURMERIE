@@ -5,7 +5,7 @@ import { SITE_CONFIG } from "@/lib/site-config";
 import { formatFCFA, whatsappLink, WHATSAPP_NUMBER } from "@/lib/products";
 import { buildOrderMessage, type OrderMessageItem } from "@/lib/order-message";
 import { fetchLiveProducts, type LiveProductInfo } from "@/lib/catalog";
-import { formatBeninPhone, normalizeBeninPhone } from "@/lib/phone";
+import { formatPhoneForCountry, PHONE_COUNTRIES } from "@/lib/phone";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, MessageCircle, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -39,12 +39,13 @@ export const Route = createFileRoute("/panier")({
 const CUSTOMER_KEY = "alkareem_customer_v1";
 const CUSTOMER_FORM_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-type ZoneKey = "Cotonou" | "Abomey-Calavi" | "Porto-Novo" | "Autre";
+type ZoneKey = "Cotonou" | "Abomey-Calavi" | "Porto-Novo" | "Autre" | "Hors Bénin";
 const ZONE_OPTIONS: { value: ZoneKey; label: string }[] = [
   { value: "Cotonou", label: "Cotonou" },
   { value: "Abomey-Calavi", label: "Abomey-Calavi" },
   { value: "Porto-Novo", label: "Porto-Novo" },
-  { value: "Autre", label: "Autre ville" },
+  { value: "Autre", label: "Autre ville du Bénin" },
+  { value: "Hors Bénin", label: "Hors Bénin (sous-région)" },
 ];
 
 const INPUT =
@@ -60,6 +61,7 @@ function CartPage() {
   const [pricesChecked, setPricesChecked] = useState(false);
   const [form, setForm] = useState({
     nom: "",
+    pays: "229",
     tel: "",
     zone: "Cotonou" as ZoneKey,
     autreVille: "",
@@ -101,8 +103,12 @@ function CartPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.length]);
 
-  const zoneLabel =
-    form.zone === "Autre" && form.autreVille.trim() ? form.autreVille.trim() : form.zone;
+  const needsPlace = form.zone === "Autre" || form.zone === "Hors Bénin";
+  const zoneLabel = !needsPlace
+    ? form.zone
+    : form.zone === "Hors Bénin"
+      ? `Hors Bénin — ${form.autreVille.trim()}`.slice(0, 60)
+      : form.autreVille.trim();
 
   const buildMessage = (lines: OrderMessageItem[], sum: number, phone: string) =>
     buildOrderMessage({
@@ -130,16 +136,23 @@ function CartPage() {
       toast.error("Merci d'indiquer votre nom.");
       return;
     }
-    const normalized = normalizeBeninPhone(form.tel);
-    if (!normalized) {
-      toast.error("Numéro invalide. Exemple : 01 61 88 89 87.");
+    const phone = formatPhoneForCountry(form.pays, form.tel);
+    if (!phone) {
+      toast.error(
+        form.pays === "229"
+          ? "Numéro invalide. Exemple : 01 61 88 89 87."
+          : "Numéro invalide. Vérifiez l'indicatif et le numéro.",
+      );
       return;
     }
-    if (form.zone === "Autre" && !form.autreVille.trim()) {
-      toast.error("Merci de préciser votre ville.");
+    if (needsPlace && form.autreVille.trim().length < 2) {
+      toast.error(
+        form.zone === "Hors Bénin"
+          ? "Merci de préciser votre pays et votre ville."
+          : "Merci de préciser votre ville.",
+      );
       return;
     }
-    const phone = formatBeninPhone(normalized);
 
     // Fenêtre ouverte pendant le geste utilisateur : sinon un navigateur mobile peut bloquer
     // WhatsApp une fois l'enregistrement asynchrone terminé.
@@ -225,7 +238,8 @@ function CartPage() {
         CUSTOMER_KEY,
         JSON.stringify({
           nom: form.nom,
-          tel: phone,
+          pays: form.pays,
+          tel: form.pays === "229" ? phone : form.tel,
           zone: form.zone,
           autreVille: form.autreVille,
           adresse: form.adresse,
@@ -449,16 +463,27 @@ function CartPage() {
                 <label className={LABEL}>
                   Téléphone (WhatsApp)
                   <span className="flex gap-2">
-                    <span className="flex h-[50px] items-center rounded-xl border border-input bg-secondary px-3 text-[15px] font-medium">
-                      +229
-                    </span>
+                    <select
+                      aria-label="Indicatif du pays"
+                      value={form.pays}
+                      onChange={(e) => setForm({ ...form, pays: e.target.value })}
+                      className="h-[50px] w-[132px] shrink-0 rounded-xl border border-input bg-secondary px-2 text-[15px] font-medium outline-none focus:border-primary"
+                    >
+                      {PHONE_COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          +{c.code} {c.label}
+                        </option>
+                      ))}
+                    </select>
                     <input
                       required
                       type="tel"
                       inputMode="tel"
                       autoComplete="tel-national"
                       maxLength={20}
-                      placeholder="01 61 88 89 87"
+                      placeholder={
+                        form.pays === "229" ? "01 61 88 89 87" : "Numéro sans l'indicatif"
+                      }
                       value={form.tel}
                       onChange={(e) => setForm({ ...form, tel: e.target.value })}
                       className={`${INPUT} min-w-0 flex-1`}
@@ -471,7 +496,7 @@ function CartPage() {
                     {ZONE_OPTIONS.map((z) => (
                       <label
                         key={z.value}
-                        className={`flex h-[46px] cursor-pointer items-center justify-center gap-2 rounded-xl text-sm ${form.zone === z.value ? "border-2 border-primary bg-accent font-semibold text-primary-deep" : "border border-input bg-card"}`}
+                        className={`flex h-[46px] cursor-pointer items-center justify-center gap-2 rounded-xl text-sm ${z.value === "Hors Bénin" ? "col-span-2" : ""} ${form.zone === z.value ? "border-2 border-primary bg-accent font-semibold text-primary-deep" : "border border-input bg-card"}`}
                       >
                         <input
                           type="radio"
@@ -486,17 +511,23 @@ function CartPage() {
                     ))}
                   </div>
                 </fieldset>
-                {form.zone === "Autre" && (
+                {needsPlace && (
                   <label className={LABEL}>
-                    Ville
+                    {form.zone === "Hors Bénin" ? "Pays et ville" : "Ville"}
                     <input
                       required
-                      maxLength={60}
-                      placeholder="Ex : Parakou"
+                      maxLength={45}
+                      placeholder={form.zone === "Hors Bénin" ? "Ex : Lomé, Togo" : "Ex : Parakou"}
                       value={form.autreVille}
                       onChange={(e) => setForm({ ...form, autreVille: e.target.value })}
                       className={INPUT}
                     />
+                    {form.zone === "Hors Bénin" && (
+                      <span className="text-xs font-normal text-muted-foreground">
+                        Délais, frais de livraison et mode de paiement confirmés avec vous sur
+                        WhatsApp.
+                      </span>
+                    )}
                   </label>
                 )}
                 <label className={LABEL}>

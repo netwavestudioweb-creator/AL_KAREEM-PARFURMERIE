@@ -51,7 +51,7 @@ export const Route = createFileRoute("/parfum/$slug")({
       : `${params.slug} — ${SITE_CONFIG.name}`;
     const rawDesc =
       p?.description ||
-      `${p?.name || params.slug} chez Al Kareem Parfumerie Cotonou. Commandez en ligne et faites-vous livrer au Bénin.`;
+      `${p?.name || params.slug} chez Al Kareem Parfumerie Cotonou. Commandez en ligne et faites-vous livrer au Bénin et dans la sous-région.`;
     const desc = rawDesc.length > 155 ? `${rawDesc.slice(0, 152)}...` : rawDesc;
     const image = p?.images?.[0];
     const url = getCanonicalUrl(`/parfum/${params.slug}`);
@@ -476,8 +476,9 @@ function ProductPage() {
               </summary>
               <p className={panelText}>
                 Votre commande est confirmée avec vous sur WhatsApp. Livraison à Cotonou et
-                Abomey-Calavi sous 24-48 h, expédition possible dans tout le Bénin. Vous payez à la
-                réception, en espèces ou par Mobile Money (MTN MoMo, Moov Money).
+                Abomey-Calavi sous 24-48 h, expédition dans tout le Bénin et dans la sous-région
+                (délais et frais confirmés sur WhatsApp). Au Bénin, vous payez à la réception, en
+                espèces ou par Mobile Money (MTN MoMo, Moov Money).
               </p>
             </details>
             <details className="group border-b border-border py-4">

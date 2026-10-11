@@ -7,7 +7,7 @@ export const SITE_CONFIG = {
   name: "Al Kareem Parfumerie",
   tagline: "Sublimez votre aura",
   description:
-    "Parfumerie de référence à Cotonou, Bénin. Parfums femme, homme, unisexe, huiles concentrées, brumes et coffrets d'exception. Commande WhatsApp et livraison rapide au Bénin.",
+    "Parfumerie de référence à Cotonou, Bénin. Parfums femme, homme, unisexe, huiles concentrées, brumes et coffrets d'exception. Commande WhatsApp, livraison au Bénin et dans la sous-région.",
   url: SITE_URL,
   logoUrl: `${SITE_URL}/alkareem-logo.jpg`,
   ogImageUrl: `${SITE_URL}/og-alkareem.jpg`,

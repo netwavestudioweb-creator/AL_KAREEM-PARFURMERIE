@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Parfumerie d'exception à Cotonou, Bénin. Collection de parfums, huiles et coffrets authentiques. Commande WhatsApp et livraison rapide au Bénin.",
+          "Parfumerie d'exception à Cotonou, Bénin. Collection de parfums, huiles et coffrets authentiques. Commande WhatsApp, livraison au Bénin et dans la sous-région.",
       },
       { property: "og:title", content: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
       {
@@ -57,7 +57,15 @@ export const Route = createFileRoute("/")({
             addressLocality: SITE_CONFIG.address.addressLocality,
             addressCountry: SITE_CONFIG.address.addressCountry,
           },
-          areaServed: "Bénin",
+          areaServed: [
+            "Bénin",
+            "Togo",
+            "Nigeria",
+            "Niger",
+            "Burkina Faso",
+            "Côte d'Ivoire",
+            "Ghana",
+          ],
           sameAs: [`https://wa.me/${SITE_CONFIG.whatsapp.replace(/[^0-9]/g, "")}`],
         }),
       },

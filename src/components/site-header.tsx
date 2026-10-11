@@ -32,9 +32,7 @@ function AnnouncementBar() {
   return (
     <div className="bg-primary-deep text-[11.5px] text-primary-foreground/90 sm:text-[12.5px]">
       <div className="mx-auto flex h-8 max-w-[1320px] items-center justify-center gap-3 px-4 sm:h-[38px] lg:justify-between lg:px-8">
-        <span className="hidden lg:inline">
-          Livraison rapide à Cotonou, Calavi &amp; Porto-Novo
-        </span>
+        <span className="hidden lg:inline">Livraison au Bénin &amp; dans la sous-région</span>
         <span className="flex items-center gap-2 font-medium">
           <span>Paiement à la livraison</span>
           <span aria-hidden className="text-gold">

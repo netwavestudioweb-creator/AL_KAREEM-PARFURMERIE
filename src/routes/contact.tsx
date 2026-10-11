@@ -30,7 +30,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:title", content: `Contact — ${SITE_CONFIG.name}` },
       {
         property: "og:description",
-        content: "Boutique Cotonou, WhatsApp, livraisons Bénin. Nous sommes à votre écoute.",
+        content: "Boutique Cotonou, WhatsApp, livraisons au Bénin et dans la sous-région.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: getCanonicalUrl("/contact") },
@@ -170,7 +170,7 @@ function ContactPage() {
             <InfoRow
               icon={Truck}
               title="Livraison"
-              desc="Cotonou, Abomey-Calavi, Porto-Novo et partout au Bénin sur demande"
+              desc="Cotonou, Abomey-Calavi, Porto-Novo, tout le Bénin et la sous-région"
             />
             <InfoRow
               icon={Wallet}

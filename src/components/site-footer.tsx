@@ -24,8 +24,8 @@ export function SiteFooter() {
             </div>
           </div>
           <p className="text-sm opacity-80 leading-relaxed">
-            Sublimez votre aura. Une sélection de parfums d'exception, à Cotonou et dans tout le
-            Bénin.
+            Sublimez votre aura. Une sélection de parfums d'exception, depuis Cotonou, livrée au
+            Bénin et dans la sous-région.
           </p>
         </div>
         <div>
