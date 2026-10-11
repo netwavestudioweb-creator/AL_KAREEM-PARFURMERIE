@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { SiteLayout } from "@/components/layout";
 import { ShopListing } from "@/components/shop-listing";
 import { fetchProducts, fetchCategories } from "@/lib/products";
-import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 const KNOWN_CATEGORY_SLUGS = [
   "parfums",
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/boutique/$category")({
         { property: "og:description", content: desc },
         { property: "og:type", content: "website" },
         { property: "og:url", content: url },
-        { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+        ...OG_IMAGE_META,
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: desc },

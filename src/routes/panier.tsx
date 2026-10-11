@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout";
 import { useCart } from "@/lib/cart";
-import { SITE_CONFIG } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG } from "@/lib/site-config";
 import { formatFCFA, whatsappLink, WHATSAPP_NUMBER } from "@/lib/products";
 import { buildOrderMessage, type OrderMessageItem } from "@/lib/order-message";
 import { fetchLiveProducts, type LiveProductInfo } from "@/lib/catalog";
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/panier")({
       { property: "og:description", content: "Finalisez votre commande de parfums via WhatsApp." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+      ...OG_IMAGE_META,
       {
         name: "twitter:image",
         content: SITE_CONFIG.ogImageUrl,

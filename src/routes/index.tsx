@@ -14,13 +14,13 @@ import {
 } from "@/components/home-sections";
 import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
 import { fetchProducts, fetchCategories } from "@/lib/products";
-import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 import { jsonLd } from "@/lib/json-ld";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `Parfumerie à Cotonou — ${SITE_CONFIG.name}` },
+      { title: `${SITE_CONFIG.name} — Parfums authentiques à Cotonou, Bénin` },
       {
         name: "description",
         content:
@@ -29,12 +29,13 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
       {
         property: "og:description",
-        content: "L'amour se porte en parfum. Parfumerie d'exception à Cotonou, Bénin.",
+        content:
+          "Parfums de marque 100 % authentiques à Cotonou. Paiement à la livraison (MoMo, espèces), livraison au Bénin et dans la sous-région.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: getCanonicalUrl("/") },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+      ...OG_IMAGE_META,
       { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
     ],
     links: [{ rel: "canonical", href: getCanonicalUrl("/") }],
@@ -44,7 +45,16 @@ export const Route = createFileRoute("/")({
         children: jsonLd({
           "@context": "https://schema.org",
           "@type": ["Store", "PerfumeStore"],
+          "@id": `${SITE_CONFIG.url}/#store`,
           name: SITE_CONFIG.name,
+          alternateName: SITE_CONFIG.alternateNames,
+          parentOrganization: { "@id": `${SITE_CONFIG.url}/#organization` },
+          openingHoursSpecification: {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: SITE_CONFIG.openingHours.days,
+            opens: SITE_CONFIG.openingHours.opens,
+            closes: SITE_CONFIG.openingHours.closes,
+          },
           description: SITE_CONFIG.description,
           url: SITE_CONFIG.url,
           logo: SITE_CONFIG.logoUrl,
@@ -74,7 +84,11 @@ export const Route = createFileRoute("/")({
         children: jsonLd({
           "@context": "https://schema.org",
           "@type": "WebSite",
+          "@id": `${SITE_CONFIG.url}/#website`,
           name: SITE_CONFIG.name,
+          alternateName: SITE_CONFIG.alternateNames,
+          inLanguage: "fr",
+          publisher: { "@id": `${SITE_CONFIG.url}/#organization` },
           url: SITE_CONFIG.url,
           potentialAction: {
             "@type": "SearchAction",

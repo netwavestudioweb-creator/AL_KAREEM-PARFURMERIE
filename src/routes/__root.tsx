@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         "@type": ["Organization", "Store", "PerfumeStore"],
         "@id": `${SITE_CONFIG.url}/#organization`,
         name: SITE_CONFIG.name,
-        altName: "Al Kareem Scents & Parfumerie",
+        alternateName: SITE_CONFIG.alternateNames,
         url: SITE_CONFIG.url,
         logo: {
           "@type": "ImageObject",
@@ -113,9 +113,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         },
         currenciesAccepted: SITE_CONFIG.currency,
         paymentAccepted: "Cash, MTN Mobile Money, Moov Money",
-        sameAs: [`https://wa.me/${SITE_CONFIG.whatsapp.replace(/[^0-9]/g, "")}`],
+        sameAs: [
+          ...SITE_CONFIG.sameAs,
+          `https://wa.me/${SITE_CONFIG.whatsapp.replace(/[^0-9]/g, "")}`,
+        ],
+        areaServed: SITE_CONFIG.areaServed,
+        contactPoint: {
+          "@type": "ContactPoint",
+          telephone: SITE_CONFIG.phone,
+          contactType: "customer service",
+          availableLanguage: ["French"],
+          areaServed: SITE_CONFIG.areaServed,
+        },
       }),
     });
+
+    // Codes de validation Search Console / Bing, renseignés dans les variables d'environnement Vercel.
+    const verification = [
+      import.meta.env.VITE_GOOGLE_SITE_VERIFICATION
+        ? {
+            name: "google-site-verification",
+            content: import.meta.env.VITE_GOOGLE_SITE_VERIFICATION,
+          }
+        : null,
+      import.meta.env.VITE_BING_SITE_VERIFICATION
+        ? { name: "msvalidate.01", content: import.meta.env.VITE_BING_SITE_VERIFICATION }
+        : null,
+    ].filter((m): m is { name: string; content: string } => m !== null);
 
     return {
       meta: [
@@ -128,12 +152,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-status-bar-style", content: "default" },
         { name: "format-detection", content: "telephone=no" },
+        ...verification,
         { title: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
         {
           name: "description",
           content: SITE_CONFIG.description,
         },
         { property: "og:site_name", content: SITE_CONFIG.name },
+        { property: "og:locale", content: "fr_FR" },
         { property: "og:title", content: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
         {
           property: "og:description",

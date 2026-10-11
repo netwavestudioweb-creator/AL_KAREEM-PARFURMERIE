@@ -13,7 +13,7 @@ import { ShopListing } from "@/components/shop-listing";
 import { normalizeSearch } from "@/lib/catalog";
 import { fetchProducts, fetchCategories } from "@/lib/products";
 import { useMemo } from "react";
-import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 const searchDefaults = {
   q: "",
@@ -62,7 +62,7 @@ export const Route = createFileRoute("/boutique/")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: getCanonicalUrl("/boutique") },
-      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+      ...OG_IMAGE_META,
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Boutique de parfums à Cotonou — Al Kareem" },
       { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },

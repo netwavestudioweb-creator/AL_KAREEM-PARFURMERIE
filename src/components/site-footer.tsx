@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { BRANDS } from "@/lib/brands";
 import { Instagram, MessageCircle, Phone, MapPin } from "lucide-react";
 import { whatsappLink } from "@/lib/products";
 
@@ -58,6 +59,18 @@ export function SiteFooter() {
                 Promotions
               </Link>
             </li>
+          </ul>
+          <div className="mb-3 mt-6 text-sm font-semibold uppercase tracking-wider opacity-80">
+            Nos marques
+          </div>
+          <ul className="space-y-2 text-sm opacity-90">
+            {BRANDS.map((b) => (
+              <li key={b.slug}>
+                <Link to="/marques/$marque" params={{ marque: b.slug }}>
+                  Parfums {b.name}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
         <div>
