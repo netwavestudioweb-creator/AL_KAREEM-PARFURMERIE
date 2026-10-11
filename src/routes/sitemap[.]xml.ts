@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { SITE_CONFIG } from "@/lib/site-config";
+import { BRANDS } from "@/lib/brands";
 
 const BASE_URL = process.env.VITE_SITE_URL || process.env.SITE_URL || SITE_CONFIG.url;
 
@@ -25,6 +26,7 @@ const CATEGORY_PATHS = [
   "/boutique/genre/femme",
   "/boutique/genre/homme",
   "/boutique/genre/unisexe",
+  ...BRANDS.map((b) => `/marques/${b.slug}`),
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({

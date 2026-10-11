@@ -100,10 +100,10 @@ export function HomeHero({ productCount }: { productCount: number }) {
           <div className="absolute inset-0 bg-gradient-to-t from-[#240c38]/95 via-[#240c38]/35 to-transparent lg:hidden" />
         </div>
         <div className="absolute inset-x-5 bottom-5 flex flex-col gap-2.5 lg:static lg:order-1 lg:justify-center lg:gap-5 lg:px-14 lg:py-16">
-          <span className={`${EYEBROW} text-gold`}>Parfumerie d'exception · Cotonou</span>
-          <h1 className="font-serif text-[38px] font-medium leading-none lg:text-[64px] lg:leading-[1.02]">
+          <h1 className={`${EYEBROW} text-gold`}>Al Kareem Parfumerie · Cotonou</h1>
+          <p className="font-serif text-[38px] font-medium leading-none lg:text-[64px] lg:leading-[1.02]">
             Sublimez votre aura.
-          </h1>
+          </p>
           <p className="hidden max-w-[440px] text-base leading-relaxed text-[#E4DAEC] lg:block">
             {productCount > 0
               ? `Plus de ${Math.floor(productCount / 10) * 10} fragrances`

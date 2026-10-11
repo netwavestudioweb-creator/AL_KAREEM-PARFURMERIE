@@ -12,6 +12,22 @@ export const SITE_CONFIG = {
   logoUrl: `${SITE_URL}/alkareem-logo.jpg`,
   // Nom de fichier versionné : changer d'image oblige Facebook/WhatsApp à rafraîchir leur cache.
   ogImageUrl: `${SITE_URL}/og-alkareem-2026.jpg`,
+  /** Variantes sous lesquelles les clients cherchent la boutique (homonymes : Google doit relier toutes ces formes à nous). */
+  alternateNames: [
+    "Al Kareem",
+    "Alkareem Parfumerie",
+    "Al-Kareem Parfumerie",
+    "Al Kareem Parfumerie Cotonou",
+    "Al Kareem Cotonou",
+  ],
+  /** Profils officiels (relient la marque à ses comptes pour Google). */
+  sameAs: ["https://www.instagram.com/khadisidibehassan/"],
+  openingHours: {
+    days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    opens: "09:00",
+    closes: "20:00",
+  },
+  areaServed: ["Bénin", "Togo", "Nigeria", "Niger", "Burkina Faso", "Côte d'Ivoire", "Ghana"],
   phone: "+2290161888987",
   whatsapp: "+2290161888987",
   address: {

@@ -27,6 +27,7 @@ import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
 import { Route as AdminVitrineRouteImport } from './routes/admin/vitrine'
 import { Route as BoutiqueIndexRouteImport } from './routes/boutique.index'
 import { Route as BoutiqueCategoryRouteImport } from './routes/boutique.$category'
+import { Route as MarquesMarqueRouteImport } from './routes/marques.$marque'
 import { Route as ParfumSlugRouteImport } from './routes/parfum.$slug'
 import { Route as AdminProduitsIdRouteImport } from './routes/admin/produits.$id'
 import { Route as AdminProduitsNouveauRouteImport } from './routes/admin/produits.nouveau'
@@ -122,6 +123,11 @@ const BoutiqueCategoryRoute = BoutiqueCategoryRouteImport.update({
   path: '/boutique/$category',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarquesMarqueRoute = MarquesMarqueRouteImport.update({
+  id: '/marques/$marque',
+  path: '/marques/$marque',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParfumSlugRoute = ParfumSlugRouteImport.update({
   id: '/parfum/$slug',
   path: '/parfum/$slug',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/vitrine': typeof AdminVitrineRoute
   '/boutique/$category': typeof BoutiqueCategoryRoute
+  '/marques/$marque': typeof MarquesMarqueRoute
   '/parfum/$slug': typeof ParfumSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/boutique/': typeof BoutiqueIndexRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/vitrine': typeof AdminVitrineRoute
   '/boutique/$category': typeof BoutiqueCategoryRoute
+  '/marques/$marque': typeof MarquesMarqueRoute
   '/parfum/$slug': typeof ParfumSlugRoute
   '/admin': typeof AdminIndexRoute
   '/boutique': typeof BoutiqueIndexRoute
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/vitrine': typeof AdminVitrineRoute
   '/boutique/$category': typeof BoutiqueCategoryRoute
+  '/marques/$marque': typeof MarquesMarqueRoute
   '/parfum/$slug': typeof ParfumSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/boutique/': typeof BoutiqueIndexRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/vitrine'
     | '/boutique/$category'
+    | '/marques/$marque'
     | '/parfum/$slug'
     | '/admin/'
     | '/boutique/'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/vitrine'
     | '/boutique/$category'
+    | '/marques/$marque'
     | '/parfum/$slug'
     | '/admin'
     | '/boutique'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/vitrine'
     | '/boutique/$category'
+    | '/marques/$marque'
     | '/parfum/$slug'
     | '/admin/'
     | '/boutique/'
@@ -302,6 +314,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BoutiqueCategoryRoute: typeof BoutiqueCategoryRoute
+  MarquesMarqueRoute: typeof MarquesMarqueRoute
   ParfumSlugRoute: typeof ParfumSlugRoute
   BoutiqueIndexRoute: typeof BoutiqueIndexRoute
   BoutiqueGenreGenreRoute: typeof BoutiqueGenreGenreRoute
@@ -435,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BoutiqueCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marques/$marque': {
+      id: '/marques/$marque'
+      path: '/marques/$marque'
+      fullPath: '/marques/$marque'
+      preLoaderRoute: typeof MarquesMarqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/parfum/$slug': {
       id: '/parfum/$slug'
       path: '/parfum/$slug'
@@ -503,6 +523,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   BoutiqueCategoryRoute: BoutiqueCategoryRoute,
+  MarquesMarqueRoute: MarquesMarqueRoute,
   ParfumSlugRoute: ParfumSlugRoute,
   BoutiqueIndexRoute: BoutiqueIndexRoute,
   BoutiqueGenreGenreRoute: BoutiqueGenreGenreRoute,

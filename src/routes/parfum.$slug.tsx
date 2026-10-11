@@ -47,7 +47,7 @@ export const Route = createFileRoute("/parfum/$slug")({
   head: ({ params, loaderData }) => {
     const p = loaderData ?? null;
     const title = p
-      ? `${p.name} ${SITE_CONFIG.name} — Prix ${formatFCFA(p.price)} | Al Kareem Parfumerie Cotonou`
+      ? `${p.name} — ${formatFCFA(p.price)} à Cotonou | ${SITE_CONFIG.name}`
       : `${params.slug} — ${SITE_CONFIG.name}`;
     const rawDesc =
       p?.description ||

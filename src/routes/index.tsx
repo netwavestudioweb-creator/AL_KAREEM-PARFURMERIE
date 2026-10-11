@@ -20,7 +20,7 @@ import { jsonLd } from "@/lib/json-ld";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `Parfumerie à Cotonou — ${SITE_CONFIG.name}` },
+      { title: `${SITE_CONFIG.name} — Parfums authentiques à Cotonou, Bénin` },
       {
         name: "description",
         content:
@@ -45,7 +45,16 @@ export const Route = createFileRoute("/")({
         children: jsonLd({
           "@context": "https://schema.org",
           "@type": ["Store", "PerfumeStore"],
+          "@id": `${SITE_CONFIG.url}/#store`,
           name: SITE_CONFIG.name,
+          alternateName: SITE_CONFIG.alternateNames,
+          parentOrganization: { "@id": `${SITE_CONFIG.url}/#organization` },
+          openingHoursSpecification: {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: SITE_CONFIG.openingHours.days,
+            opens: SITE_CONFIG.openingHours.opens,
+            closes: SITE_CONFIG.openingHours.closes,
+          },
           description: SITE_CONFIG.description,
           url: SITE_CONFIG.url,
           logo: SITE_CONFIG.logoUrl,
@@ -75,7 +84,11 @@ export const Route = createFileRoute("/")({
         children: jsonLd({
           "@context": "https://schema.org",
           "@type": "WebSite",
+          "@id": `${SITE_CONFIG.url}/#website`,
           name: SITE_CONFIG.name,
+          alternateName: SITE_CONFIG.alternateNames,
+          inLanguage: "fr",
+          publisher: { "@id": `${SITE_CONFIG.url}/#organization` },
           url: SITE_CONFIG.url,
           potentialAction: {
             "@type": "SearchAction",
