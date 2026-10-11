@@ -5,7 +5,7 @@ import heroPerfumes from "@/assets/hero-perfumes.jpg";
 import { PerksStrip } from "@/components/home-sections";
 import { whatsappLink } from "@/lib/products";
 import { ArrowRight, Heart, MessageCircle, Sparkles, Users } from "lucide-react";
-import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/a-propos")({
   head: () => ({
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/a-propos")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: getCanonicalUrl("/a-propos") },
-      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+      ...OG_IMAGE_META,
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: `À propos — ${SITE_CONFIG.name}` },
       { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },

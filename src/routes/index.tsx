@@ -14,7 +14,7 @@ import {
 } from "@/components/home-sections";
 import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
 import { fetchProducts, fetchCategories } from "@/lib/products";
-import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 import { jsonLd } from "@/lib/json-ld";
 
 export const Route = createFileRoute("/")({
@@ -29,12 +29,13 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
       {
         property: "og:description",
-        content: "L'amour se porte en parfum. Parfumerie d'exception à Cotonou, Bénin.",
+        content:
+          "Parfums de marque 100 % authentiques à Cotonou. Paiement à la livraison (MoMo, espèces), livraison au Bénin et dans la sous-région.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: getCanonicalUrl("/") },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+      ...OG_IMAGE_META,
       { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
     ],
     links: [{ rel: "canonical", href: getCanonicalUrl("/") }],

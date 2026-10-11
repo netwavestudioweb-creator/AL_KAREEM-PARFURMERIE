@@ -15,7 +15,7 @@ import { whatsappLink } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/contact")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: getCanonicalUrl("/contact") },
-      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+      ...OG_IMAGE_META,
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: `Contact — ${SITE_CONFIG.name}` },
       { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },

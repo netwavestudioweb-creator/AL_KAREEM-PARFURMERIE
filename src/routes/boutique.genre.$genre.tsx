@@ -5,7 +5,7 @@ import { SiteLayout } from "@/components/layout";
 import { ShopListing } from "@/components/shop-listing";
 import { matchesGenre, type Genre } from "@/lib/catalog";
 import { fetchCategories, fetchProducts } from "@/lib/products";
-import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 const VALID_GENRES = ["femme", "homme", "unisexe"];
 
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/boutique/genre/$genre")({
         { property: "og:description", content: desc },
         { property: "og:type", content: "website" },
         { property: "og:url", content: url },
-        { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+        ...OG_IMAGE_META,
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: desc },

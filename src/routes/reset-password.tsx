@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-import { SITE_CONFIG } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG } from "@/lib/site-config";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/reset-password")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+      ...OG_IMAGE_META,
       {
         name: "twitter:image",
         content: SITE_CONFIG.ogImageUrl,

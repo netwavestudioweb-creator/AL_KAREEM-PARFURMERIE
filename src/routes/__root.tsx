@@ -134,6 +134,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           content: SITE_CONFIG.description,
         },
         { property: "og:site_name", content: SITE_CONFIG.name },
+        { property: "og:locale", content: "fr_FR" },
         { property: "og:title", content: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}` },
         {
           property: "og:description",

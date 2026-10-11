@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage } from "@/components/legal-page";
-import { SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
+import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/cgv")({
   head: () => ({
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/cgv")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: SITE_CONFIG.ogImageUrl },
+      ...OG_IMAGE_META,
       {
         name: "twitter:image",
         content: SITE_CONFIG.ogImageUrl,

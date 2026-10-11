@@ -53,7 +53,7 @@ export const Route = createFileRoute("/parfum/$slug")({
       p?.description ||
       `${p?.name || params.slug} chez Al Kareem Parfumerie Cotonou. Commandez en ligne et faites-vous livrer au Bénin et dans la sous-région.`;
     const desc = rawDesc.length > 155 ? `${rawDesc.slice(0, 152)}...` : rawDesc;
-    const image = p?.images?.[0];
+    const image = p?.largeImages?.[0] ?? p?.images?.[0];
     const url = getCanonicalUrl(`/parfum/${params.slug}`);
     const share = image && /^https?:\/\//.test(image) ? image : SITE_CONFIG.ogImageUrl;
 
@@ -66,6 +66,17 @@ export const Route = createFileRoute("/parfum/$slug")({
       { property: "og:type", content: "product" },
       { property: "og:url", content: url },
       { property: "og:image", content: share },
+      { property: "og:image:secure_url", content: share },
+      ...(share !== SITE_CONFIG.ogImageUrl
+        ? [
+            { property: "og:image:width", content: "900" },
+            { property: "og:image:height", content: "900" },
+          ]
+        : []),
+      {
+        property: "og:image:alt",
+        content: p ? `${p.name} — Al Kareem Parfumerie` : SITE_CONFIG.name,
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
