@@ -1,6 +1,16 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout";
-import { MapPin, Phone, Clock, Instagram, MessageCircle, Send } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Instagram,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Send,
+  Truck,
+  Wallet,
+} from "lucide-react";
 import { whatsappLink } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -34,18 +44,48 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
+const INPUT =
+  "h-[50px] w-full rounded-xl border border-input bg-card px-3.5 text-base font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/15";
+const LABEL = "flex flex-col gap-1.5 text-[13px] font-semibold";
+
+const QUICK = [
+  {
+    href: whatsappLink("Bonjour Al Kareem, j'ai une question."),
+    icon: MessageCircle,
+    title: "WhatsApp",
+    desc: "Réponse rapide, conseil et commandes",
+    external: true,
+    tone: "bg-whatsapp text-whatsapp-foreground",
+  },
+  {
+    href: "tel:+2290161888987",
+    icon: Phone,
+    title: "Appeler",
+    desc: "+229 01 61 88 89 87",
+    external: false,
+    tone: "bg-card text-foreground border border-border",
+  },
+  {
+    href: "https://instagram.com/khadisidibehassan",
+    icon: Instagram,
+    title: "Instagram",
+    desc: "@khadisidibehassan",
+    external: true,
+    tone: "bg-card text-foreground border border-border",
+  },
+];
+
 function ContactPage() {
-  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", contact: "", message: "" });
   const [honeypot, setHoneypot] = useState("");
   const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Champ piège (invisible) : rempli uniquement par les robots.
     if (honeypot.trim()) {
-      toast.success("Message envoyé ✨ Nous vous répondons rapidement.");
-      setForm({ name: "", contact: "", message: "" });
+      setSent(true);
       return;
     }
     if (
@@ -68,140 +108,196 @@ function ContactPage() {
       toast.error(
         /Trop de messages/i.test(error.message)
           ? "Vous avez déjà envoyé plusieurs messages. Merci de patienter quelques minutes."
-          : "Impossible d'envoyer le message. Réessayez.",
+          : "Impossible d'envoyer le message. Réessayez ou écrivez-nous sur WhatsApp.",
       );
       return;
     }
-    toast.success("Message envoyé ✨ Nous vous répondons rapidement.");
     setForm({ name: "", contact: "", message: "" });
-    navigate({ to: "/" });
+    setSent(true);
   };
 
   return (
     <SiteLayout>
-      <section className="bg-gradient-hero">
-        <div className="mx-auto max-w-4xl px-4 py-16 md:py-20 text-center">
-          <div className="text-xs uppercase tracking-widest text-primary mb-3">Nous joindre</div>
-          <h1 className="font-serif text-4xl md:text-5xl text-primary-deep">Restons en contact</h1>
-          <p className="mt-4 text-foreground/70 max-w-xl mx-auto">
-            Une question, un conseil parfum, une commande particulière ? Nous vous répondons avec
-            plaisir.
-          </p>
-        </div>
-      </section>
+      <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-5 lg:px-8 lg:pt-8">
+        <nav aria-label="Fil d'Ariane" className="flex gap-2 text-[13px] text-muted-foreground">
+          <Link to="/" className="hover:text-primary">
+            Accueil
+          </Link>
+          <span aria-hidden>/</span>
+          <span className="text-foreground" aria-current="page">
+            Contact
+          </span>
+        </nav>
+        <h1 className="mt-3 font-serif text-[34px] font-medium leading-tight text-primary-deep lg:text-5xl">
+          Restons en contact
+        </h1>
+        <p className="mt-2 max-w-xl text-[15px] text-foreground/75">
+          Une question, un conseil parfum, une commande particulière ? Nous vous répondons avec
+          plaisir.
+        </p>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 grid gap-6 md:grid-cols-2">
-        <div className="p-8 rounded-2xl bg-white border border-border shadow-soft space-y-6">
-          <h2 className="font-serif text-2xl text-primary-deep">Boutique physique</h2>
-          <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-primary-deep shrink-0">
-              <MapPin className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="font-medium">Cotonou, Bénin</div>
-              <div className="text-sm text-muted-foreground">
-                Adresse précise sur demande WhatsApp
-              </div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-primary-deep shrink-0">
-              <Phone className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="font-medium">+229 01 61 88 89 87</div>
-              <div className="text-sm text-muted-foreground">Appels & WhatsApp</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-primary-deep shrink-0">
-              <Clock className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="font-medium">Lun — Sam · 9h - 20h</div>
-              <div className="text-sm text-muted-foreground">Dimanche sur rendez-vous</div>
-            </div>
-          </div>
-          <div className="pt-4 border-t border-border">
+        {/* Contacts rapides */}
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          {QUICK.map((q) => (
             <a
-              href={whatsappLink("Bonjour Al Kareem 👋")}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-whatsapp text-whatsapp-foreground px-6 py-3 text-sm font-medium hover:opacity-90"
+              key={q.title}
+              href={q.href}
+              target={q.external ? "_blank" : undefined}
+              rel={q.external ? "noopener noreferrer" : undefined}
+              className={`flex items-center gap-3.5 rounded-2xl p-4 transition-transform hover:-translate-y-0.5 ${q.tone}`}
             >
-              <MessageCircle className="h-4 w-4" /> Ouvrir WhatsApp
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/5">
+                <q.icon className="h-5 w-5" />
+              </span>
+              <span className="flex flex-col">
+                <span className="text-[15px] font-semibold">{q.title}</span>
+                <span className="text-[13px] opacity-80">{q.desc}</span>
+              </span>
             </a>
-            <div className="mt-4">
-              <a
-                href="https://instagram.com/khadisidibehassan"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-primary-deep hover:opacity-80"
-              >
-                <Instagram className="h-4 w-4" /> @khadisidibehassan
-              </a>
-            </div>
-          </div>
+          ))}
         </div>
 
-        <form
-          onSubmit={submit}
-          className="p-8 rounded-2xl bg-gradient-primary text-primary-foreground shadow-elegant space-y-4"
-        >
-          <h2 className="font-serif text-2xl">Écrivez-nous</h2>
-          <p className="opacity-90 text-sm">
-            Laissez-nous un message, nous vous répondons dès que possible.
-          </p>
+        <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8">
+          {/* Infos boutique */}
+          <section className="flex flex-col gap-5 rounded-2xl bg-[#2D1244] p-6 text-white lg:p-8">
+            <h2 className="font-serif text-2xl lg:text-3xl">La boutique</h2>
+            <InfoRow
+              icon={MapPin}
+              title="Cotonou, Bénin"
+              desc="Adresse précise sur demande WhatsApp"
+            />
+            <InfoRow icon={Clock} title="Lun — Sam · 9h - 20h" desc="Dimanche sur rendez-vous" />
+            <InfoRow
+              icon={Truck}
+              title="Livraison"
+              desc="Cotonou, Abomey-Calavi, Porto-Novo et partout au Bénin sur demande"
+            />
+            <InfoRow
+              icon={Wallet}
+              title="Paiement à la réception"
+              desc="Espèces, MTN MoMo, Moov Money"
+            />
+          </section>
 
-          <label className="block">
-            <span className="text-xs font-medium opacity-90">Nom</span>
-            <input
-              required
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="mt-1 w-full h-11 rounded-lg bg-white/95 text-foreground px-3 text-sm outline-none focus:ring-2 focus:ring-white/40"
-            />
-          </label>
-          <label className="block">
-            <span className="text-xs font-medium opacity-90">Téléphone ou e-mail</span>
-            <input
-              required
-              value={form.contact}
-              onChange={(e) => setForm({ ...form, contact: e.target.value })}
-              placeholder="+229 01 61 88 89 87 ou vous@exemple.com"
-              className="mt-1 w-full h-11 rounded-lg bg-white/95 text-foreground px-3 text-sm outline-none focus:ring-2 focus:ring-white/40"
-            />
-          </label>
-          <label className="block">
-            <span className="text-xs font-medium opacity-90">Message</span>
-            <textarea
-              required
-              rows={5}
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="mt-1 w-full rounded-lg bg-white/95 text-foreground px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-white/40"
-            />
-          </label>
-          {/* Champ piège anti-robots : invisible et non focalisable pour un humain. */}
-          <input
-            type="text"
-            name="website"
-            tabIndex={-1}
-            autoComplete="off"
-            aria-hidden="true"
-            value={honeypot}
-            onChange={(e) => setHoneypot(e.target.value)}
-            className="hidden"
-          />
-          <button
-            type="submit"
-            disabled={busy}
-            className="inline-flex items-center gap-2 rounded-full bg-white text-primary-deep px-6 py-3 text-sm font-medium hover:opacity-90 disabled:opacity-60"
-          >
-            <Send className="h-4 w-4" /> {busy ? "Envoi…" : "Envoyer le message"}
-          </button>
-        </form>
-      </section>
+          {/* Formulaire */}
+          <section className="rounded-2xl border border-border bg-card p-6 lg:p-8">
+            {sent ? (
+              <div role="status" className="flex flex-col items-start gap-4 py-6">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-primary">
+                  <CheckCircle2 className="h-7 w-7" />
+                </span>
+                <h2 className="font-serif text-[28px] text-primary-deep">Message envoyé</h2>
+                <p className="text-[15px] text-foreground/80">
+                  Merci ! Nous vous répondons rapidement, par téléphone ou par e-mail selon le
+                  contact indiqué.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    to="/boutique"
+                    className="inline-flex h-12 items-center rounded-full bg-primary-deep px-6 text-sm font-semibold text-primary-foreground"
+                  >
+                    Voir la boutique
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setSent(false)}
+                    className="inline-flex h-12 items-center rounded-full border border-input px-6 text-sm font-semibold"
+                  >
+                    Envoyer un autre message
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
+                <div>
+                  <h2 className="font-serif text-2xl text-primary-deep lg:text-3xl">
+                    Écrivez-nous
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Nous vous répondons dès que possible.
+                  </p>
+                </div>
+                <label className={LABEL}>
+                  Nom
+                  <input
+                    required
+                    maxLength={100}
+                    autoComplete="name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className={INPUT}
+                  />
+                </label>
+                <label className={LABEL}>
+                  Téléphone ou e-mail
+                  <input
+                    required
+                    maxLength={120}
+                    value={form.contact}
+                    onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                    placeholder="01 61 88 89 87 ou vous@exemple.com"
+                    className={INPUT}
+                  />
+                </label>
+                <label className={LABEL}>
+                  Message
+                  <textarea
+                    required
+                    rows={5}
+                    maxLength={2000}
+                    value={form.message}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                    className={`${INPUT} h-auto min-h-[130px] py-3 leading-relaxed`}
+                  />
+                  <span className="self-end text-[11.5px] font-normal text-muted-foreground">
+                    {form.message.length} / 2000
+                  </span>
+                </label>
+                {/* Champ piège anti-robots : invisible et non focalisable pour un humain. */}
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  className="hidden"
+                />
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-full bg-primary-deep text-[15px] font-semibold text-primary-foreground hover:bg-primary disabled:opacity-60"
+                >
+                  <Send className="h-4 w-4" /> {busy ? "Envoi…" : "Envoyer le message"}
+                </button>
+              </form>
+            )}
+          </section>
+        </div>
+      </div>
     </SiteLayout>
+  );
+}
+
+function InfoRow({
+  icon: Icon,
+  title,
+  desc,
+}: {
+  icon: typeof MapPin;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="flex items-start gap-3.5">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-gold">
+        <Icon className="h-5 w-5" />
+      </span>
+      <span className="flex flex-col">
+        <span className="font-semibold">{title}</span>
+        <span className="text-sm text-[#CFC3DA]">{desc}</span>
+      </span>
+    </div>
   );
 }

@@ -75,3 +75,13 @@ export function loadAnalytics() {
     document.head.appendChild(s);
   }
 }
+
+/** Efface le choix enregistré : le bandeau réapparaît (lien « Modifier mes choix »). */
+export function resetConsent() {
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    /* ignore */
+  }
+  window.location.reload();
+}
