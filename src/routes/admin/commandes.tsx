@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,6 +73,16 @@ function AdminOrdersPage() {
     queryKey: ["admin-orders"],
     queryFn: fetchOrders,
   });
+  const { data: reviewByOrder = {} } = useQuery({
+    queryKey: ["admin-reviews-by-order"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("reviews").select("order_id,status");
+      if (error) return {} as Record<string, string>;
+      return Object.fromEntries(
+        (data ?? []).filter((r) => r.order_id).map((r) => [r.order_id as string, r.status]),
+      ) as Record<string, string>;
+    },
+  });
   const [filter, setFilter] = useState<OrderStatus | "">("");
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -86,10 +96,21 @@ function AdminOrdersPage() {
       const { error } = await supabase.from("orders").update({ status }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
       qc.invalidateQueries({ queryKey: ["admin-count-orders-envoyee"] });
-      toast.success("Statut mis à jour");
+      const order = orders.find((o) => o.id === v.id);
+      if (v.status === "livree" && order && !reviewByOrder[order.id]) {
+        toast.success("Commande livrée. Demandez son avis à la cliente ?", {
+          duration: 10_000,
+          action: {
+            label: "Demander un avis",
+            onClick: () => requestReview(order, whatsappNumberFromOrderPhone(order.customer_phone)),
+          },
+        });
+      } else {
+        toast.success("Statut mis à jour");
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -119,6 +140,7 @@ function AdminOrdersPage() {
         win.location.href = url;
       } else window.location.href = url;
       qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+      qc.invalidateQueries({ queryKey: ["admin-reviews-by-order"] });
     } catch (e) {
       win?.close();
       toast.error(
@@ -205,6 +227,13 @@ function AdminOrdersPage() {
                   )}
                 </button>
 
+                {o.status === "livree" && (
+                  <ReviewBar
+                    reviewStatus={reviewByOrder[o.id]}
+                    onRequest={() => requestReview(o, waPhone)}
+                  />
+                )}
+
                 {open && (
                   <div className="border-t border-gray-100 p-4 space-y-4 bg-gray-50">
                     <ul className="text-sm space-y-1">
@@ -235,15 +264,6 @@ function AdminOrdersPage() {
                       >
                         <MessageCircle className="h-3.5 w-3.5" /> Contacter sur WhatsApp
                       </a>
-                      {o.status === "livree" && (
-                        <button
-                          type="button"
-                          onClick={() => requestReview(o, waPhone)}
-                          className="inline-flex items-center gap-1.5 rounded-full bg-primary-deep text-primary-foreground px-4 py-2 text-xs font-medium hover:bg-primary"
-                        >
-                          <Star className="h-3.5 w-3.5" /> Demander un avis
-                        </button>
-                      )}
                       {isStaleEnvoyee(o) && (
                         <button
                           onClick={() => setStatus.mutate({ id: o.id, status: "non_confirmee" })}
@@ -289,6 +309,46 @@ function AdminOrdersPage() {
             );
           })}
         </ul>
+      )}
+    </div>
+  );
+}
+
+/** Bas de carte d'une commande livrée : demander, relancer ou consulter l'avis. */
+function ReviewBar({
+  reviewStatus,
+  onRequest,
+}: {
+  reviewStatus: string | undefined;
+  onRequest: () => void;
+}) {
+  const answered = reviewStatus && reviewStatus !== "requested";
+  return (
+    <div className="flex items-center justify-between gap-3 border-t border-gray-100 bg-[#FBF8F2] px-3 py-2.5">
+      <span className="flex items-center gap-1.5 text-xs text-gray-600">
+        <Star className={`h-3.5 w-3.5 ${answered ? "fill-gold text-gold" : "text-gray-400"}`} />
+        {answered
+          ? "Avis reçu"
+          : reviewStatus === "requested"
+            ? "Avis demandé, en attente de réponse"
+            : "Livrée : demandez son avis à la cliente"}
+      </span>
+      {answered ? (
+        <Link
+          to="/admin/avis"
+          className="shrink-0 rounded-full border border-gray-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-800"
+        >
+          Voir l'avis
+        </Link>
+      ) : (
+        <button
+          type="button"
+          onClick={onRequest}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary-deep px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary"
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          {reviewStatus === "requested" ? "Relancer" : "Demander un avis"}
+        </button>
       )}
     </div>
   );
