@@ -15,6 +15,7 @@ import {
   Package,
   ShoppingBag,
   Sparkles,
+  Star,
   Tag,
 } from "lucide-react";
 
@@ -92,6 +93,7 @@ const NAV = [
   { to: "/admin", label: "Produits", short: "Produits", icon: Package, exact: true },
   { to: "/admin/commandes", label: "Commandes", short: "Commandes", icon: ShoppingBag },
   { to: "/admin/messages", label: "Messages", short: "Messages", icon: Mail },
+  { to: "/admin/avis", label: "Avis clients", short: "Avis", icon: Star },
   { to: "/admin/vitrine", label: "Vitrine (avis & preuves)", short: "Vitrine", icon: Sparkles },
   { to: "/admin/categories", label: "Catégories", short: "Catégories", icon: Tag },
 ] as const;
@@ -124,7 +126,9 @@ function AdminSidebar({ email }: { email: string }) {
             ? counts.orders
             : n.to === "/admin/messages"
               ? counts.messages
-              : 0;
+              : n.to === "/admin/avis"
+                ? counts.reviews
+                : 0;
         return (
           <Link
             key={n.to}
@@ -195,12 +199,13 @@ function AdminTabBar() {
   return (
     <nav
       aria-label="Administration"
-      className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(64px+env(safe-area-inset-bottom,0px))] grid-cols-5 border-t border-border bg-card pb-[env(safe-area-inset-bottom,0px)] lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(64px+env(safe-area-inset-bottom,0px))] grid-cols-6 border-t border-border bg-card pb-[env(safe-area-inset-bottom,0px)] lg:hidden"
     >
       {NAV.map((n) => {
         const dot =
           (n.to === "/admin/commandes" && counts.orders > 0) ||
-          (n.to === "/admin/messages" && counts.messages > 0);
+          (n.to === "/admin/messages" && counts.messages > 0) ||
+          (n.to === "/admin/avis" && counts.reviews > 0);
         return (
           <Link
             key={n.to}

@@ -21,10 +21,12 @@ import { Route as PanierRouteImport } from './routes/panier'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAvisRouteImport } from './routes/admin/avis'
 import { Route as AdminCategoriesRouteImport } from './routes/admin/categories'
 import { Route as AdminCommandesRouteImport } from './routes/admin/commandes'
 import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
 import { Route as AdminVitrineRouteImport } from './routes/admin/vitrine'
+import { Route as AvisTokenRouteImport } from './routes/avis.$token'
 import { Route as BoutiqueIndexRouteImport } from './routes/boutique.index'
 import { Route as BoutiqueCategoryRouteImport } from './routes/boutique.$category'
 import { Route as MarquesMarqueRouteImport } from './routes/marques.$marque'
@@ -93,6 +95,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminAvisRoute = AdminAvisRouteImport.update({
+  id: '/avis',
+  path: '/avis',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
@@ -112,6 +119,11 @@ const AdminVitrineRoute = AdminVitrineRouteImport.update({
   id: '/vitrine',
   path: '/vitrine',
   getParentRoute: () => AdminRouteRoute,
+} as any)
+const AvisTokenRoute = AvisTokenRouteImport.update({
+  id: '/avis/$token',
+  path: '/avis/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const BoutiqueIndexRoute = BoutiqueIndexRouteImport.update({
   id: '/boutique/',
@@ -161,10 +173,12 @@ export interface FileRoutesByFullPath {
   '/panier': typeof PanierRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/avis': typeof AdminAvisRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/commandes': typeof AdminCommandesRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/vitrine': typeof AdminVitrineRoute
+  '/avis/$token': typeof AvisTokenRoute
   '/boutique/$category': typeof BoutiqueCategoryRoute
   '/marques/$marque': typeof MarquesMarqueRoute
   '/parfum/$slug': typeof ParfumSlugRoute
@@ -185,10 +199,12 @@ export interface FileRoutesByTo {
   '/panier': typeof PanierRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/avis': typeof AdminAvisRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/commandes': typeof AdminCommandesRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/vitrine': typeof AdminVitrineRoute
+  '/avis/$token': typeof AvisTokenRoute
   '/boutique/$category': typeof BoutiqueCategoryRoute
   '/marques/$marque': typeof MarquesMarqueRoute
   '/parfum/$slug': typeof ParfumSlugRoute
@@ -211,10 +227,12 @@ export interface FileRoutesById {
   '/panier': typeof PanierRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/avis': typeof AdminAvisRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/commandes': typeof AdminCommandesRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/vitrine': typeof AdminVitrineRoute
+  '/avis/$token': typeof AvisTokenRoute
   '/boutique/$category': typeof BoutiqueCategoryRoute
   '/marques/$marque': typeof MarquesMarqueRoute
   '/parfum/$slug': typeof ParfumSlugRoute
@@ -238,10 +256,12 @@ export interface FileRouteTypes {
     | '/panier'
     | '/reset-password'
     | '/sitemap.xml'
+    | '/admin/avis'
     | '/admin/categories'
     | '/admin/commandes'
     | '/admin/messages'
     | '/admin/vitrine'
+    | '/avis/$token'
     | '/boutique/$category'
     | '/marques/$marque'
     | '/parfum/$slug'
@@ -262,10 +282,12 @@ export interface FileRouteTypes {
     | '/panier'
     | '/reset-password'
     | '/sitemap.xml'
+    | '/admin/avis'
     | '/admin/categories'
     | '/admin/commandes'
     | '/admin/messages'
     | '/admin/vitrine'
+    | '/avis/$token'
     | '/boutique/$category'
     | '/marques/$marque'
     | '/parfum/$slug'
@@ -287,10 +309,12 @@ export interface FileRouteTypes {
     | '/panier'
     | '/reset-password'
     | '/sitemap.xml'
+    | '/admin/avis'
     | '/admin/categories'
     | '/admin/commandes'
     | '/admin/messages'
     | '/admin/vitrine'
+    | '/avis/$token'
     | '/boutique/$category'
     | '/marques/$marque'
     | '/parfum/$slug'
@@ -313,6 +337,7 @@ export interface RootRouteChildren {
   PanierRoute: typeof PanierRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AvisTokenRoute: typeof AvisTokenRoute
   BoutiqueCategoryRoute: typeof BoutiqueCategoryRoute
   MarquesMarqueRoute: typeof MarquesMarqueRoute
   ParfumSlugRoute: typeof ParfumSlugRoute
@@ -406,6 +431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/avis': {
+      id: '/admin/avis'
+      path: '/avis'
+      fullPath: '/admin/avis'
+      preLoaderRoute: typeof AdminAvisRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/categories': {
       id: '/admin/categories'
       path: '/categories'
@@ -433,6 +465,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/vitrine'
       preLoaderRoute: typeof AdminVitrineRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/avis/$token': {
+      id: '/avis/$token'
+      path: '/avis/$token'
+      fullPath: '/avis/$token'
+      preLoaderRoute: typeof AvisTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/boutique/': {
       id: '/boutique/'
@@ -487,6 +526,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteRouteChildren {
+  AdminAvisRoute: typeof AdminAvisRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCommandesRoute: typeof AdminCommandesRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
@@ -497,6 +537,7 @@ interface AdminRouteRouteChildren {
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminAvisRoute: AdminAvisRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCommandesRoute: AdminCommandesRoute,
   AdminMessagesRoute: AdminMessagesRoute,
@@ -522,6 +563,7 @@ const rootRouteChildren: RootRouteChildren = {
   PanierRoute: PanierRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AvisTokenRoute: AvisTokenRoute,
   BoutiqueCategoryRoute: BoutiqueCategoryRoute,
   MarquesMarqueRoute: MarquesMarqueRoute,
   ParfumSlugRoute: ParfumSlugRoute,

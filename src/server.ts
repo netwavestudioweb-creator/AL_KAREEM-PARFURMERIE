@@ -86,7 +86,7 @@ const SECURITY_HEADERS: Record<string, string> = {
 // visites. Le HTML ne contient aucune donnée personnelle (panier et session admin
 // vivent dans le navigateur). Une modification dans l'admin apparaît sous ~1 min.
 const PUBLIC_PAGE_CACHE = "public, max-age=0, s-maxage=60, stale-while-revalidate=600";
-const NO_CDN_CACHE_PREFIXES = ["/admin", "/reset-password", "/_serverFn", "/api"];
+const NO_CDN_CACHE_PREFIXES = ["/admin", "/reset-password", "/avis", "/_serverFn", "/api"];
 
 function isCacheablePage(request: Request, response: Response): boolean {
   if (request.method !== "GET" || response.status !== 200) return false;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { analyticsConfigured, loadAnalytics, readConsent, saveConsent } from "@/lib/consent";
 
-/** Bandeau de consentement aux mesures d'audience (jamais affiché dans l'admin). */
+/** Bandeau de consentement aux mesures d'audience (jamais affiché dans l'admin ni sur la page d'avis). */
 export function ConsentBanner() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
@@ -14,7 +14,7 @@ export function ConsentBanner() {
     else if (choice === null) setOpen(true);
   }, []);
 
-  if (!open || pathname.startsWith("/admin")) return null;
+  if (!open || pathname.startsWith("/admin") || pathname.startsWith("/avis")) return null;
 
   const decide = (choice: "granted" | "denied") => {
     saveConsent(choice);

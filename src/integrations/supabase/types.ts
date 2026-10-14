@@ -187,6 +187,63 @@ export type Database = {
           },
         ];
       };
+      reviews: {
+        Row: {
+          id: string;
+          order_id: string | null;
+          token: string;
+          customer_name: string;
+          display_name: string;
+          city: string;
+          rating: number | null;
+          product_score: string | null;
+          delivery_score: string | null;
+          service_score: string | null;
+          message: string;
+          consent_publish: boolean;
+          status: string;
+          testimonial_id: string | null;
+          created_at: string;
+          submitted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          order_id?: string | null;
+          token?: string;
+          customer_name?: string;
+          display_name?: string;
+          city?: string;
+          rating?: number | null;
+          product_score?: string | null;
+          delivery_score?: string | null;
+          service_score?: string | null;
+          message?: string;
+          consent_publish?: boolean;
+          status?: string;
+          testimonial_id?: string | null;
+          created_at?: string;
+          submitted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          order_id?: string | null;
+          token?: string;
+          customer_name?: string;
+          display_name?: string;
+          city?: string;
+          rating?: number | null;
+          product_score?: string | null;
+          delivery_score?: string | null;
+          service_score?: string | null;
+          message?: string;
+          consent_publish?: boolean;
+          status?: string;
+          testimonial_id?: string | null;
+          created_at?: string;
+          submitted_at?: string | null;
+        };
+        Relationships: [];
+      };
       testimonials: {
         Row: {
           created_at: string;
@@ -240,7 +297,28 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      get_review_request: {
+        Args: { p_token: string };
+        Returns: { first_name: string; already_submitted: boolean }[];
+      };
+      submit_review: {
+        Args: {
+          p_token: string;
+          p_rating: number;
+          p_product: string;
+          p_delivery: string;
+          p_service: string;
+          p_message: string;
+          p_display_name: string;
+          p_city: string;
+          p_consent: boolean;
+        };
+        Returns: boolean;
+      };
+      verified_testimonial_ids: {
+        Args: Record<PropertyKey, never>;
+        Returns: string[];
+      };
     };
     Enums: {
       app_role: "admin";

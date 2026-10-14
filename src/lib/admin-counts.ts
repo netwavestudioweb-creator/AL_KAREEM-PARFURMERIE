@@ -25,5 +25,16 @@ export function useAdminCounts() {
     },
     refetchInterval: 30_000,
   });
-  return { orders: orders.data ?? 0, messages: messages.data ?? 0 };
+  const reviews = useQuery({
+    queryKey: ["admin-count-reviews"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "received");
+      return error ? 0 : (count ?? 0);
+    },
+    refetchInterval: 60_000,
+  });
+  return { orders: orders.data ?? 0, messages: messages.data ?? 0, reviews: reviews.data ?? 0 };
 }
