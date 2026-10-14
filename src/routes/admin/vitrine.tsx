@@ -6,6 +6,7 @@ import { uploadImage } from "@/lib/image-upload";
 import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
 import { toast } from "sonner";
 import { ImagePlus, Loader2, Plus, Trash2, Star } from "lucide-react";
+import { ReviewsModeration } from "@/components/admin/reviews-moderation";
 
 export const Route = createFileRoute("/admin/vitrine")({
   component: VitrinePage,
@@ -15,8 +16,9 @@ function VitrinePage() {
   return (
     <div className="space-y-8">
       <h1 className="font-serif text-2xl text-gray-900">Vitrine</h1>
-      <ProofsSection />
+      <ReviewsModeration />
       <TestimonialsSection />
+      <ProofsSection />
     </div>
   );
 }

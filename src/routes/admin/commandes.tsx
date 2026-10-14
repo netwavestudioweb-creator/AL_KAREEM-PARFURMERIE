@@ -335,7 +335,8 @@ function ReviewBar({
       </span>
       {answered ? (
         <Link
-          to="/admin/avis"
+          to="/admin/vitrine"
+          hash="avis"
           className="shrink-0 rounded-full border border-gray-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-800"
         >
           Voir l'avis
