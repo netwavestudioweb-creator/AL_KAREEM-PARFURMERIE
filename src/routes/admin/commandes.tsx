@@ -2,8 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { formatFCFA, whatsappLink } from "@/lib/products";
-import { MessageCircle, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { formatFCFA } from "@/lib/products";
+import { MessageCircle, ChevronDown, ChevronUp, Star, Trash2 } from "lucide-react";
+import {
+  ensureReviewRequest,
+  reviewRequestMessage,
+  whatsappNumberFromOrderPhone,
+} from "@/lib/reviews";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/commandes")({
@@ -102,6 +107,28 @@ function AdminOrdersPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  /** Ouvre WhatsApp avec le lien d'avis personnel de la cliente (créé au premier clic). */
+  const requestReview = async (o: Order, waPhone: string) => {
+    // Fenêtre ouverte pendant le clic : sinon le navigateur mobile la bloque.
+    const win = window.open("about:blank", "_blank");
+    try {
+      const token = await ensureReviewRequest(o.id, o.customer_name);
+      const url = `https://wa.me/${waPhone}?text=${encodeURIComponent(reviewRequestMessage(o.customer_name, token))}`;
+      if (win) {
+        win.opener = null;
+        win.location.href = url;
+      } else window.location.href = url;
+      qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+    } catch (e) {
+      win?.close();
+      toast.error(
+        e instanceof Error && /reviews/.test(e.message)
+          ? "Le module des avis n'est pas encore installé dans la base de données."
+          : "Impossible de créer le lien d'avis. Réessayez.",
+      );
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -142,7 +169,7 @@ function AdminOrdersPage() {
               dateStyle: "short",
               timeStyle: "short",
             });
-            const waPhone = o.customer_phone.replace(/[^0-9]/g, "");
+            const waPhone = whatsappNumberFromOrderPhone(o.customer_phone);
             return (
               <li
                 key={o.id}
@@ -201,15 +228,22 @@ function AdminOrdersPage() {
 
                     <div className="flex flex-wrap gap-2">
                       <a
-                        href={whatsappLink(
-                          `Bonjour ${o.customer_name}, je reviens vers vous concernant votre commande Al Kareem Parfumerie du ${date}.`,
-                        ).replace(/wa\.me\/\d+/, `wa.me/${waPhone}`)}
+                        href={`https://wa.me/${waPhone}?text=${encodeURIComponent(`Bonjour ${o.customer_name}, je reviens vers vous concernant votre commande Al Kareem Parfumerie du ${date}.`)}`}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 text-white px-4 py-2 text-xs font-medium hover:bg-emerald-700"
                       >
                         <MessageCircle className="h-3.5 w-3.5" /> Contacter sur WhatsApp
                       </a>
+                      {o.status === "livree" && (
+                        <button
+                          type="button"
+                          onClick={() => requestReview(o, waPhone)}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-primary-deep text-primary-foreground px-4 py-2 text-xs font-medium hover:bg-primary"
+                        >
+                          <Star className="h-3.5 w-3.5" /> Demander un avis
+                        </button>
+                      )}
                       {isStaleEnvoyee(o) && (
                         <button
                           onClick={() => setStatus.mutate({ id: o.id, status: "non_confirmee" })}

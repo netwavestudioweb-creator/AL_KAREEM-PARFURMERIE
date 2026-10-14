@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /avis/
 Disallow: /*?*sort=*
 
 Sitemap: https://www.al-kareemparfurmerie.com/sitemap.xml

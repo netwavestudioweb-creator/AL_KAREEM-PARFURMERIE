@@ -20,7 +20,7 @@ import {
   type Product,
   type ScentFamily,
 } from "@/lib/catalog";
-import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
+import { fetchProofs, fetchTestimonials, fetchVerifiedTestimonialIds } from "@/lib/vitrine";
 import { whatsappLink } from "@/lib/products";
 import { ProductCard } from "./product-card";
 import { CONSEIL_MESSAGE, GENRES } from "./site-header";
@@ -584,6 +584,11 @@ export function TrustSection() {
     queryKey: ["testimonials"],
     queryFn: fetchTestimonials,
   });
+  const { data: verifiedIds = [] } = useQuery({
+    queryKey: ["testimonials-verified"],
+    queryFn: fetchVerifiedTestimonialIds,
+    enabled: testimonials.length > 0,
+  });
   const photos =
     proofs.length > 0
       ? proofs
@@ -614,42 +619,45 @@ export function TrustSection() {
               className="aspect-square w-full rounded-xl object-cover lg:aspect-[3/4] lg:rounded-[14px]"
             />
           ))}
-          {testimonials.slice(0, 1).map((t) => (
-            <figure
-              key={t.id}
-              className="col-span-2 flex flex-col justify-between gap-3 rounded-[14px] border border-border bg-card p-5 lg:col-span-1"
-            >
-              {t.rating ? (
-                <span className="flex gap-0.5" aria-label={`${t.rating} sur 5`}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${i < t.rating! ? "fill-gold text-gold" : "text-border"}`}
-                    />
-                  ))}
-                </span>
-              ) : null}
-              <blockquote className="font-serif text-xl leading-snug">« {t.message} »</blockquote>
-              <figcaption className="text-[13px] font-semibold text-primary-deep">
-                {t.name}
-              </figcaption>
-            </figure>
-          ))}
         </div>
       </div>
-      {testimonials.length > 1 && (
-        <div className="scrollbar-none mt-4 flex gap-3 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-4">
-          {testimonials.slice(1, 4).map((t) => (
-            <figure
-              key={t.id}
-              className="w-[280px] shrink-0 rounded-[14px] border border-border bg-card p-5 lg:w-auto"
-            >
-              <blockquote className="font-serif text-lg leading-snug">« {t.message} »</blockquote>
-              <figcaption className="mt-3 text-[13px] font-semibold text-primary-deep">
-                {t.name}
-              </figcaption>
-            </figure>
-          ))}
+      {testimonials.length > 0 && (
+        <div className="mt-8 lg:mt-12">
+          <div className="mb-4 flex items-baseline justify-between gap-3">
+            <h3 className="font-serif text-[24px] font-medium text-primary-deep lg:text-[30px]">
+              Ce que disent nos clientes
+            </h3>
+          </div>
+          <div className="scrollbar-none -mx-4 flex gap-3 overflow-x-auto px-4 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:px-0">
+            {testimonials.slice(0, 6).map((t) => (
+              <figure
+                key={t.id}
+                className="flex w-[285px] shrink-0 flex-col gap-3 rounded-[14px] border border-border bg-card p-5 lg:w-auto"
+              >
+                {t.rating ? (
+                  <span className="flex gap-0.5" aria-label={`${t.rating} sur 5`}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${i < t.rating! ? "fill-gold text-gold" : "text-border"}`}
+                      />
+                    ))}
+                  </span>
+                ) : null}
+                <blockquote className="flex-1 font-serif text-lg leading-snug">
+                  « {t.message} »
+                </blockquote>
+                <figcaption className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+                  <span className="font-semibold text-primary-deep">{t.name}</span>
+                  {verifiedIds.includes(t.id) && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-primary-deep">
+                      <ShieldCheck className="h-3 w-3" /> Achat vérifié
+                    </span>
+                  )}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       )}
     </section>

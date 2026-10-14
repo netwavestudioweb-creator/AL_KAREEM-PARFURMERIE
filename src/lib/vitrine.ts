@@ -53,3 +53,12 @@ export async function fetchTestimonials(): Promise<Testimonial[]> {
   if (error) throw error;
   return (data ?? []) as Testimonial[];
 }
+
+/** Témoignages issus d'un avis client sur une vraie commande (mention « Achat vérifié »). */
+export async function fetchVerifiedTestimonialIds(): Promise<string[]> {
+  const supabase = await getSupabase();
+  const { data, error } = await supabase.rpc("verified_testimonial_ids");
+  // Tant que la migration des avis n'est pas installée, la fonction n'existe pas : aucun badge.
+  if (error) return [];
+  return (data ?? []) as string[];
+}
