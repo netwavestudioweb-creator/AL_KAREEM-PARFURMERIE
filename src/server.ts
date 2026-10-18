@@ -51,11 +51,14 @@ function isH3SwallowedErrorBody(body: string): boolean {
 const SUPABASE = "https://*.supabase.co wss://*.supabase.co";
 const ANALYTICS =
   "https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://*.clarity.ms";
+// Vercel Web Analytics : chargement du script + envoi des pageviews
+const VERCEL_ANALYTICS = "https://va.vercel-scripts.com";
+const VERCEL_INSIGHTS = "https://vitals.vercel-insights.com";
 
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.clarity.ms`,
-  `connect-src 'self' ${SUPABASE} ${ANALYTICS}`,
+  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.clarity.ms ${VERCEL_ANALYTICS}`,
+  `connect-src 'self' ${SUPABASE} ${ANALYTICS} ${VERCEL_INSIGHTS}`,
   `img-src 'self' data: blob: https://*.supabase.co ${ANALYTICS}`,
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
