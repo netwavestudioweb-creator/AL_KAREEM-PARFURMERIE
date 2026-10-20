@@ -11,7 +11,7 @@ export function SiteFooter() {
           <div className="flex items-center gap-3 mb-4">
             <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-soft overflow-hidden shrink-0">
               <img
-                src="/alkareem-logo.webp"
+                src="/alkareem-logo-120.webp"
                 alt="Al Kareem Parfumerie"
                 width={105}
                 height={140}
