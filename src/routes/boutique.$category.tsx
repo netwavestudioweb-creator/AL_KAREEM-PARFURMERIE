@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { SiteLayout } from "@/components/layout";
 import { ShopListing } from "@/components/shop-listing";
 import { fetchProducts, fetchCategories } from "@/lib/products";
+import { CATEGORY_SEO } from "@/lib/category-seo";
 import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 const KNOWN_CATEGORY_SLUGS = [
@@ -38,8 +39,11 @@ export const Route = createFileRoute("/boutique/$category")({
       .split("-")
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
-    const title = `${readable} à Cotonou — Al Kareem Parfumerie`;
-    const desc = `Découvrez notre collection d'exception de ${readable.toLowerCase()} à Cotonou, Bénin. Produits 100% authentiques et livraison rapide.`;
+    const seo = CATEGORY_SEO[params.category];
+    const title = seo?.title ?? `${readable} à Cotonou — Al Kareem Parfumerie`;
+    const desc =
+      seo?.description ??
+      `Découvrez notre collection de ${readable.toLowerCase()} à Cotonou, Bénin. Produits 100 % authentiques, paiement à la livraison.`;
     const url = getCanonicalUrl(`/boutique/${params.category}`);
 
     return {

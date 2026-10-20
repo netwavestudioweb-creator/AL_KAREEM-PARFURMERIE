@@ -16,6 +16,7 @@ import { Route as CgvRouteImport } from './routes/cgv'
 import { Route as CommandeEnvoyeeRouteImport } from './routes/commande-envoyee'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as PanierRouteImport } from './routes/panier'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -29,6 +30,8 @@ import { Route as AdminVitrineRouteImport } from './routes/admin/vitrine'
 import { Route as AvisTokenRouteImport } from './routes/avis.$token'
 import { Route as BoutiqueIndexRouteImport } from './routes/boutique.index'
 import { Route as BoutiqueCategoryRouteImport } from './routes/boutique.$category'
+import { Route as ConseilsIndexRouteImport } from './routes/conseils.index'
+import { Route as ConseilsSlugRouteImport } from './routes/conseils.$slug'
 import { Route as MarquesMarqueRouteImport } from './routes/marques.$marque'
 import { Route as ParfumSlugRouteImport } from './routes/parfum.$slug'
 import { Route as AdminProduitsIdRouteImport } from './routes/admin/produits.$id'
@@ -68,6 +71,11 @@ const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
@@ -135,6 +143,16 @@ const BoutiqueCategoryRoute = BoutiqueCategoryRouteImport.update({
   path: '/boutique/$category',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConseilsIndexRoute = ConseilsIndexRouteImport.update({
+  id: '/conseils/',
+  path: '/conseils/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConseilsSlugRoute = ConseilsSlugRouteImport.update({
+  id: '/conseils/$slug',
+  path: '/conseils/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarquesMarqueRoute = MarquesMarqueRouteImport.update({
   id: '/marques/$marque',
   path: '/marques/$marque',
@@ -169,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/commande-envoyee': typeof CommandeEnvoyeeRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/panier': typeof PanierRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -180,10 +199,12 @@ export interface FileRoutesByFullPath {
   '/admin/vitrine': typeof AdminVitrineRoute
   '/avis/$token': typeof AvisTokenRoute
   '/boutique/$category': typeof BoutiqueCategoryRoute
+  '/conseils/$slug': typeof ConseilsSlugRoute
   '/marques/$marque': typeof MarquesMarqueRoute
   '/parfum/$slug': typeof ParfumSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/boutique/': typeof BoutiqueIndexRoute
+  '/conseils/': typeof ConseilsIndexRoute
   '/admin/produits/$id': typeof AdminProduitsIdRoute
   '/admin/produits/nouveau': typeof AdminProduitsNouveauRoute
   '/boutique/genre/$genre': typeof BoutiqueGenreGenreRoute
@@ -195,6 +216,7 @@ export interface FileRoutesByTo {
   '/commande-envoyee': typeof CommandeEnvoyeeRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/panier': typeof PanierRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -206,10 +228,12 @@ export interface FileRoutesByTo {
   '/admin/vitrine': typeof AdminVitrineRoute
   '/avis/$token': typeof AvisTokenRoute
   '/boutique/$category': typeof BoutiqueCategoryRoute
+  '/conseils/$slug': typeof ConseilsSlugRoute
   '/marques/$marque': typeof MarquesMarqueRoute
   '/parfum/$slug': typeof ParfumSlugRoute
   '/admin': typeof AdminIndexRoute
   '/boutique': typeof BoutiqueIndexRoute
+  '/conseils': typeof ConseilsIndexRoute
   '/admin/produits/$id': typeof AdminProduitsIdRoute
   '/admin/produits/nouveau': typeof AdminProduitsNouveauRoute
   '/boutique/genre/$genre': typeof BoutiqueGenreGenreRoute
@@ -223,6 +247,7 @@ export interface FileRoutesById {
   '/commande-envoyee': typeof CommandeEnvoyeeRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/panier': typeof PanierRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -234,10 +259,12 @@ export interface FileRoutesById {
   '/admin/vitrine': typeof AdminVitrineRoute
   '/avis/$token': typeof AvisTokenRoute
   '/boutique/$category': typeof BoutiqueCategoryRoute
+  '/conseils/$slug': typeof ConseilsSlugRoute
   '/marques/$marque': typeof MarquesMarqueRoute
   '/parfum/$slug': typeof ParfumSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/boutique/': typeof BoutiqueIndexRoute
+  '/conseils/': typeof ConseilsIndexRoute
   '/admin/produits/$id': typeof AdminProduitsIdRoute
   '/admin/produits/nouveau': typeof AdminProduitsNouveauRoute
   '/boutique/genre/$genre': typeof BoutiqueGenreGenreRoute
@@ -252,6 +279,7 @@ export interface FileRouteTypes {
     | '/commande-envoyee'
     | '/confidentialite'
     | '/contact'
+    | '/llms.txt'
     | '/mentions-legales'
     | '/panier'
     | '/reset-password'
@@ -263,10 +291,12 @@ export interface FileRouteTypes {
     | '/admin/vitrine'
     | '/avis/$token'
     | '/boutique/$category'
+    | '/conseils/$slug'
     | '/marques/$marque'
     | '/parfum/$slug'
     | '/admin/'
     | '/boutique/'
+    | '/conseils/'
     | '/admin/produits/$id'
     | '/admin/produits/nouveau'
     | '/boutique/genre/$genre'
@@ -278,6 +308,7 @@ export interface FileRouteTypes {
     | '/commande-envoyee'
     | '/confidentialite'
     | '/contact'
+    | '/llms.txt'
     | '/mentions-legales'
     | '/panier'
     | '/reset-password'
@@ -289,10 +320,12 @@ export interface FileRouteTypes {
     | '/admin/vitrine'
     | '/avis/$token'
     | '/boutique/$category'
+    | '/conseils/$slug'
     | '/marques/$marque'
     | '/parfum/$slug'
     | '/admin'
     | '/boutique'
+    | '/conseils'
     | '/admin/produits/$id'
     | '/admin/produits/nouveau'
     | '/boutique/genre/$genre'
@@ -305,6 +338,7 @@ export interface FileRouteTypes {
     | '/commande-envoyee'
     | '/confidentialite'
     | '/contact'
+    | '/llms.txt'
     | '/mentions-legales'
     | '/panier'
     | '/reset-password'
@@ -316,10 +350,12 @@ export interface FileRouteTypes {
     | '/admin/vitrine'
     | '/avis/$token'
     | '/boutique/$category'
+    | '/conseils/$slug'
     | '/marques/$marque'
     | '/parfum/$slug'
     | '/admin/'
     | '/boutique/'
+    | '/conseils/'
     | '/admin/produits/$id'
     | '/admin/produits/nouveau'
     | '/boutique/genre/$genre'
@@ -333,15 +369,18 @@ export interface RootRouteChildren {
   CommandeEnvoyeeRoute: typeof CommandeEnvoyeeRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   PanierRoute: typeof PanierRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AvisTokenRoute: typeof AvisTokenRoute
   BoutiqueCategoryRoute: typeof BoutiqueCategoryRoute
+  ConseilsSlugRoute: typeof ConseilsSlugRoute
   MarquesMarqueRoute: typeof MarquesMarqueRoute
   ParfumSlugRoute: typeof ParfumSlugRoute
   BoutiqueIndexRoute: typeof BoutiqueIndexRoute
+  ConseilsIndexRoute: typeof ConseilsIndexRoute
   BoutiqueGenreGenreRoute: typeof BoutiqueGenreGenreRoute
 }
 
@@ -394,6 +433,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentions-legales': {
@@ -487,6 +533,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BoutiqueCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conseils/': {
+      id: '/conseils/'
+      path: '/conseils'
+      fullPath: '/conseils/'
+      preLoaderRoute: typeof ConseilsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conseils/$slug': {
+      id: '/conseils/$slug'
+      path: '/conseils/$slug'
+      fullPath: '/conseils/$slug'
+      preLoaderRoute: typeof ConseilsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marques/$marque': {
       id: '/marques/$marque'
       path: '/marques/$marque'
@@ -559,15 +619,18 @@ const rootRouteChildren: RootRouteChildren = {
   CommandeEnvoyeeRoute: CommandeEnvoyeeRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   PanierRoute: PanierRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AvisTokenRoute: AvisTokenRoute,
   BoutiqueCategoryRoute: BoutiqueCategoryRoute,
+  ConseilsSlugRoute: ConseilsSlugRoute,
   MarquesMarqueRoute: MarquesMarqueRoute,
   ParfumSlugRoute: ParfumSlugRoute,
   BoutiqueIndexRoute: BoutiqueIndexRoute,
+  ConseilsIndexRoute: ConseilsIndexRoute,
   BoutiqueGenreGenreRoute: BoutiqueGenreGenreRoute,
 }
 export const routeTree = rootRouteImport

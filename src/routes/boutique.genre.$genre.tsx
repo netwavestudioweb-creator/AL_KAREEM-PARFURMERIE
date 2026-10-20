@@ -5,6 +5,7 @@ import { SiteLayout } from "@/components/layout";
 import { ShopListing } from "@/components/shop-listing";
 import { matchesGenre, type Genre } from "@/lib/catalog";
 import { fetchCategories, fetchProducts } from "@/lib/products";
+import { GENRE_SEO } from "@/lib/category-seo";
 import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 
 const VALID_GENRES = ["femme", "homme", "unisexe"];
@@ -30,8 +31,11 @@ export const Route = createFileRoute("/boutique/genre/$genre")({
   head: ({ params }) => {
     const genreCapitalized =
       params.genre.charAt(0).toUpperCase() + params.genre.slice(1).toLowerCase();
-    const title = `Parfums ${genreCapitalized} à Cotonou — Al Kareem Parfumerie`;
-    const desc = `Sélection exclusive de parfums ${params.genre.toLowerCase()} à Cotonou, Bénin. Flacons 100% authentiques, conseils olfactifs et livraison rapide.`;
+    const seo = GENRE_SEO[params.genre.toLowerCase()];
+    const title = seo?.title ?? `Parfums ${genreCapitalized} à Cotonou — Al Kareem Parfumerie`;
+    const desc =
+      seo?.description ??
+      `Sélection de parfums ${params.genre.toLowerCase()} à Cotonou, Bénin. Flacons 100 % authentiques, paiement à la livraison.`;
     const url = getCanonicalUrl(`/boutique/genre/${params.genre.toLowerCase()}`);
 
     return {

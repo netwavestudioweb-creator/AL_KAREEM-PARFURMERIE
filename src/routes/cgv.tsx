@@ -5,6 +5,8 @@ import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 export const Route = createFileRoute("/cgv")({
   head: () => ({
     meta: [
+      // Page légale : suivie mais hors index, pour ne pas concurrencer l'accueil sur le nom de la marque.
+      { name: "robots", content: "noindex, follow" },
       { title: "Conditions générales de vente — Al Kareem Parfumerie" },
       {
         name: "description",

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/layout";
 import {
   CategoryChips,
+  HomeFaq,
   HomeHero,
   NewArrivals,
   PerksStrip,
@@ -16,6 +17,7 @@ import { fetchProofs, fetchTestimonials } from "@/lib/vitrine";
 import { fetchProducts, fetchCategories } from "@/lib/products";
 import { OG_IMAGE_META, SITE_CONFIG, getCanonicalUrl } from "@/lib/site-config";
 import { jsonLd } from "@/lib/json-ld";
+import { HOME_FAQ } from "@/lib/guides";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -97,6 +99,18 @@ export const Route = createFileRoute("/")({
           },
         }),
       },
+      {
+        type: "application/ld+json",
+        children: jsonLd({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: HOME_FAQ.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
     ],
   }),
   loader: async ({ context }) => {
@@ -151,6 +165,7 @@ function HomePage() {
       <NewArrivals products={products} />
       <ScentQuizAndGifts products={products} />
       <TrustSection />
+      <HomeFaq />
       <WhatsAppBand />
       <div className="h-12 lg:h-20" />
     </SiteLayout>

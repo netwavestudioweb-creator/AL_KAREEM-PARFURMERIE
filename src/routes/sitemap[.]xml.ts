@@ -3,6 +3,7 @@ import type {} from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { SITE_CONFIG } from "@/lib/site-config";
 import { BRANDS } from "@/lib/brands";
+import { GUIDES } from "@/lib/guides";
 
 const BASE_URL = process.env.VITE_SITE_URL || process.env.SITE_URL || SITE_CONFIG.url;
 
@@ -11,9 +12,8 @@ const STATIC_PATHS = [
   { path: "/boutique", priority: "0.9", changefreq: "daily" as const },
   { path: "/a-propos", priority: "0.5", changefreq: "monthly" as const },
   { path: "/contact", priority: "0.5", changefreq: "monthly" as const },
-  { path: "/mentions-legales", priority: "0.2", changefreq: "yearly" as const },
-  { path: "/confidentialite", priority: "0.2", changefreq: "yearly" as const },
-  { path: "/cgv", priority: "0.2", changefreq: "yearly" as const },
+  { path: "/conseils", priority: "0.7", changefreq: "monthly" as const },
+  // Pages légales absentes : elles sont en noindex.
 ];
 
 const CATEGORY_PATHS = [
@@ -27,6 +27,7 @@ const CATEGORY_PATHS = [
   "/boutique/genre/homme",
   "/boutique/genre/unisexe",
   ...BRANDS.map((b) => `/marques/${b.slug}`),
+  ...GUIDES.map((g) => `/conseils/${g.slug}`),
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({

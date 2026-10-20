@@ -22,6 +22,7 @@ import {
 } from "@/lib/catalog";
 import { fetchProofs, fetchTestimonials, fetchVerifiedTestimonialIds } from "@/lib/vitrine";
 import { whatsappLink } from "@/lib/products";
+import { GUIDES, HOME_FAQ } from "@/lib/guides";
 import { ProductCard } from "./product-card";
 import { CONSEIL_MESSAGE, GENRES } from "./site-header";
 import hero640 from "@/assets/perfume-woman-hero-640.webp";
@@ -134,6 +135,54 @@ export function HomeHero({ productCount }: { productCount: number }) {
               Trouver mon parfum
             </a>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Parfumerie à Cotonou : texte de présentation + FAQ (mots clés)     */
+/* ------------------------------------------------------------------ */
+
+export function HomeFaq() {
+  return (
+    <section className={`${CONTAINER} mt-9 lg:mt-[72px]`} aria-labelledby="faq-title">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-14">
+        <div>
+          <p className={`${EYEBROW} text-gold-ink`}>Votre parfumerie à Cotonou</p>
+          <h2 id="faq-title" className={`${H2} mt-2`}>
+            Parfums authentiques au Bénin, payés à la livraison
+          </h2>
+          <p className="mt-4 text-[15px] leading-relaxed text-foreground/80">
+            Al Kareem Parfumerie est une parfumerie de Cotonou spécialisée dans les parfums
+            originaux : parfums femme, parfums homme, parfums unisexe et orientaux, huiles
+            concentrées, brumes et coffrets cadeaux. Commandez sur le site ou sur WhatsApp, nous
+            livrons à Cotonou, dans tout le Bénin et dans la sous-région.
+          </p>
+          <ul className="mt-5 flex flex-col gap-2 text-[14.5px]">
+            {GUIDES.slice(0, 3).map((g) => (
+              <li key={g.slug}>
+                <Link
+                  to="/conseils/$slug"
+                  params={{ slug: g.slug }}
+                  className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
+                >
+                  {g.title} <ArrowRight className="h-4 w-4" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="divide-y divide-border border-y border-border">
+          {HOME_FAQ.map((f) => (
+            <details key={f.q} className="group py-4">
+              <summary className="cursor-pointer list-none font-semibold text-foreground marker:hidden">
+                {f.q}
+              </summary>
+              <p className="mt-2 text-[15px] leading-relaxed text-foreground/80">{f.a}</p>
+            </details>
+          ))}
         </div>
       </div>
     </section>
