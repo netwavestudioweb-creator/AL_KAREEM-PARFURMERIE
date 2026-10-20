@@ -150,7 +150,7 @@ export function SiteHeader() {
               aria-label="Al Kareem — Accueil"
             >
               <img
-                src="/alkareem-logo.webp"
+                src="/alkareem-logo-120.webp"
                 alt=""
                 width={105}
                 height={140}

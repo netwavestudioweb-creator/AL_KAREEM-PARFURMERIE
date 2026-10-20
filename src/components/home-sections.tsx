@@ -24,7 +24,9 @@ import { fetchProofs, fetchTestimonials, fetchVerifiedTestimonialIds } from "@/l
 import { whatsappLink } from "@/lib/products";
 import { ProductCard } from "./product-card";
 import { CONSEIL_MESSAGE, GENRES } from "./site-header";
-import heroImg from "@/assets/perfume-woman-hero.webp";
+import hero640 from "@/assets/perfume-woman-hero-640.webp";
+import hero960 from "@/assets/perfume-woman-hero-960.webp";
+import hero1376 from "@/assets/perfume-woman-hero-1376.webp";
 import boutiqueImg from "@/assets/boutique.webp";
 import femmeImg from "@/assets/product-femme.jpg";
 import hommeImg from "@/assets/product-homme.jpg";
@@ -83,18 +85,25 @@ export function CategoryChips() {
 /* Hero compact                                                       */
 /* ------------------------------------------------------------------ */
 
+/* Image LCP : `object-cover` sur 300 px (mobile) / 460 px (desktop) de haut,
+   la largeur affichée suit donc la hauteur, d'où des `sizes` fixes.
+   React précharge seul cette image (fetchPriority="high") pendant le SSR. */
+const HERO_SRCSET = `${hero640} 640w, ${hero960} 960w, ${hero1376} 1376w`;
+const HERO_SIZES = "(min-width: 1024px) 830px, 540px";
+
 export function HomeHero({ productCount }: { productCount: number }) {
   return (
     <section className={`${CONTAINER} mt-1 lg:mt-6`}>
       <div className="relative grid overflow-hidden rounded-[18px] bg-[#2D1244] text-white lg:min-h-[460px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:rounded-[20px]">
         <div className="relative h-[300px] lg:order-2 lg:h-auto">
           <img
-            src={heroImg}
+            src={hero960}
+            srcSet={HERO_SRCSET}
+            sizes={HERO_SIZES}
             alt="Femme se parfumant — Al Kareem Parfumerie Cotonou"
-            width={1200}
-            height={900}
+            width={1376}
+            height={768}
             fetchPriority="high"
-            decoding="async"
             className="absolute inset-0 h-full w-full object-cover object-[70%_20%] lg:object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#240c38]/95 via-[#240c38]/35 to-transparent lg:hidden" />
@@ -324,8 +333,8 @@ export function SelectionGrid({ products }: { products: Product[] }) {
       </div>
       {shown.length > 0 ? (
         <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-5 lg:gap-6">
-          {shown.map((p, i) => (
-            <ProductCard key={p.id} product={p} priority={i < 2} />
+          {shown.map((p) => (
+            <ProductCard key={p.id} product={p} />
           ))}
         </div>
       ) : (
