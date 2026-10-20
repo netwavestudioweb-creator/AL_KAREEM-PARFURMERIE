@@ -693,7 +693,7 @@ export function TrustSection() {
                 className="flex w-[285px] shrink-0 flex-col gap-3 rounded-[14px] border border-border bg-card p-5 lg:w-auto"
               >
                 {t.rating ? (
-                  <span className="flex gap-0.5" aria-label={`${t.rating} sur 5`}>
+                  <span className="flex gap-0.5" role="img" aria-label={`${t.rating} sur 5`}>
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}

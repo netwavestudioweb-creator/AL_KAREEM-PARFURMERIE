@@ -29,7 +29,7 @@ const SCORE_STYLE: Record<Score, string> = {
 
 function Stars({ value }: { value: number | null }) {
   return (
-    <span className="flex gap-0.5" aria-label={`${value ?? 0} sur 5`}>
+    <span className="flex gap-0.5" role="img" aria-label={`${value ?? 0} sur 5`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
