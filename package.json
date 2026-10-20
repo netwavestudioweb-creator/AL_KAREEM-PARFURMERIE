@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "keepalive": "node scripts/keep-supabase-alive.mjs",
+    "indexnow": "node scripts/indexnow.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
