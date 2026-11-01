@@ -142,6 +142,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         : null,
     ].filter((m): m is { name: string; content: string } => m !== null);
 
+    const supabaseUrl =
+      import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+    let supabaseOrigin = "";
+    try {
+      if (supabaseUrl) supabaseOrigin = new URL(supabaseUrl).origin;
+    } catch {
+      /* ignore */
+    }
+
     return {
       meta: [
         { charSet: "utf-8" },
@@ -176,12 +185,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "twitter:image", content: SITE_CONFIG.ogImageUrl },
       ],
       links: [
-        {
-          rel: "preconnect",
-          href: "https://zoagwbhgpaslyjjsdnnv.supabase.co",
-          crossOrigin: "anonymous",
-        },
-        { rel: "dns-prefetch", href: "https://zoagwbhgpaslyjjsdnnv.supabase.co" },
+        ...(supabaseOrigin
+          ? [
+              {
+                rel: "preconnect" as const,
+                href: supabaseOrigin,
+                crossOrigin: "anonymous" as const,
+              },
+              { rel: "dns-prefetch" as const, href: supabaseOrigin },
+            ]
+          : []),
         { rel: "manifest", href: "/site.webmanifest" },
         { rel: "preload", as: "style", href: appCss },
         {

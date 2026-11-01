@@ -29,14 +29,18 @@ import { jsonLd } from "@/lib/json-ld";
 
 export const Route = createFileRoute("/parfum/$slug")({
   loader: async ({ params, context }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData({
-        queryKey: ["product", params.slug],
-        queryFn: () => fetchProductBySlug(params.slug),
-      }),
-      // Utilisées par l'en-tête : évite un appel supplémentaire côté navigateur.
-      context.queryClient.ensureQueryData({ queryKey: ["categories"], queryFn: fetchCategories }),
-    ]);
+    try {
+      await Promise.all([
+        context.queryClient.ensureQueryData({
+          queryKey: ["product", params.slug],
+          queryFn: () => fetchProductBySlug(params.slug),
+        }),
+        // Utilisées par l'en-tête : évite un appel supplémentaire côté navigateur.
+        context.queryClient.ensureQueryData({ queryKey: ["categories"], queryFn: fetchCategories }),
+      ]);
+    } catch (err) {
+      console.error(`[SSR Product ${params.slug}] Failed to prefetch data:`, err);
+    }
     return (
       context.queryClient.getQueryData<Awaited<ReturnType<typeof fetchProductBySlug>>>([
         "product",
