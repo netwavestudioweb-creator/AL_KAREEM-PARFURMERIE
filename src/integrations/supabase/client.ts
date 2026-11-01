@@ -6,8 +6,20 @@ function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
 }
 
-function createSupabaseFetch(supabaseKey: string): typeof fetch {
-  return (input, init) => {
+function createResilientSupabaseFetch(
+  primaryUrl: string,
+  primaryKey: string,
+  backupUrl?: string,
+  backupKey?: string,
+): typeof fetch {
+  return async (input, init) => {
+    const inputUrl =
+      typeof input === "string"
+        ? input
+        : typeof Request !== "undefined" && input instanceof Request
+          ? input.url
+          : String(input);
+
     const headers = new Headers(
       typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
     );
@@ -16,16 +28,62 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
       new Headers(init.headers).forEach((value, key) => headers.set(key, value));
     }
 
-    // New Supabase API keys are opaque strings, not bearer JWTs.
     if (
-      isNewSupabaseApiKey(supabaseKey) &&
-      headers.get("Authorization") === `Bearer ${supabaseKey}`
+      isNewSupabaseApiKey(primaryKey) &&
+      headers.get("Authorization") === `Bearer ${primaryKey}`
     ) {
       headers.delete("Authorization");
     }
 
-    headers.set("apikey", supabaseKey);
-    return fetch(input, { ...init, headers });
+    headers.set("apikey", primaryKey);
+
+    // Timeout de 7s pour éviter de bloquer indéfiniment le rendu SSR
+    const controller = new AbortController();
+    let timedOut = false;
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 7000);
+
+    if (init?.signal) {
+      init.signal.addEventListener("abort", () => controller.abort(), { once: true });
+    }
+
+    try {
+      const res = await fetch(input, { ...init, headers, signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok && res.status >= 500 && backupUrl && backupKey && inputUrl.includes(primaryUrl)) {
+        throw new Error(`Primary Supabase returned HTTP ${res.status}`);
+      }
+      return res;
+    } catch (err: unknown) {
+      clearTimeout(timeoutId);
+      const isNetworkOrTimeout =
+        timedOut ||
+        (err instanceof Error &&
+          (err.name === "AbortError" ||
+            err.message.includes("fetch failed") ||
+            err.message.includes("ENOTFOUND") ||
+            err.message.includes("ETIMEDOUT") ||
+            err.message.includes("returned HTTP 5")));
+
+      if (isNetworkOrTimeout && backupUrl && backupKey && inputUrl.includes(primaryUrl)) {
+        console.warn(
+          `[Supabase Failover] Base principale inaccessible (${(err as Error).message}), bascule automatique vers la base de secours : ${backupUrl}`,
+        );
+        const failoverUrl = inputUrl.replace(primaryUrl, backupUrl);
+        const failoverHeaders = new Headers(headers);
+        if (isNewSupabaseApiKey(backupKey)) {
+          failoverHeaders.delete("Authorization");
+        } else {
+          failoverHeaders.set("Authorization", `Bearer ${backupKey}`);
+        }
+        failoverHeaders.set("apikey", backupKey);
+
+        return fetch(failoverUrl, { ...init, headers: failoverHeaders });
+      }
+      throw err;
+    }
   };
 }
 
@@ -35,6 +93,17 @@ function createSupabaseClient() {
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
   const SUPABASE_PUBLISHABLE_KEY =
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+
+  const SUPABASE_BACKUP_URL =
+    import.meta.env.VITE_SUPABASE_BACKUP_URL ||
+    process.env.SUPABASE_BACKUP_URL ||
+    import.meta.env.VITE_SUPABASE_URL_2 ||
+    process.env.SUPABASE_URL_2;
+  const SUPABASE_BACKUP_PUBLISHABLE_KEY =
+    import.meta.env.VITE_SUPABASE_BACKUP_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_BACKUP_PUBLISHABLE_KEY ||
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY_2 ||
+    process.env.SUPABASE_PUBLISHABLE_KEY_2;
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
@@ -48,7 +117,12 @@ function createSupabaseClient() {
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     global: {
-      fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
+      fetch: createResilientSupabaseFetch(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        SUPABASE_BACKUP_URL,
+        SUPABASE_BACKUP_PUBLISHABLE_KEY,
+      ),
     },
     auth: {
       storage: typeof window !== "undefined" ? localStorage : undefined,

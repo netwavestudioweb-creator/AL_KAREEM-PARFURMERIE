@@ -44,16 +44,14 @@ sinon l'en-tête collant casse.
 
 | Projet | Rôle |
 |---|---|
-| `zoagwbhgpaslyjjsdnnv` | **Base de production du site**, gérée par Lovable (86 produits, admin, commandes, avis). |
-| `dnakohzxqxpnqfopxtni` | Base personnelle : copie exportée plus ancienne (31 produits, pas d'admin). Migration vers elle reportée. |
+| `dnakohzxqxpnqfopxtni` | **Base principale de production du site** (compte personnel, 96 produits, admin, catégories, avis). |
+| `zoagwbhgpaslyjjsdnnv` | **Base de secours (Failover automatique)** : si la base principale est indisponible, le client bascule dessus automatiquement. |
 
-- Pour lancer du SQL sur la production : passer par Lovable (son SQL editor), en lui demandant de ne pas toucher au code.
-  Vérifier la base visée avant d'exécuter : `select count(*) from products` (86 = production).
 - RLS partout ; rôle admin via `private.has_role(auth.uid(), 'admin'::public.app_role)`.
-  Inscriptions publiques désactivées. Le bucket `product-images` est privé (URLs signées).
+  Inscriptions publiques désactivées. Le bucket `product-images` est public/signé.
 - Ne jamais coller de clé `service_role` ni de mot de passe dans le chat ou le code : seulement dans `.env`.
   Les clés `sb_publishable_…` sont publiques par nature.
-- Le connecteur Supabase de Claude est lié à une autre organisation : il n'atteint aucune des deux bases.
+- Le client Supabase (`src/integrations/supabase/client.ts`) intègre un mécanisme de failover résilient : en cas de timeout ou d'erreur réseau sur la base principale, la requête est rejouée de façon transparente sur la base de secours.
 
 ### Anti-pause (plan gratuit, pause après 7 jours d'inactivité)
 

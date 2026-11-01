@@ -114,24 +114,28 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData({
-        queryKey: ["products"],
-        queryFn: () => fetchProducts(),
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: ["categories"],
-        queryFn: fetchCategories,
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: ["authenticity-proofs"],
-        queryFn: fetchProofs,
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: ["testimonials"],
-        queryFn: fetchTestimonials,
-      }),
-    ]);
+    try {
+      await Promise.all([
+        context.queryClient.ensureQueryData({
+          queryKey: ["products"],
+          queryFn: () => fetchProducts(),
+        }),
+        context.queryClient.ensureQueryData({
+          queryKey: ["categories"],
+          queryFn: fetchCategories,
+        }),
+        context.queryClient.ensureQueryData({
+          queryKey: ["authenticity-proofs"],
+          queryFn: fetchProofs,
+        }),
+        context.queryClient.ensureQueryData({
+          queryKey: ["testimonials"],
+          queryFn: fetchTestimonials,
+        }),
+      ]);
+    } catch (err) {
+      console.error("[SSR Home] Failed to prefetch data:", err);
+    }
   },
   component: HomePage,
 });

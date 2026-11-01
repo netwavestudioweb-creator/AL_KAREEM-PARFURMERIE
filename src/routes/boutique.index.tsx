@@ -90,16 +90,20 @@ export const Route = createFileRoute("/boutique/")({
       });
     }
 
-    await Promise.all([
-      context.queryClient.ensureQueryData({
-        queryKey: ["products"],
-        queryFn: () => fetchProducts(),
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: ["categories"],
-        queryFn: fetchCategories,
-      }),
-    ]);
+    try {
+      await Promise.all([
+        context.queryClient.ensureQueryData({
+          queryKey: ["products"],
+          queryFn: () => fetchProducts(),
+        }),
+        context.queryClient.ensureQueryData({
+          queryKey: ["categories"],
+          queryFn: fetchCategories,
+        }),
+      ]);
+    } catch (err) {
+      console.error("[SSR Boutique] Failed to prefetch data:", err);
+    }
   },
   component: BoutiquePage,
 });
