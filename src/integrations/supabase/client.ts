@@ -17,8 +17,8 @@ function createResilientSupabaseFetch(
       typeof input === "string"
         ? input
         : typeof Request !== "undefined" && input instanceof Request
-        ? input.url
-        : String(input);
+          ? input.url
+          : String(input);
 
     const headers = new Headers(
       typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,

@@ -142,8 +142,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         : null,
     ].filter((m): m is { name: string; content: string } => m !== null);
 
-    const supabaseUrl =
-      import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
     let supabaseOrigin = "";
     try {
       if (supabaseUrl) supabaseOrigin = new URL(supabaseUrl).origin;
