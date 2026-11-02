@@ -42,13 +42,13 @@ sinon l'en-tête collant casse.
 
 ## Bases de données & Redondance (important)
 
-Le projet utilise une architecture résiliente à triple niveau :
+Le projet utilise une architecture résiliente avec une hiérarchie stricte à 3 niveaux :
 
-| Plateforme / Projet                             | Rôle                                    | Description                                                                                                                                                           |
-| ----------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Supabase Principal** (`dnakohzxqxpnqfopxtni`) | **Base primaire de production**         | Compte personnel de la marque. Contient les 96 produits, 7 catégories, avis clients, preuves d'authenticité et comptes admin. Requêtée en priorité par Vercel.        |
-| **Supabase Lovable** (`zoagwbhgpaslyjjsdnnv`)   | **Secours automatique (Failover)**      | Réplique temps réel. Le client (`client.ts`) bascule dessus de façon transparente si la base principale met plus de 7 s à répondre ou retourne une erreur réseau/DNS. |
-| **Neon** (`neon.tech`)                          | **Miroir externe & Archive PostgreSQL** | Base PostgreSQL indépendante hors de l'écosystème Supabase. Contient le schéma complet et le catalogue synchronisé.                                                   |
+| Priorité               | Plateforme / Projet                             | Rôle                                         | Description                                                                                                                                                                              |
+| ---------------------- | ----------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1er (Principal)**    | **Supabase Principal** (`dnakohzxqxpnqfopxtni`) | **Base primaire de production**              | Compte personnel de la marque. Source de vérité contenant les 96 produits, 7 catégories, avis clients, preuves d'authenticité et comptes admin. Requêtée en priorité absolue par Vercel. |
+| **2ème (Secours N°1)** | **Neon** (`neon.tech`)                          | **1ère base de secours & Miroir PostgreSQL** | Base PostgreSQL indépendante hors de l'écosystème Supabase. Miroir complet du catalogue synchronisé automatiquement (chaque nuit et sur demande).                                        |
+| **3ème (Secours N°2)** | **Supabase Lovable** (`zoagwbhgpaslyjjsdnnv`)   | **Secours d'urgence (Failover)**             | Deuxième base de secours de réserve en cas de rupture des deux premières. Le client (`client.ts`) peut basculer dessus de façon transparente.                                            |
 
 - RLS partout ; rôle admin via `private.has_role(auth.uid(), 'admin'::public.app_role)`.
   Inscriptions publiques désactivées. Le bucket `product-images` est public/signé.
