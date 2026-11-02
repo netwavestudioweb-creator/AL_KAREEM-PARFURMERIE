@@ -42,4 +42,8 @@ dist-ssr
 /*.png
 /*.jpg
 
+# Database dumps & local backups
+neon/
+neon-backup.sql
+
 .claude/

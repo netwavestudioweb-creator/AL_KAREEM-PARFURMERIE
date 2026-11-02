@@ -40,12 +40,15 @@ Charte : fond ivoire, violet `#3F1A5E` / `#241034`, or `#E9C46A` (texte or : `#8
 polices Inter + Cormorant Garamond (hébergées localement). `overflow-x: clip` (pas `hidden`) sur html/body,
 sinon l'en-tête collant casse.
 
-## Bases de données Supabase (important)
+## Bases de données & Redondance (important)
 
-| Projet | Rôle |
-|---|---|
-| `dnakohzxqxpnqfopxtni` | **Base principale de production du site** (compte personnel, 96 produits, admin, catégories, avis). |
-| `zoagwbhgpaslyjjsdnnv` | **Base de secours (Failover automatique)** : si la base principale est indisponible, le client bascule dessus automatiquement. |
+Le projet utilise une architecture résiliente à triple niveau :
+
+| Plateforme / Projet                             | Rôle                                    | Description                                                                                                                                                           |
+| ----------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Supabase Principal** (`dnakohzxqxpnqfopxtni`) | **Base primaire de production**         | Compte personnel de la marque. Contient les 96 produits, 7 catégories, avis clients, preuves d'authenticité et comptes admin. Requêtée en priorité par Vercel.        |
+| **Supabase Lovable** (`zoagwbhgpaslyjjsdnnv`)   | **Secours automatique (Failover)**      | Réplique temps réel. Le client (`client.ts`) bascule dessus de façon transparente si la base principale met plus de 7 s à répondre ou retourne une erreur réseau/DNS. |
+| **Neon** (`neon.tech`)                          | **Miroir externe & Archive PostgreSQL** | Base PostgreSQL indépendante hors de l'écosystème Supabase. Contient le schéma complet et le catalogue synchronisé.                                                   |
 
 - RLS partout ; rôle admin via `private.has_role(auth.uid(), 'admin'::public.app_role)`.
   Inscriptions publiques désactivées. Le bucket `product-images` est public/signé.
@@ -56,10 +59,33 @@ sinon l'en-tête collant casse.
 ### Anti-pause (plan gratuit, pause après 7 jours d'inactivité)
 
 `.github/workflows/supabase-keepalive.yml` lance `scripts/keep-supabase-alive.mjs` le lundi et le jeudi
-à 08:00 UTC (et à la demande depuis l'onglet Actions). Il interroge les deux bases et échoue s'il n'obtient
+à 08:00 UTC (et à la demande depuis l'onglet Actions). Il interroge les deux bases Supabase et échoue s'il n'obtient
 pas HTTP 200 (GitHub envoie alors un e-mail). Secrets GitHub : `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`,
 `SUPABASE_URL_2`, `SUPABASE_PUBLISHABLE_KEY_2`. Il réactive aussi le workflow à chaque passage
 (GitHub coupe les tâches planifiées d'un dépôt public après 60 jours sans activité).
+
+### Synchronisation continue des bases (Mises à jour des données)
+
+Au fur et à mesure que la base principale évolue (nouveaux parfums, changement de prix, ajustement des stocks) :
+
+1. **Option 1 (Automatisée via GitHub Actions — Recommandée)** :
+   - Un workflow planifié (ex. quotidien à 02:00 UTC ou déclenché manuellement depuis l'onglet Actions) interroge l'API de la base principale `dnakohzxqxpnqfopxtni`.
+   - Il compare et applique les `INSERT` / `UPDATE` sur la base de secours Supabase (`zoagwbhgpaslyjjsdnnv`) et sur la base Neon via `scripts/push-to-neon.mjs`.
+   - Secret GitHub requis : `NEON_DATABASE_URL` (chaîne de connexion `postgresql://...`).
+
+2. **Option 2 (Double écriture dans le panneau `/admin`)** :
+   - Dans le formulaire produit (`src/components/admin/product-form.tsx`), la validation d'un enregistrement écrit d'abord sur la base principale puis réplique la mutation sur la base de secours.
+   - Avantage : synchronisation instantanée dès qu'un administrateur sauvegarde un produit sur le site.
+
+3. **Option 3 (Supabase Database Webhooks)** :
+   - Déclencheur webhook natif Supabase sur les tables `products`, `categories` qui notifie une fonction serverless Vercel ou Edge Function répercutant l'événement sur Neon.
+
+4. **Synchronisation ponctuelle / manuelle vers Neon** :
+   - Script Node.js prêt à l'emploi :
+     ```bash
+     node scripts/push-to-neon.mjs "postgresql://neondb_owner:xxxx@ep-xyz.neon.tech/neondb?sslmode=require"
+     ```
+   - Ou via les lots SQL découpés dans le dossier `neon/` (exécutables directement dans le SQL Editor Neon sans risque de dépassement de limite de texte).
 
 ## Fonctionnalités notables
 
@@ -86,9 +112,9 @@ pas HTTP 200 (GitHub envoie alors un e-mail). Secrets GitHub : `SUPABASE_URL`, `
 - Messages de commit en anglais, conventionnels (`feat:`, `fix:`…). Interface et textes du site en français.
 - Aucune modification de base sans accord explicite.
 
-## Historique (oct. 2026)
+## Historique
 
-1. Audit, puis refonte complète validée sur maquettes (boutique d'abord, inspiration e-commerce US) :
+1. **Octobre 2026** : Audit, puis refonte complète validée sur maquettes (boutique d'abord, inspiration e-commerce US) :
    en-tête, barre d'onglets mobile, listing avec filtres, fiche produit, panier en une étape, admin.
 2. Sécurité et vitesse : CSP, JSON-LD échappé, consentement, cache CDN, Supabase chargé à la demande.
    Bugs corrigés : filtres catégorie, en-tête collant, double chargement, prix WhatsApp périmé, liens produits,
@@ -99,11 +125,12 @@ pas HTTP 200 (GitHub envoie alors un e-mail). Secrets GitHub : `SUPABASE_URL`, `
 6. Keepalive Supabase fiabilisé (PR #8) et étendu à la seconde base.
 7. Marketing (hors dépôt) : affiche unique 4:5, storyboard + déroulé de la pub V9,
    vidéo `AlKareem_Pub_V9_40s_sans-musique.mp4` (40 s, 9:16, dans Téléchargements, sans son).
+8. **Novembre 2026** : Migration complète vers la base Supabase personnelle `dnakohzxqxpnqfopxtni` (96 produits, 7 catégories, preuves, témoignages). Architecture résiliente avec failover automatique vers Lovable (`zoagwbhgpaslyjjsdnnv`) et loaders SSR protégés contre les erreurs 500. Création d'un miroir PostgreSQL externe sur Neon (`neon.tech`) avec script d'export et d'injection automatique `scripts/push-to-neon.mjs`. Variables Vercel de production mises à jour et validées.
 
 ## Reste à faire / idées
 
+- Automatisation continue : mettre en place un workflow GitHub Actions de synchronisation quotidienne vers Neon et Lovable (nécessite le secret `NEON_DATABASE_URL`).
 - Pub V9 : ajouter musique/voix off ; remplacer la scène « avis » par un vrai avis publié ; offre du moment,
   compte Instagram de la marque ; versions 15 s, 6 s et 4:5.
 - Google Business Profile + Search Console ; acheter `alkareemparfumerie.com` (orthographe correcte) en redirection.
 - Règle de limitation de débit dans le pare-feu Vercel ; déconnecter GitHub dans Lovable.
-- Migration vers la base personnelle `dnakohzx…` (nécessite la clé service_role dans `.env`).

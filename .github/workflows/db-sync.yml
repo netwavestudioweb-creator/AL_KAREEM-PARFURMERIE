@@ -1,0 +1,34 @@
+name: 🔄 Synchronisation des Bases de Données
+
+on:
+  # Tous les jours à 02h00 UTC
+  schedule:
+    - cron: "0 2 * * *"
+
+  # Déclenchement manuel en un clic depuis l'onglet Actions de GitHub
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Synchronisation Supabase vers Neon
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout du code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: 🔄 Exécuter la synchronisation
+        env:
+          SUPABASE_PRIMARY_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PRIMARY_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: node scripts/sync-databases.mjs
