@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { thumbnailPath, THUMB_WIDTHS } from "@/lib/catalog";
 
 const BUCKET = "product-images";
 const MAX_DIM = 900;
@@ -42,10 +43,13 @@ function supportsWebp(): boolean {
   }
 }
 
-async function compressImage(file: File): Promise<{ blob: Blob; ext: string; type: string }> {
+async function compressImage(
+  file: Blob,
+  maxDim = MAX_DIM,
+): Promise<{ blob: Blob; ext: string; type: string }> {
   // createImageBitmap échoue si le contenu n'est pas réellement décodable.
   const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX_DIM / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
   const w = Math.round(bitmap.width * scale);
   const h = Math.round(bitmap.height * scale);
   const canvas = document.createElement("canvas");
@@ -78,6 +82,24 @@ export async function uploadImage(file: File, prefix = ""): Promise<string> {
     upsert: false,
   });
   if (error) throw error;
+
+  // Vignettes servies par le site (pas de redimensionnement à la volée sur l'offre gratuite).
+  // Un échec ici n'empêche pas l'envoi (les cartes produits retombent sur l'original) ;
+  // `node --env-file=.env scripts/generate-thumbnails.mjs --apply` recrée ce qui manque.
+  await Promise.all(
+    THUMB_WIDTHS.map(async (w) => {
+      try {
+        const thumb = w >= MAX_DIM ? { blob, type } : await compressImage(blob, w);
+        await supabase.storage.from(BUCKET).upload(thumbnailPath(path, w), thumb.blob, {
+          contentType: thumb.type,
+          cacheControl: CACHE_CONTROL,
+          upsert: true,
+        });
+      } catch {
+        /* ignore */
+      }
+    }),
+  );
 
   // On génère une URL signée longue durée (10 ans) — stable et garantie accessible
   const { data: signData, error: signErr } = await supabase.storage
