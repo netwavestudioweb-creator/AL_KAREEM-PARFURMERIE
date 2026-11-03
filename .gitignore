@@ -50,3 +50,4 @@ neon-backup.sql
 
 # Export des anciennes commandes (données clients)
 supabase/import-anciennes-commandes.sql
+supabase/activer-notifications.sql

@@ -10,6 +10,7 @@ import {
   whatsappNumberFromOrderPhone,
 } from "@/lib/reviews";
 import { toast } from "sonner";
+import { PushToggle } from "@/components/admin/push-toggle";
 
 export const Route = createFileRoute("/admin/commandes")({
   component: AdminOrdersPage,
@@ -157,6 +158,8 @@ function AdminOrdersPage() {
         <h1 className="font-serif text-2xl text-gray-900">Commandes</h1>
         <div className="text-xs text-gray-500">{orders.length} au total</div>
       </div>
+
+      <PushToggle />
 
       <div className="bg-white rounded-2xl border border-gray-200 p-3 flex flex-wrap gap-2 mb-4">
         <button
