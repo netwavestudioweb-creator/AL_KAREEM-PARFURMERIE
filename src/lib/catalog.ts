@@ -51,6 +51,30 @@ const PLACEHOLDER =
 /** À passer à "true" seulement si le projet Supabase a les transformations d'images (offre Pro). */
 const IMAGE_TRANSFORMS = import.meta.env.VITE_SUPABASE_IMAGE_TRANSFORMS === "true";
 
+const PRIMARY_SUPABASE_URL: string | undefined =
+  import.meta.env.VITE_SUPABASE_URL ||
+  (typeof process !== "undefined" ? process.env?.SUPABASE_URL : undefined);
+
+/** Largeurs des vignettes WebP précalculées dans le bucket (thumbs/<largeur>/<chemin>.webp). */
+export const THUMB_WIDTHS = [400, 900] as const;
+
+export function thumbnailPath(path: string, width: number): string {
+  return `thumbs/${width}/${path.replace(/\.[a-z0-9]+$/i, "")}.webp`;
+}
+
+/**
+ * URL publique de la vignette la plus proche de `size`, pour une image du bucket
+ * « product-images » de la base principale. `null` pour toute autre image (base de secours,
+ * lien externe) : elle est alors servie telle quelle.
+ */
+function thumbnailUrl(url: string, size: number): string | null {
+  if (!PRIMARY_SUPABASE_URL || !url.startsWith(PRIMARY_SUPABASE_URL)) return null;
+  const m = url.match(/\/storage\/v1\/object\/(?:public|sign)\/product-images\/([^?]+)/);
+  if (!m || m[1].startsWith("thumbs/")) return null;
+  const width = THUMB_WIDTHS.find((w) => w >= size) ?? THUMB_WIDTHS[THUMB_WIDTHS.length - 1];
+  return `${PRIMARY_SUPABASE_URL}/storage/v1/object/public/product-images/${thumbnailPath(decodeURIComponent(m[1]), width)}`;
+}
+
 /**
  * Returns an optimized Supabase CDN image URL (WebP, resized, edge-cached).
  * Supports both signed and public bucket URLs from Supabase.
@@ -64,8 +88,9 @@ export function getOptimizedImageUrl(
   if (!url) return PLACEHOLDER;
   if (url.startsWith("data:")) return url;
   // Le redimensionnement (/render/image/) est réservé aux offres payantes de Supabase :
-  // la base principale (offre gratuite) répond 403 « FeatureNotEnabled ». On sert l'original.
-  if (!IMAGE_TRANSFORMS) return url;
+  // la base principale (offre gratuite) répond 403 « FeatureNotEnabled ». On sert la vignette
+  // précalculée (scripts/generate-thumbnails.mjs, uploadImage), sinon l'original.
+  if (!IMAGE_TRANSFORMS) return thumbnailUrl(url, Math.max(width, height)) ?? url;
 
   // Signed storage URL -> transform via Supabase image render endpoint for edge CDN compression
   if (url.includes("/storage/v1/object/sign/")) {
