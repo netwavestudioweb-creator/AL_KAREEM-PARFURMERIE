@@ -36,6 +36,7 @@ import { Route as MarquesMarqueRouteImport } from './routes/marques.$marque'
 import { Route as ParfumSlugRouteImport } from './routes/parfum.$slug'
 import { Route as AdminProduitsIdRouteImport } from './routes/admin/produits.$id'
 import { Route as AdminProduitsNouveauRouteImport } from './routes/admin/produits.nouveau'
+import { Route as ApiPushNewOrderRouteImport } from './routes/api.push.new-order'
 import { Route as BoutiqueGenreGenreRouteImport } from './routes/boutique.genre.$genre'
 
 const IndexRoute = IndexRouteImport.update({
@@ -173,6 +174,11 @@ const AdminProduitsNouveauRoute = AdminProduitsNouveauRouteImport.update({
   path: '/produits/nouveau',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ApiPushNewOrderRoute = ApiPushNewOrderRouteImport.update({
+  id: '/api/push/new-order',
+  path: '/api/push/new-order',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BoutiqueGenreGenreRoute = BoutiqueGenreGenreRouteImport.update({
   id: '/boutique/genre/$genre',
   path: '/boutique/genre/$genre',
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/conseils/': typeof ConseilsIndexRoute
   '/admin/produits/$id': typeof AdminProduitsIdRoute
   '/admin/produits/nouveau': typeof AdminProduitsNouveauRoute
+  '/api/push/new-order': typeof ApiPushNewOrderRoute
   '/boutique/genre/$genre': typeof BoutiqueGenreGenreRoute
 }
 export interface FileRoutesByTo {
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/conseils': typeof ConseilsIndexRoute
   '/admin/produits/$id': typeof AdminProduitsIdRoute
   '/admin/produits/nouveau': typeof AdminProduitsNouveauRoute
+  '/api/push/new-order': typeof ApiPushNewOrderRoute
   '/boutique/genre/$genre': typeof BoutiqueGenreGenreRoute
 }
 export interface FileRoutesById {
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/conseils/': typeof ConseilsIndexRoute
   '/admin/produits/$id': typeof AdminProduitsIdRoute
   '/admin/produits/nouveau': typeof AdminProduitsNouveauRoute
+  '/api/push/new-order': typeof ApiPushNewOrderRoute
   '/boutique/genre/$genre': typeof BoutiqueGenreGenreRoute
 }
 export interface FileRouteTypes {
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/conseils/'
     | '/admin/produits/$id'
     | '/admin/produits/nouveau'
+    | '/api/push/new-order'
     | '/boutique/genre/$genre'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/conseils'
     | '/admin/produits/$id'
     | '/admin/produits/nouveau'
+    | '/api/push/new-order'
     | '/boutique/genre/$genre'
   id:
     | '__root__'
@@ -358,6 +369,7 @@ export interface FileRouteTypes {
     | '/conseils/'
     | '/admin/produits/$id'
     | '/admin/produits/nouveau'
+    | '/api/push/new-order'
     | '/boutique/genre/$genre'
   fileRoutesById: FileRoutesById
 }
@@ -381,6 +393,7 @@ export interface RootRouteChildren {
   ParfumSlugRoute: typeof ParfumSlugRoute
   BoutiqueIndexRoute: typeof BoutiqueIndexRoute
   ConseilsIndexRoute: typeof ConseilsIndexRoute
+  ApiPushNewOrderRoute: typeof ApiPushNewOrderRoute
   BoutiqueGenreGenreRoute: typeof BoutiqueGenreGenreRoute
 }
 
@@ -575,6 +588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProduitsNouveauRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/api/push/new-order': {
+      id: '/api/push/new-order'
+      path: '/api/push/new-order'
+      fullPath: '/api/push/new-order'
+      preLoaderRoute: typeof ApiPushNewOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/boutique/genre/$genre': {
       id: '/boutique/genre/$genre'
       path: '/boutique/genre/$genre'
@@ -631,6 +651,7 @@ const rootRouteChildren: RootRouteChildren = {
   ParfumSlugRoute: ParfumSlugRoute,
   BoutiqueIndexRoute: BoutiqueIndexRoute,
   ConseilsIndexRoute: ConseilsIndexRoute,
+  ApiPushNewOrderRoute: ApiPushNewOrderRoute,
   BoutiqueGenreGenreRoute: BoutiqueGenreGenreRoute,
 }
 export const routeTree = rootRouteImport
