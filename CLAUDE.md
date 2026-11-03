@@ -126,6 +126,7 @@ Au fur et à mesure que la base principale évolue (nouveaux parfums, changement
 7. Marketing (hors dépôt) : affiche unique 4:5, storyboard + déroulé de la pub V9,
    vidéo `AlKareem_Pub_V9_40s_sans-musique.mp4` (40 s, 9:16, dans Téléchargements, sans son).
 8. **Novembre 2026** : Migration complète vers la base Supabase personnelle `dnakohzxqxpnqfopxtni` (96 produits, 7 catégories, preuves, témoignages). Architecture résiliente avec failover automatique vers Lovable (`zoagwbhgpaslyjjsdnnv`) et loaders SSR protégés contre les erreurs 500. Création d'un miroir PostgreSQL externe sur Neon (`neon.tech`) avec script d'export et d'injection automatique `scripts/push-to-neon.mjs`. Variables Vercel de production mises à jour et validées.
+9. **03/11/2026** : images rapatriées de Lovable vers la base principale (`scripts/migrate-images-from-lovable.mjs`) et vignettes WebP précalculées dans `thumbs/` (`scripts/generate-thumbnails.mjs`) : l'offre gratuite n'a pas de redimensionnement d'images. Les 10 commandes, 1 message et 7 avis d'avant le 01/11, oubliés par la migration, ont été réimportés (`scripts/export-lovable-orders.mjs`).
 
 ## Reste à faire / idées
 
