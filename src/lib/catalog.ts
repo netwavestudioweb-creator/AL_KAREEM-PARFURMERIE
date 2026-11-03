@@ -48,6 +48,9 @@ export interface Product {
 const PLACEHOLDER =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23F3E9F7'/><text x='50%25' y='50%25' font-family='serif' font-size='28' fill='%236B2FA0' text-anchor='middle' dominant-baseline='middle'>Al Kareem</text></svg>";
 
+/** À passer à "true" seulement si le projet Supabase a les transformations d'images (offre Pro). */
+const IMAGE_TRANSFORMS = import.meta.env.VITE_SUPABASE_IMAGE_TRANSFORMS === "true";
+
 /**
  * Returns an optimized Supabase CDN image URL (WebP, resized, edge-cached).
  * Supports both signed and public bucket URLs from Supabase.
@@ -60,6 +63,9 @@ export function getOptimizedImageUrl(
 ): string {
   if (!url) return PLACEHOLDER;
   if (url.startsWith("data:")) return url;
+  // Le redimensionnement (/render/image/) est réservé aux offres payantes de Supabase :
+  // la base principale (offre gratuite) répond 403 « FeatureNotEnabled ». On sert l'original.
+  if (!IMAGE_TRANSFORMS) return url;
 
   // Signed storage URL -> transform via Supabase image render endpoint for edge CDN compression
   if (url.includes("/storage/v1/object/sign/")) {
