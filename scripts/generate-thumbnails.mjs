@@ -85,9 +85,12 @@ async function listFolder(prefix) {
 }
 const existing = new Set();
 if (!FORCE) {
-  const dirs = new Set([...paths].map((p) => p.slice(0, p.lastIndexOf("/"))));
+  const dirs = new Set(
+    [...paths].map((p) => (p.includes("/") ? p.slice(0, p.lastIndexOf("/")) : "")),
+  );
   for (const w of WIDTHS) {
-    for (const d of dirs) (await listFolder(`thumbs/${w}/${d}`)).forEach((f) => existing.add(f));
+    for (const d of dirs)
+      (await listFolder(d ? `thumbs/${w}/${d}` : `thumbs/${w}`)).forEach((f) => existing.add(f));
   }
 }
 const todo = [...paths].filter((p) => WIDTHS.some((w) => !existing.has(thumbPath(p, w))));
