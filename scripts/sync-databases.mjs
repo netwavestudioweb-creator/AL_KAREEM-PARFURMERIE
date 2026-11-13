@@ -16,6 +16,14 @@
 
 import { execSync } from "node:child_process";
 
+if (typeof process.loadEnvFile === "function") {
+  try {
+    process.loadEnvFile();
+  } catch {
+    // .env absent ou variables déjà injectées (ex: GitHub Actions)
+  }
+}
+
 const PRIMARY_URL =
   process.env.SUPABASE_PRIMARY_URL ||
   process.env.SUPABASE_URL ||
