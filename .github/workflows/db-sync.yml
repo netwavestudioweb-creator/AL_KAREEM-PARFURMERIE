@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 jobs:
   sync:
@@ -32,3 +33,10 @@ jobs:
           SUPABASE_PRIMARY_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
         run: node scripts/sync-databases.mjs
+
+      # Empêche GitHub de désactiver ce workflow automatique en cas d'inactivité sur le dépôt (seuil 60 jours)
+      - name: ♻️ Garder le workflow actif
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable db-sync.yml --repo "${{ github.repository }}" || true
