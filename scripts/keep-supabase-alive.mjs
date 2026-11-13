@@ -23,6 +23,14 @@
  */
 
 // ── Configuration ─────────────────────────────────────────────────────────────
+if (typeof process.loadEnvFile === "function") {
+  try {
+    process.loadEnvFile();
+  } catch {
+    // .env absent ou variables déjà injectées (ex: GitHub Actions)
+  }
+}
+
 const env = process.env;
 const targets = [
   {
