@@ -16,6 +16,7 @@ import { Route as CgvRouteImport } from './routes/cgv'
 import { Route as CommandeEnvoyeeRouteImport } from './routes/commande-envoyee'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FetesRouteImport } from './routes/fetes'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as PanierRouteImport } from './routes/panier'
@@ -72,6 +73,11 @@ const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FetesRoute = FetesRouteImport.update({
+  id: '/fetes',
+  path: '/fetes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/commande-envoyee': typeof CommandeEnvoyeeRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/fetes': typeof FetesRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/panier': typeof PanierRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/commande-envoyee': typeof CommandeEnvoyeeRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/fetes': typeof FetesRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/panier': typeof PanierRoute
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/commande-envoyee': typeof CommandeEnvoyeeRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/fetes': typeof FetesRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/panier': typeof PanierRoute
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/commande-envoyee'
     | '/confidentialite'
     | '/contact'
+    | '/fetes'
     | '/llms.txt'
     | '/mentions-legales'
     | '/panier'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/commande-envoyee'
     | '/confidentialite'
     | '/contact'
+    | '/fetes'
     | '/llms.txt'
     | '/mentions-legales'
     | '/panier'
@@ -349,6 +360,7 @@ export interface FileRouteTypes {
     | '/commande-envoyee'
     | '/confidentialite'
     | '/contact'
+    | '/fetes'
     | '/llms.txt'
     | '/mentions-legales'
     | '/panier'
@@ -381,6 +393,7 @@ export interface RootRouteChildren {
   CommandeEnvoyeeRoute: typeof CommandeEnvoyeeRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
+  FetesRoute: typeof FetesRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   PanierRoute: typeof PanierRoute
@@ -446,6 +459,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fetes': {
+      id: '/fetes'
+      path: '/fetes'
+      fullPath: '/fetes'
+      preLoaderRoute: typeof FetesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/llms.txt': {
@@ -639,6 +659,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommandeEnvoyeeRoute: CommandeEnvoyeeRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
+  FetesRoute: FetesRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   PanierRoute: PanierRoute,
