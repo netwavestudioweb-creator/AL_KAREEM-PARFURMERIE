@@ -4,305 +4,394 @@ import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/layout";
 import { fetchProducts } from "@/lib/products";
 import { ProductCard } from "@/components/product-card";
-import { formatFCFA, type Product } from "@/lib/products";
 import {
   Sparkles,
-  Gift,
-  Truck,
-  ShieldCheck,
-  Clock,
-  MessageCircle,
+  PartyPopper,
+  Flame,
+  Moon,
+  Wine,
   Play,
-  Heart,
-  Share2,
-  CheckCircle2,
-  Award,
-  Volume2,
-  ShoppingBag,
-  Star,
   Eye,
+  Sliders,
+  Palette,
+  Star,
+  Crown,
+  Check,
+  Volume2,
+  Clock,
   ArrowRight,
+  Layers,
 } from "lucide-react";
 
 export const Route = createFileRoute("/fetes")({
   head: () => ({
     meta: [
-      { title: "Édition Spéciale Fêtes de Fin d'Année — Al Kareem Parfumerie" },
+      { title: "Ambiance Féerique & Nuits de Fêtes — Al Kareem Parfumerie" },
       {
         name: "description",
         content:
-          "Découvrez notre sélection féerique pour Noël et le Nouvel An : coffrets cadeaux d'exception, parfums de fête et livraison express garantie à Cotonou.",
+          "Plongez dans l'ambiance féerique de Noël et du Réveillon avec Al Kareem Parfumerie : lumières dorées, sillages de gala et élégance festive.",
       },
     ],
   }),
-  component: FetesPage,
+  component: FetesAtmospherePage,
 });
 
-type TabMode = "maquette" | "affiches" | "videos" | "guide";
+type TabView = "vitrine" | "affiche" | "video" | "elements";
 
-export function FetesPage() {
-  const [activeTab, setActiveTab] = useState<TabMode>("maquette");
-  const [giftFilter, setGiftFilter] = useState<string>("tous");
+export function FetesAtmospherePage() {
+  const [activeTab, setActiveTab] = useState<TabView>("vitrine");
+
+  // Commandes interactives d'ambiance pour l'utilisateur
+  const [showSparkles, setShowSparkles] = useState(true);
+  const [showGlow, setShowGlow] = useState(true);
+  const [showSnowflakes, setShowSnowflakes] = useState(true);
+  const [ambientScent, setAmbientScent] = useState<"tous" | "ambre" | "oud" | "petillant">("tous");
+  const [afficheStyle, setAfficheStyle] = useState<"nuit" | "or">("nuit");
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => fetchProducts(),
   });
 
-  // Sélections pour la maquette fêtes
-  const coffrets = useMemo(() => {
-    return products.filter(
-      (p) =>
-        p.category === "coffrets-cadeaux" ||
-        p.category === "coffrets" ||
-        p.name.toLowerCase().includes("coffret") ||
-        p.name.toLowerCase().includes("set") ||
-        p.name.toLowerCase().includes("collection"),
-    );
-  }, [products]);
+  // Filtres olfactifs pour l'ambiance des fêtes
+  const scentsAtmosphere = useMemo(() => {
+    if (ambientScent === "ambre") {
+      return products.filter(
+        (p) =>
+          p.name.toLowerCase().includes("amber") ||
+          p.name.toLowerCase().includes("ambre") ||
+          p.name.toLowerCase().includes("rouge") ||
+          p.name.toLowerCase().includes("vanilla") ||
+          p.name.toLowerCase().includes("velvet"),
+      );
+    }
+    if (ambientScent === "oud") {
+      return products.filter(
+        (p) =>
+          p.name.toLowerCase().includes("oud") ||
+          p.name.toLowerCase().includes("bois") ||
+          p.name.toLowerCase().includes("royal") ||
+          p.name.toLowerCase().includes("noir") ||
+          p.name.toLowerCase().includes("intense"),
+      );
+    }
+    if (ambientScent === "petillant") {
+      return products.filter(
+        (p) =>
+          p.name.toLowerCase().includes("white") ||
+          p.name.toLowerCase().includes("cristal") ||
+          p.name.toLowerCase().includes("rose") ||
+          p.name.toLowerCase().includes("eau") ||
+          p.name.toLowerCase().includes("musk"),
+      );
+    }
+    return products.slice(0, 8);
+  }, [ambientScent, products]);
 
-  const pourElle = useMemo(() => {
-    return products.filter(
-      (p) =>
-        p.category === "femmes" ||
-        p.category === "femme" ||
-        p.name.toLowerCase().includes("pour femme") ||
-        p.name.toLowerCase().includes("woman") ||
-        p.name.toLowerCase().includes("her") ||
-        p.name.toLowerCase().includes("femme"),
-    );
-  }, [products]);
-
-  const pourLui = useMemo(() => {
-    return products.filter(
-      (p) =>
-        p.category === "hommes" ||
-        p.category === "homme" ||
-        p.name.toLowerCase().includes("pour homme") ||
-        p.name.toLowerCase().includes("men") ||
-        p.name.toLowerCase().includes("him") ||
-        p.name.toLowerCase().includes("homme"),
-    );
-  }, [products]);
-
-  const petitsPrix = useMemo(() => {
-    return products.filter((p) => p.price <= 25000);
-  }, [products]);
-
-  const filteredProducts = useMemo(() => {
-    if (giftFilter === "coffrets") return coffrets.length > 0 ? coffrets : products.slice(0, 8);
-    if (giftFilter === "elle") return pourElle.length > 0 ? pourElle : products.slice(0, 8);
-    if (giftFilter === "lui") return pourLui.length > 0 ? pourLui : products.slice(0, 8);
-    if (giftFilter === "petits-prix")
-      return petitsPrix.length > 0 ? petitsPrix : products.slice(0, 8);
-    return products.slice(0, 12);
-  }, [giftFilter, products, coffrets, pourElle, pourLui, petitsPrix]);
+  const displayedProducts =
+    scentsAtmosphere.length > 0 ? scentsAtmosphere.slice(0, 8) : products.slice(0, 8);
 
   return (
     <SiteLayout>
       {/* ────────────────────────────────────────────────────────── */}
-      {/* BARRE DE CONTRÔLE DU STUDIO DE PROPOSITION (STICKY HEADER) */}
+      {/* CONSOLE DE NAVIGATION & DE TEST DE L'AMBIANCE FESTIVE      */}
       {/* ────────────────────────────────────────────────────────── */}
       <aside
-        aria-label="Console de prévisualisation des Fêtes"
-        className="sticky top-[64px] z-30 border-b border-[#E9C46A]/40 bg-[#241034] text-white shadow-lg backdrop-blur-md"
+        aria-label="Console d'ambiance festive"
+        className="sticky top-[64px] z-40 border-b border-[#E9C46A]/50 bg-[#1A0A26] text-white shadow-xl backdrop-blur-md"
       >
         <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-3 px-4 py-2.5 lg:px-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E9C46A] text-[#241034]">
-              <Sparkles className="h-4 w-4" />
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-[#E9C46A] to-[#FDF0CD] text-[#241034] shadow">
+              <PartyPopper className="h-4 w-4" />
             </span>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-[#E9C46A]">
-                Proposition Noël & Nouvel An 2026
+                Esquisse & Démo d'Ambiance de Noël
               </p>
               <p className="text-xs font-medium text-white/90">
-                Aperçu local interactif pour Al Kareem
+                Al Kareem Parfumerie · Célébration & Nuits Précieuses
               </p>
             </div>
           </div>
 
-          {/* Onglets de navigation dans la proposition */}
+          {/* Navigation entre les exemples concrets */}
           <nav
-            aria-label="Vues de la proposition"
-            className="flex items-center gap-1.5 overflow-x-auto rounded-lg bg-black/30 p-1 text-xs"
+            aria-label="Vues de l'ambiance"
+            className="flex items-center gap-1.5 overflow-x-auto rounded-xl bg-black/40 p-1 text-xs"
           >
             <button
-              onClick={() => setActiveTab("maquette")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium transition-all ${
-                activeTab === "maquette"
-                  ? "bg-[#E9C46A] text-[#241034] shadow font-semibold"
+              onClick={() => setActiveTab("vitrine")}
+              className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 font-medium transition-all ${
+                activeTab === "vitrine"
+                  ? "bg-[#E9C46A] text-[#241034] font-semibold shadow"
                   : "text-white/80 hover:text-white"
               }`}
             >
-              <ShoppingBag className="h-3.5 w-3.5" />
-              1. Maquette Site Fêtes
+              <Sparkles className="h-3.5 w-3.5" />
+              1. Esquisse Site : Ambiance Festive
             </button>
             <button
-              onClick={() => setActiveTab("affiches")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium transition-all ${
-                activeTab === "affiches"
-                  ? "bg-[#E9C46A] text-[#241034] shadow font-semibold"
+              onClick={() => setActiveTab("affiche")}
+              className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 font-medium transition-all ${
+                activeTab === "affiche"
+                  ? "bg-[#E9C46A] text-[#241034] font-semibold shadow"
                   : "text-white/80 hover:text-white"
               }`}
             >
               <Eye className="h-3.5 w-3.5" />
-              2. Les 3 Affiches Publicitaires
+              2. Esquisse Affiche : Nuit de Réveillon
             </button>
             <button
-              onClick={() => setActiveTab("videos")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium transition-all ${
-                activeTab === "videos"
-                  ? "bg-[#E9C46A] text-[#241034] shadow font-semibold"
+              onClick={() => setActiveTab("video")}
+              className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 font-medium transition-all ${
+                activeTab === "video"
+                  ? "bg-[#E9C46A] text-[#241034] font-semibold shadow"
                   : "text-white/80 hover:text-white"
               }`}
             >
               <Play className="h-3.5 w-3.5" />
-              3. Vidéos & Storyboards
+              3. Esquisse Vidéo : Storyboard & Spot
             </button>
             <button
-              onClick={() => setActiveTab("guide")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium transition-all ${
-                activeTab === "guide"
-                  ? "bg-[#E9C46A] text-[#241034] shadow font-semibold"
+              onClick={() => setActiveTab("elements")}
+              className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 font-medium transition-all ${
+                activeTab === "elements"
+                  ? "bg-[#E9C46A] text-[#241034] font-semibold shadow"
                   : "text-white/80 hover:text-white"
               }`}
             >
-              <Gift className="h-3.5 w-3.5" />
-              4. Stratégie Cadeaux
+              <Layers className="h-3.5 w-3.5" />
+              4. Décomposition des Éléments
             </button>
           </nav>
+        </div>
+
+        {/* Contrôleur en direct des effets visuels de fête */}
+        <div className="border-t border-white/10 bg-black/30 px-4 py-2 text-[11px] text-white/80">
+          <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-[#E9C46A]">
+              <Sliders className="h-3.5 w-3.5" />
+              <span className="font-semibold uppercase tracking-wider">
+                Testez l'ambiance en direct :
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <label className="flex cursor-pointer items-center gap-1.5 transition-opacity hover:opacity-100">
+                <input
+                  type="checkbox"
+                  checked={showSparkles}
+                  onChange={(e) => setShowSparkles(e.target.checked)}
+                  className="rounded border-[#E9C46A] accent-[#E9C46A]"
+                />
+                <span>✨ Particules dorées scintillantes</span>
+              </label>
+
+              <label className="flex cursor-pointer items-center gap-1.5 transition-opacity hover:opacity-100">
+                <input
+                  type="checkbox"
+                  checked={showGlow}
+                  onChange={(e) => setShowGlow(e.target.checked)}
+                  className="rounded border-[#E9C46A] accent-[#E9C46A]"
+                />
+                <span>🕯️ Lueurs chaudes de Réveillon</span>
+              </label>
+
+              <label className="flex cursor-pointer items-center gap-1.5 transition-opacity hover:opacity-100">
+                <input
+                  type="checkbox"
+                  checked={showSnowflakes}
+                  onChange={(e) => setShowSnowflakes(e.target.checked)}
+                  className="rounded border-[#E9C46A] accent-[#E9C46A]"
+                />
+                <span>❄️ Étoiles & Cristaux festifs</span>
+              </label>
+            </div>
+          </div>
         </div>
       </aside>
 
       {/* ══════════════════════════════════════════════════════════ */}
-      {/* VUE 1 : MAQUETTE INTERACTIVE DU SITE SPÉCIAL FÊTES        */}
+      {/* VUE 1 : ESQUISSE DU SITE EN MODE FÊTE & RÉVEILLON         */}
       {/* ══════════════════════════════════════════════════════════ */}
-      {activeTab === "maquette" && (
-        <div className="bg-[#FAF7F2]">
-          {/* BANDEAU ANNONCE NOËL / RÉVEILLON */}
-          <div className="relative overflow-hidden bg-gradient-to-r from-[#2D1244] via-[#4A1D6D] to-[#2D1244] px-4 py-2.5 text-center text-xs font-medium text-white shadow-inner">
-            <div className="flex items-center justify-center gap-2">
+      {activeTab === "vitrine" && (
+        <div className="relative min-h-screen bg-[#FAF7F2] pb-24 text-[#241034]">
+          {/* BANDEAU FESTIF POÉTIQUE (Non commercial, pure ambiance de Noël) */}
+          <div className="relative overflow-hidden bg-gradient-to-r from-[#1E092F] via-[#3B1457] to-[#1E092F] px-4 py-2.5 text-center text-xs text-white shadow-inner">
+            <div className="flex items-center justify-center gap-2 font-light tracking-wide">
               <Sparkles className="h-3.5 w-3.5 animate-pulse text-[#E9C46A]" />
               <p>
-                <span className="font-semibold text-[#E9C46A]">Fêtes 2026 :</span> Emballage cadeau
-                luxe & ruban doré <strong className="underline">offerts</strong> sur toutes vos
-                commandes. Livraison express garantie à Cotonou & Calavi ! 🎁
+                <span className="font-serif italic text-[#E9C46A]">Nuits Précieuses :</span> Que la
+                magie de Noël et l'éclat du Réveillon illuminent vos plus beaux moments avec Al
+                Kareem.
               </p>
               <Sparkles className="h-3.5 w-3.5 animate-pulse text-[#E9C46A]" />
             </div>
           </div>
 
-          {/* HERO SPÉCIAL FÊTES */}
-          <section className="relative mx-auto mt-2 w-full max-w-[1320px] px-4 lg:mt-6 lg:px-8">
-            <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#1E092F] via-[#2F1149] to-[#12041D] text-white shadow-2xl">
-              {/* Étoiles dorées d'arrière-plan */}
-              <div
-                className="pointer-events-none absolute inset-0 opacity-20"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(#E9C46A 1px, transparent 1px), radial-gradient(#E9C46A 1.5px, transparent 1.5px)",
-                  backgroundSize: "28px 28px, 44px 44px",
-                  backgroundPosition: "0 0, 14px 14px",
-                }}
-              />
+          {/* HERO SPÉCIAL AMBIANCE DE FÊTE */}
+          <section className="relative mx-auto mt-4 w-full max-w-[1320px] px-4 lg:mt-6 lg:px-8">
+            <div
+              className={`relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#12041D] via-[#240A38] to-[#0A0210] p-8 text-white shadow-2xl transition-all duration-700 lg:p-16 ${
+                showGlow ? "shadow-[0_0_50px_rgba(233,196,106,0.2)]" : ""
+              }`}
+            >
+              {/* Effet lueur / bokeh de fête */}
+              {showGlow && (
+                <div
+                  className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[#E9C46A]/20 blur-3xl animate-pulse"
+                  style={{ animationDuration: "4s" }}
+                />
+              )}
+              {showGlow && (
+                <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-[#6C2599]/25 blur-3xl" />
+              )}
 
-              <div className="relative grid min-h-[480px] lg:grid-cols-[1.1fr_0.9fr]">
-                {/* Texte et appel à l'action */}
-                <div className="flex flex-col justify-center px-6 py-12 lg:px-14 lg:py-16">
-                  <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E9C46A]/40 bg-[#E9C46A]/10 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest text-[#E9C46A]">
-                    <Sparkles className="h-3 w-3" /> Édition Spéciale Fêtes de Fin d'Année
+              {/* Particules scintillantes dorées */}
+              {showSparkles && (
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-30"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(#E9C46A 1.5px, transparent 1.5px), radial-gradient(#F3D89A 1px, transparent 1px)",
+                    backgroundSize: "36px 36px, 52px 52px",
+                    backgroundPosition: "0 0, 18px 18px",
+                  }}
+                />
+              )}
+
+              {/* Flocons / cristaux dorés subtils flottants */}
+              {showSnowflakes && (
+                <div className="pointer-events-none absolute inset-0 overflow-hidden text-xs text-[#E9C46A]/30">
+                  <span
+                    className="absolute left-[10%] top-[15%] text-lg animate-bounce"
+                    style={{ animationDuration: "6s" }}
+                  >
+                    ✦
+                  </span>
+                  <span
+                    className="absolute left-[30%] top-[70%] text-sm animate-pulse"
+                    style={{ animationDuration: "3s" }}
+                  >
+                    ✧
+                  </span>
+                  <span
+                    className="absolute left-[75%] top-[25%] text-base animate-bounce"
+                    style={{ animationDuration: "5s" }}
+                  >
+                    ✦
+                  </span>
+                  <span
+                    className="absolute left-[85%] top-[65%] text-xl animate-pulse"
+                    style={{ animationDuration: "4s" }}
+                  >
+                    ✧
+                  </span>
+                  <span className="absolute left-[50%] top-[10%] text-sm">✦</span>
+                </div>
+              )}
+
+              <div className="relative grid items-center gap-12 lg:grid-cols-[1.2fr_0.8fr]">
+                {/* Texte d'ambiance */}
+                <div className="space-y-6">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#E9C46A]/40 bg-[#E9C46A]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-[#E9C46A] backdrop-blur-sm">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>L'Esprit des Fêtes · Célébration & Lumière</span>
                   </div>
 
-                  <h1 className="mt-4 font-serif text-[38px] font-medium leading-[1.08] text-white lg:text-[62px]">
-                    Offrez la Magie d'un <span className="italic text-[#E9C46A]">Sillage d'Or</span>
-                    .
+                  <h1 className="font-serif text-4xl font-normal leading-[1.08] text-white lg:text-[64px]">
+                    Quand la Magie de Noël <br />
+                    s'habille de <span className="italic text-[#E9C46A]">Lumière</span> & de{" "}
+                    <span className="italic text-[#E9C46A]">Sillage</span>.
                   </h1>
 
-                  <p className="mt-4 max-w-[480px] text-sm leading-relaxed text-[#E5D7F0] lg:text-base">
-                    Pour Noël et le Réveillon, sublimez ceux que vous aimez avec nos coffrets
-                    d'exception, fragrances rares et huiles pures. Prêts à offrir dans un écrin de
-                    fête raffiné.
+                  <p className="max-w-xl text-base leading-relaxed text-[#EADAF3]">
+                    Pour vos dîners de réveillon, vos grandes soirées de fête et vos instants
+                    précieux en famille. Découvrez les fragrances nobles qui capturent la chaleur,
+                    l'éclat et l'émotion de cette fin d'année à Cotonou.
                   </p>
 
-                  {/* Boutons d'action */}
-                  <div className="mt-8 flex flex-wrap items-center gap-3">
-                    <a
-                      href="#selection-fetes"
-                      className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-full bg-[#E9C46A] px-7 text-sm font-semibold text-[#241034] shadow-lg transition-transform hover:scale-105 active:scale-95"
-                    >
-                      <Gift className="h-4 w-4" />
-                      Découvrir la Sélection Fêtes
-                    </a>
-                    <a
-                      href="https://wa.me/2290161888987?text=Bonjour%20Al%20Kareem,%20je%20souhaite%20un%20conseil%20cadeau%20pour%20les%20f%C3%AAtes."
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-6 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-                    >
-                      <MessageCircle className="h-4 w-4 text-[#25D366]" />
-                      Conseil Cadeau WhatsApp
-                    </a>
+                  {/* Accents de fête */}
+                  <div className="grid grid-cols-3 gap-3 border-y border-white/15 py-5 text-xs text-[#EADAF3]">
+                    <div className="flex items-center gap-2.5">
+                      <Flame className="h-4 w-4 text-[#E9C46A]" />
+                      <span>Sillages Chaleureux</span>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Wine className="h-4 w-4 text-[#E9C46A]" />
+                      <span>Nuits de Gala</span>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Moon className="h-4 w-4 text-[#E9C46A]" />
+                      <span>Éclat du Réveillon</span>
+                    </div>
                   </div>
 
-                  {/* Badges de réassurance fêtes */}
-                  <div className="mt-8 flex flex-wrap items-center gap-5 border-t border-white/10 pt-5 text-xs text-[#E5D7F0]">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-[#E9C46A]" />
-                      <span>Emballage cadeau offert</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Truck className="h-4 w-4 text-[#E9C46A]" />
-                      <span>Livré le jour même à Cotonou</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-[#E9C46A]" />
-                      <span>100% Parfums certifiés</span>
-                    </div>
+                  <div className="flex flex-wrap items-center gap-4 pt-2">
+                    <a
+                      href="#ambiance-olfactive"
+                      className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-[#E9C46A] to-[#F3D89A] px-8 text-sm font-semibold text-[#241034] shadow-lg transition-transform hover:scale-105"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Explorer les Parfums de Réveillon
+                    </a>
+                    <button
+                      onClick={() => setActiveTab("affiche")}
+                      className="inline-flex h-[52px] items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                    >
+                      <Eye className="h-4 w-4 text-[#E9C46A]" />
+                      Voir l'Affiche de Soirée
+                    </button>
                   </div>
                 </div>
 
-                {/* Visuel vitrine de fête */}
-                <div className="relative hidden items-center justify-center p-8 lg:flex">
-                  <div className="relative aspect-square w-full max-w-[420px] overflow-hidden rounded-2xl border border-[#E9C46A]/30 bg-gradient-to-b from-white/10 to-transparent p-6 shadow-2xl backdrop-blur-sm">
-                    <div className="flex h-full flex-col justify-between rounded-xl border border-dashed border-[#E9C46A]/40 p-6 text-center">
-                      <div className="space-y-1">
-                        <span className="text-3xl">🎁</span>
-                        <h2 className="font-serif text-2xl font-medium text-[#E9C46A]">
-                          Le Coffret Idéal
+                {/* Illustration festive scénarisée */}
+                <div className="relative hidden items-center justify-center lg:flex">
+                  <div className="relative aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-3xl border border-[#E9C46A]/40 bg-gradient-to-b from-[#250B3B]/80 to-[#12041D]/90 p-8 shadow-2xl backdrop-blur-md">
+                    {/* Ruban festif doré stylisé en coin */}
+                    <div className="absolute -right-12 -top-12 h-28 w-28 rotate-45 bg-gradient-to-r from-[#E9C46A] to-[#F3D89A] shadow-md flex items-end justify-center pb-1">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-[#241034]">
+                        FÊTE
+                      </span>
+                    </div>
+
+                    <div className="flex h-full flex-col justify-between text-center">
+                      <div className="space-y-2 pt-4">
+                        <span className="text-4xl">🕯️✨</span>
+                        <h2 className="font-serif text-2xl font-normal text-white">
+                          La Nuit du Réveillon
                         </h2>
-                        <p className="text-xs text-white/70">
-                          Composé selon vos envies ou prêt-à-offrir
+                        <p className="text-xs text-[#E5D7F0]/80">
+                          Une présence inoubliable jusqu'au bout de la nuit
                         </p>
                       </div>
 
-                      <div className="space-y-2 rounded-lg bg-black/40 p-4 text-left text-xs">
-                        <div className="flex justify-between border-b border-white/10 pb-1.5">
-                          <span className="text-white/80">Flacon 100ml au choix</span>
-                          <span className="font-semibold text-[#E9C46A]">Inclus</span>
+                      {/* Notes olfactives de fête */}
+                      <div className="my-auto space-y-2.5 rounded-2xl border border-white/10 bg-black/40 p-5 text-left text-xs">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                          <span className="text-[#E5D7F0]">Ambiance</span>
+                          <span className="font-serif italic text-[#E9C46A]">
+                            Élégante & Festive
+                          </span>
                         </div>
-                        <div className="flex justify-between border-b border-white/10 pb-1.5">
-                          <span className="text-white/80">Déodorant ou Brume assortie</span>
-                          <span className="font-semibold text-[#E9C46A]">Inclus</span>
+                        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                          <span className="text-[#E5D7F0]">Notes Clés</span>
+                          <span className="font-medium text-white">Ambre, Oud & Vanille</span>
                         </div>
-                        <div className="flex justify-between border-b border-white/10 pb-1.5">
-                          <span className="text-white/80">Écrin rigide & ruban doré</span>
-                          <span className="font-semibold text-emerald-400">Offert</span>
+                        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                          <span className="text-[#E5D7F0]">Sillage</span>
+                          <span className="font-medium text-[#E9C46A]">Intense & Majestueux</span>
                         </div>
-                        <div className="flex justify-between pt-1 font-medium">
-                          <span>Carte de vœux manuscrite</span>
-                          <span className="font-semibold text-emerald-400">Offerte</span>
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-[#E5D7F0]">Moment</span>
+                          <span className="font-medium text-emerald-300">24 & 31 Décembre</span>
                         </div>
                       </div>
 
-                      <a
-                        href="https://wa.me/2290161888987?text=Bonjour%20Al%20Kareem,%20je%20veux%20composer%20un%20coffret%20cadeau%20de%20f%C3%AAte."
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#E9C46A] text-xs font-semibold text-[#241034] transition-transform hover:scale-102"
-                      >
-                        Composer mon Coffret Fêtes
-                      </a>
+                      <p className="font-serif italic text-xs text-[#E9C46A]">
+                        « Que votre sillage soit le plus beau souvenir de cette fête. »
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -311,39 +400,40 @@ export function FetesPage() {
           </section>
 
           {/* ────────────────────────────────────────────────────────── */}
-          {/* SÉLECTEUR RAPIDE D'IDÉES CADEAUX (FILTRES INTERACTIFS)     */}
+          {/* SECTION : LES SILLAGES QUI FONT LA FÊTE (AMBIANCE SENSORIELLE) */}
           {/* ────────────────────────────────────────────────────────── */}
           <section
-            id="selection-fetes"
-            className="mx-auto mt-12 w-full max-w-[1320px] px-4 lg:px-8"
+            id="ambiance-olfactive"
+            className="mx-auto mt-16 w-full max-w-[1320px] px-4 lg:px-8"
           >
             <div className="text-center">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8A6420]">
-                Trouvez le Cadeau Parfait
+              <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8A6420]">
+                Symphonie des Fêtes
               </span>
-              <h2 className="mt-1 font-serif text-3xl font-medium text-[#241034] lg:text-4xl">
-                À qui souhaitez-vous faire plaisir ?
+              <h2 className="mt-2 font-serif text-3xl font-medium text-[#241034] lg:text-4xl">
+                Les Parfums des Nuits de Célébration
               </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Une sélection sur-mesure pour chaque personnalité et chaque budget.
+              <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
+                Comment la parfumerie raconte Noël et le Nouvel An : par des notes chaleureuses qui
+                réchauffent l'atmosphère et des sillages étincelants taillés pour les grandes
+                soirées.
               </p>
             </div>
 
-            {/* Boutons de filtres */}
-            <div className="mt-6 flex flex-wrap justify-center gap-2.5">
+            {/* Sélecteur d'atmosphère olfactive */}
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
               {[
-                { id: "tous", label: "✨ Toute la Sélection Fêtes", icon: Sparkles },
-                { id: "coffrets", label: "🎁 Coffrets Cadeaux", icon: Gift },
-                { id: "elle", label: "🌸 Pour Elle (Féminin & Envoûtant)", icon: Heart },
-                { id: "lui", label: "👑 Pour Lui (Boisé & Intense)", icon: Award },
-                { id: "petits-prix", label: "💎 Moins de 25 000 FCFA", icon: ShoppingBag },
+                { id: "tous", label: "🌟 Toute l'Ambiance de Fête", icon: Sparkles },
+                { id: "ambre", label: "🕯️ Les Nuits Ambrées & Chaleureuses", icon: Flame },
+                { id: "oud", label: "👑 L'Oud Impérial du Réveillon", icon: Crown },
+                { id: "petillant", label: "🥂 L'Éclat Pétillant du Nouvel An", icon: Wine },
               ].map((btn) => {
                 const Icon = btn.icon;
-                const isSelected = giftFilter === btn.id;
+                const isSelected = ambientScent === btn.id;
                 return (
                   <button
                     key={btn.id}
-                    onClick={() => setGiftFilter(btn.id)}
+                    onClick={() => setAmbientScent(btn.id as any)}
                     className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-xs font-semibold transition-all ${
                       isSelected
                         ? "border-[#241034] bg-[#241034] text-white shadow-md scale-105"
@@ -359,22 +449,22 @@ export function FetesPage() {
               })}
             </div>
 
-            {/* Grille de produits */}
-            <div className="mt-8 grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 lg:gap-6">
+            {/* Vitrine des flacons baignés dans l'ambiance */}
+            <div className="mt-10 grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 lg:gap-6">
               {isLoading ? (
                 <div className="col-span-full py-16 text-center text-sm text-muted-foreground">
-                  Chargement des fragrances de fête…
+                  Illumination de la galerie des fêtes…
                 </div>
-              ) : filteredProducts.length === 0 ? (
+              ) : displayedProducts.length === 0 ? (
                 <div className="col-span-full py-16 text-center text-sm text-muted-foreground">
-                  Aucun produit ne correspond à ce filtre actuellement.
+                  Chargement des fragrances de réveillon…
                 </div>
               ) : (
-                filteredProducts.map((p) => (
-                  <div key={p.id} className="relative">
-                    {/* Badge cadeau festif */}
-                    <span className="absolute left-2.5 top-2.5 z-10 rounded-full bg-[#241034] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#E9C46A] shadow">
-                      Cadeau Fêtes 🎁
+                displayedProducts.map((p) => (
+                  <div key={p.id} className="relative group">
+                    <span className="absolute left-2.5 top-2.5 z-10 flex items-center gap-1 rounded-full bg-[#1C082A] px-2.5 py-0.5 text-[10px] font-semibold text-[#E9C46A] shadow border border-[#E9C46A]/30">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      Édition Fêtes
                     </span>
                     <ProductCard product={p} />
                   </div>
@@ -384,309 +474,243 @@ export function FetesPage() {
           </section>
 
           {/* ────────────────────────────────────────────────────────── */}
-          {/* BANDEAU DES 4 ENGAGEMENTS FÊTES AL KAREEM                  */}
+          {/* L'EXPÉRIENCE SENSORIELLE DE FIN D'ANNÉE À COTONOU          */}
           {/* ────────────────────────────────────────────────────────── */}
-          <section className="mx-auto mt-16 w-full max-w-[1320px] px-4 lg:px-8">
-            <div className="rounded-2xl border border-[#E9C46A]/40 bg-gradient-to-r from-[#FBF6EE] via-white to-[#FBF6EE] p-6 shadow-sm lg:p-10">
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
-                    <Gift className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-serif text-base font-semibold text-[#241034]">
-                      Emballage Luxe Offert
-                    </h3>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                      Pochette ou coffret rigide avec ruban satiné or et carte de vœux
-                      personnalisée.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
-                    <Clock className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-serif text-base font-semibold text-[#241034]">
-                      Livraison Express Réveillon
-                    </h3>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                      Livré en 2h à 4h à Cotonou & Calavi. Assuré jusqu'au 24 et 31 décembre à 19h !
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
-                    <ShieldCheck className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-serif text-base font-semibold text-[#241034]">
-                      Authenticité Garantie
-                    </h3>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                      100% de parfums authentiques vérifiés. Tenue exceptionnelle pour les soirées.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
-                    <MessageCircle className="h-6 w-6 text-[#25D366]" />
-                  </div>
-                  <div>
-                    <h3 className="font-serif text-base font-semibold text-[#241034]">
-                      Paiement à la Réception
-                    </h3>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                      Validez sur WhatsApp, payez en mains propres (MTN MoMo, Moov ou Espèces).
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* APPEL WHATSAPP VIP FÊTES */}
-          <section className="mx-auto my-16 w-full max-w-[1320px] px-4 lg:px-8">
-            <div className="flex flex-col items-center justify-between gap-6 rounded-2xl bg-[#241034] p-8 text-white lg:flex-row lg:px-12">
-              <div className="space-y-1 text-center lg:text-left">
-                <span className="text-[11px] font-semibold uppercase tracking-widest text-[#E9C46A]">
-                  Assistance Personnalisée Fêtes
+          <section className="mx-auto mt-20 w-full max-w-[1320px] px-4 lg:px-8">
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="rounded-2xl border border-[#E9C46A]/30 bg-white p-7 shadow-sm">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
+                  <Flame className="h-6 w-6" />
                 </span>
-                <h3 className="font-serif text-2xl font-medium lg:text-3xl">
-                  Vous hésitez sur le choix du parfum ?
+                <h3 className="mt-4 font-serif text-xl font-medium text-[#241034]">
+                  La Chaleur du Dîner de Noël
                 </h3>
-                <p className="text-sm text-[#E5D7F0]">
-                  Donnez-nous la personnalité ou les goûts de la personne, nous sélectionnons son
-                  parfum idéal.
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  Le moment où les proches se réunissent autour d'une table illuminée. Le parfum
+                  crée une enveloppe rassurante, gourmande et inoubliable, mariant épices douces et
+                  vanille noble.
                 </p>
               </div>
 
-              <a
-                href="https://wa.me/2290161888987?text=Bonjour%20Al%20Kareem,%20j'aimerais%20de%20l'aide%20pour%20choisir%20un%20cadeau%20de%20f%C3%AAte."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-[52px] shrink-0 items-center justify-center gap-2.5 rounded-full bg-[#25D366] px-8 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
-              >
-                <MessageCircle className="h-5 w-5" />
-                Écrire à notre Conseillère WhatsApp
-              </a>
+              <div className="rounded-2xl border border-[#E9C46A]/30 bg-white p-7 shadow-sm">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
+                  <Moon className="h-6 w-6" />
+                </span>
+                <h3 className="mt-4 font-serif text-xl font-medium text-[#241034]">
+                  La Nuit du Réveillon du 31
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  L'énergie des réceptions de Cotonou, les tenues de gala et le compte à rebours
+                  vers minuit. Un sillage puissant à base de bois précieux et de muscs intenses pour
+                  marquer les esprits.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-[#E9C46A]/30 bg-white p-7 shadow-sm">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
+                  <Wine className="h-6 w-6" />
+                </span>
+                <h3 className="mt-4 font-serif text-xl font-medium text-[#241034]">
+                  L'Éclat du Premier Matin
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  Le renouveau du 1er janvier : un parfum d'agrumes vifs, de bergamote fraîche et de
+                  fleurs blanches pour entamer la nouvelle année sous le signe de l'élégance et de
+                  la sérénité.
+                </p>
+              </div>
             </div>
           </section>
         </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════ */}
-      {/* VUE 2 : LES 3 AFFICHES PUBLICITAIRES RECOMMANDÉES         */}
+      {/* VUE 2 : ESQUISSE D'AFFICHE - L'ATMOSPHÈRE DE RÉVEILLON    */}
       {/* ══════════════════════════════════════════════════════════ */}
-      {activeTab === "affiches" && (
+      {activeTab === "affiche" && (
         <section
-          aria-label="Affiches publicitaires"
+          aria-label="Esquisse de l'affiche festive"
           className="mx-auto my-10 w-full max-w-[1320px] px-4 lg:px-8"
         >
           <div className="mb-8 text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[#8A6420]">
-              Campagne Visuelle Fêtes 2026
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8A6420]">
+              Esquisse Visuelle Publicitaire
             </span>
-            <h2 className="font-serif text-3xl font-medium text-[#241034] lg:text-4xl">
-              3 Affiches Clés en Main pour Réseaux Sociaux & Print
+            <h2 className="mt-1 font-serif text-3xl font-medium text-[#241034] lg:text-4xl">
+              L'Affiche Festive : Pure Ambiance de Réveillon
             </h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
-              Ces 3 affiches couvrent les 3 moments critiques de décembre : le lancement des
-              cadeaux, la promotion des coffrets, et la commande d'urgence avant le réveillon.
+              Voici exactement à quoi ressemble une affiche qui respire la fête sans être agressive
+              : un hommage à la nuit, aux bougies, à la lumière et à l'élégance de la fin d'année.
             </p>
+
+            {/* Sélecteur de style d'affiche */}
+            <div className="mt-6 flex justify-center gap-3">
+              <button
+                onClick={() => setAfficheStyle("nuit")}
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold transition-all ${
+                  afficheStyle === "nuit"
+                    ? "bg-[#241034] text-white shadow"
+                    : "border border-border bg-white text-[#241034]"
+                }`}
+              >
+                <Moon className="h-3.5 w-3.5 text-[#E9C46A]" />
+                Variante 1 : Nuit Étoilée & Bougies
+              </button>
+              <button
+                onClick={() => setAfficheStyle("or")}
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold transition-all ${
+                  afficheStyle === "or"
+                    ? "bg-[#241034] text-white shadow"
+                    : "border border-border bg-white text-[#241034]"
+                }`}
+              >
+                <Wine className="h-3.5 w-3.5 text-[#E9C46A]" />
+                Variante 2 : Gala Or & Champagne
+              </button>
+            </div>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-3">
-            {/* ───────────── AFFICHE 1 : L'ART D'OFFRIR ───────────── */}
-            <div className="flex flex-col rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between border-b pb-3 text-xs">
-                <span className="rounded-full bg-[#241034] px-2.5 py-0.5 font-semibold text-[#E9C46A]">
-                  Affiche N°1 · Lancement
-                </span>
-                <span className="text-muted-foreground">Format 4:5 & 9:16</span>
-              </div>
+          <div className="grid items-start gap-10 lg:grid-cols-[1fr_1fr]">
+            {/* ───────────── LE RENDU GRAPHIQUE DE L'AFFICHE (ESQUISSE) ───────────── */}
+            <div className="mx-auto w-full max-w-[460px]">
+              <div
+                className={`relative aspect-[4/5] overflow-hidden rounded-3xl border-2 shadow-2xl p-8 flex flex-col justify-between text-white transition-all duration-500 ${
+                  afficheStyle === "nuit"
+                    ? "border-[#E9C46A]/60 bg-gradient-to-b from-[#0A0210] via-[#210935] to-[#0A0210]"
+                    : "border-[#E9C46A] bg-gradient-to-b from-[#1C0D02] via-[#38164A] to-[#140520]"
+                }`}
+              >
+                {/* Bokeh de lumières de fête en arrière plan */}
+                <div className="pointer-events-none absolute -right-10 top-10 h-48 w-48 rounded-full bg-[#E9C46A]/20 blur-2xl" />
+                <div className="pointer-events-none absolute -left-10 bottom-20 h-48 w-48 rounded-full bg-[#E9C46A]/15 blur-2xl" />
+                <div className="pointer-events-none absolute right-10 bottom-10 h-32 w-32 rounded-full bg-purple-500/20 blur-xl" />
 
-              {/* Rendu Visuel de l'Affiche */}
-              <div className="mt-4 flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-xl border border-[#E9C46A]/50 bg-gradient-to-b from-[#1C072A] via-[#2D1244] to-[#12041D] p-6 text-white shadow-md relative">
-                <div className="absolute top-0 right-0 p-4 opacity-15 text-5xl">✨</div>
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[#E9C46A]">
-                    Al Kareem Parfumerie · Cotonou
-                  </p>
-                  <h3 className="mt-3 font-serif text-2xl font-medium leading-tight text-white">
-                    Offrez un Sillage <br />
-                    <span className="italic text-[#E9C46A]">Inoubliable</span>.
+                {/* Étoiles scintillantes */}
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-25"
+                  style={{
+                    backgroundImage: "radial-gradient(#E9C46A 1.5px, transparent 1.5px)",
+                    backgroundSize: "32px 32px",
+                  }}
+                />
+
+                {/* En-tête de l'affiche */}
+                <div className="relative z-10 flex items-center justify-between border-b border-white/15 pb-4">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#E9C46A]">
+                      Al Kareem Parfumerie
+                    </p>
+                    <p className="font-serif italic text-xs text-[#E5D7F0]">
+                      Haute Fragrance · Cotonou
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-[#E9C46A]/40 bg-[#E9C46A]/15 px-3 py-1 font-serif text-[10px] text-[#E9C46A]">
+                    Édition Fêtes 2026
+                  </span>
+                </div>
+
+                {/* Cœur visuel de l'affiche : La mise en scène du flacon sous les lumières */}
+                <div className="relative z-10 my-auto text-center space-y-4 py-6">
+                  <div className="inline-block relative">
+                    {/* Halo lumineux derrière le flacon */}
+                    <div className="absolute inset-0 rounded-full bg-[#E9C46A]/30 blur-xl animate-pulse" />
+                    <div className="relative rounded-2xl border border-[#E9C46A]/40 bg-white/5 p-6 backdrop-blur-md shadow-2xl">
+                      <span className="text-5xl drop-shadow-[0_0_20px_rgba(233,196,106,0.6)]">
+                        ✨🍾✨
+                      </span>
+                      <p className="mt-3 font-serif text-xl font-normal text-white">
+                        L'Éclat d'une Nuit Inoubliable
+                      </p>
+                      <p className="text-[11px] text-[#E5D7F0]">
+                        Quand le réveillon s'habille de votre plus beau sillage
+                      </p>
+                    </div>
+                  </div>
+
+                  <h3 className="font-serif text-3xl font-light leading-tight text-white lg:text-4xl">
+                    Brillez au <span className="italic text-[#E9C46A]">Réveillon</span>.
                   </h3>
                 </div>
 
-                <div className="my-auto py-4 text-center">
-                  <div className="inline-block rounded-2xl border border-[#E9C46A]/30 bg-white/5 p-5 backdrop-blur-sm">
-                    <span className="text-4xl">🎁✨</span>
-                    <p className="mt-2 font-serif text-lg font-medium text-white">
-                      Collection Prestige 2026
-                    </p>
-                    <p className="text-[11px] text-[#E5D7F0]">
-                      Parfums raffinés · Flacons d'exception
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t border-white/10 pt-3">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-[#E9C46A] font-semibold">Emballage Luxe Offert</span>
-                    <span className="rounded bg-[#25D366] px-2 py-0.5 text-[10px] font-bold text-white">
-                      WhatsApp 61 88 89 87
+                {/* Bas de l'affiche */}
+                <div className="relative z-10 border-t border-white/15 pt-4 text-center">
+                  <p className="font-serif italic text-xs text-[#E5D7F0]">
+                    « La plus belle tenue commence par la signature que vous laissez derrière vous.
+                    »
+                  </p>
+                  <div className="mt-3 flex items-center justify-between text-[10px] text-[#E9C46A]">
+                    <span>Boutique Cotonou & Calavi</span>
+                    <span className="font-semibold tracking-wider">
+                      www.al-kareemparfurmerie.com
                     </span>
                   </div>
-                  <p className="mt-1 text-[9px] text-white/60">
-                    www.al-kareemparfurmerie.com · Cotonou & Calavi
-                  </p>
-                </div>
-              </div>
-
-              {/* Arguments & Texte de publication */}
-              <div className="mt-5 space-y-2 text-xs">
-                <h4 className="font-semibold text-[#241034]">💡 Objectif :</h4>
-                <p className="text-muted-foreground">
-                  Positionner Al Kareem comme la référence incontournable du cadeau chic à Cotonou
-                  dès le 1er décembre.
-                </p>
-                <h4 className="font-semibold text-[#241034]">📝 Texte de publication prêt :</h4>
-                <div className="rounded-lg bg-secondary/50 p-3 font-mono text-[11px] text-foreground">
-                  « Le meilleur cadeau n'est pas celui qui s'oublie, c'est celui qui laisse une
-                  empreinte… ✨ Découvrez notre collection féerique des fêtes chez Al Kareem.
-                  Emballage luxe avec ruban or offert ! 🎁 Commandes WhatsApp en bio ou sur le site.
-                  #AlKareem #Cotonou #Noel2026 »
                 </div>
               </div>
             </div>
 
-            {/* ───────────── AFFICHE 2 : LES COFFRETS PRESTIGE ───────────── */}
-            <div className="flex flex-col rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between border-b pb-3 text-xs">
-                <span className="rounded-full bg-[#8A6420] px-2.5 py-0.5 font-semibold text-white">
-                  Affiche N°2 · Offre Vedette
-                </span>
-                <span className="text-muted-foreground">Format 4:5 & Carré</span>
-              </div>
-
-              {/* Rendu Visuel de l'Affiche */}
-              <div className="mt-4 flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-xl border border-[#E9C46A]/50 bg-gradient-to-b from-[#2B1408] via-[#3F1A5E] to-[#1F082F] p-6 text-white shadow-md relative">
-                <div>
-                  <span className="rounded-full bg-[#E9C46A] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#241034]">
-                    Offre Spéciale Fêtes
+            {/* ───────────── ANALYSE DES ÉLÉMENTS DE CETTE AFFICHE ───────────── */}
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-[#E9C46A]/40 bg-white p-7 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
+                    <Palette className="h-5 w-5" />
                   </span>
-                  <h3 className="mt-2.5 font-serif text-2xl font-medium leading-tight text-white">
-                    Les Coffrets Cadeaux <br />
-                    <span className="text-[#E9C46A]">Duo & Trio</span>
-                  </h3>
-                </div>
-
-                <div className="my-auto rounded-xl border border-white/10 bg-black/30 p-4 text-center">
-                  <p className="text-xs font-semibold text-[#E9C46A]">LE PACK PRÊT-À-OFFRIR</p>
-                  <p className="mt-1 text-sm font-medium">Parfum 100ml + Déodorant / Brume</p>
-                  <div className="mt-2 flex items-center justify-center gap-2">
-                    <span className="text-xs text-white/60 line-through">35 000 FCFA</span>
-                    <span className="rounded-full bg-[#E9C46A] px-3 py-1 font-serif text-base font-bold text-[#241034]">
-                      Dès 25 000 FCFA
-                    </span>
-                  </div>
-                  <p className="mt-2 text-[10px] text-emerald-300">
-                    + Carte de vœux manuscrite incluse
-                  </p>
-                </div>
-
-                <div className="border-t border-white/10 pt-3">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-semibold text-white">Stock Spécial Fêtes</span>
-                    <span className="rounded bg-[#25D366] px-2 py-0.5 text-[10px] font-bold text-white">
-                      Commandez sur WhatsApp
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[9px] text-white/60">
-                    Paiement à la livraison : MoMo, Moov ou Espèces
-                  </p>
-                </div>
-              </div>
-
-              {/* Arguments & Texte de publication */}
-              <div className="mt-5 space-y-2 text-xs">
-                <h4 className="font-semibold text-[#241034]">💡 Objectif :</h4>
-                <p className="text-muted-foreground">
-                  Générer des paniers moyens élevés en vendant des duos et coffrets prêts à offrir
-                  sans prise de tête pour le client.
-                </p>
-                <h4 className="font-semibold text-[#241034]">📝 Texte de publication prêt :</h4>
-                <div className="rounded-lg bg-secondary/50 p-3 font-mono text-[11px] text-foreground">
-                  « Pas le temps de courir les boutiques ? 🎄 Nos coffrets prestige sont prêts à
-                  être posés sous le sapin. Parfum d'exception + soin assorti dans un écrin de luxe.
-                  Faites briller les yeux de vos proches en un clic WhatsApp ! 💫 »
-                </div>
-              </div>
-            </div>
-
-            {/* ───────────── AFFICHE 3 : URGENCE RÉVEILLON ───────────── */}
-            <div className="flex flex-col rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between border-b pb-3 text-xs">
-                <span className="rounded-full bg-red-700 px-2.5 py-0.5 font-semibold text-white">
-                  Affiche N°3 · Urgence 24h
-                </span>
-                <span className="text-muted-foreground">Format 9:16 (Story/Statut)</span>
-              </div>
-
-              {/* Rendu Visuel de l'Affiche */}
-              <div className="mt-4 flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-xl border border-red-500/40 bg-gradient-to-b from-[#330914] via-[#240A28] to-[#12041D] p-6 text-white shadow-md relative">
-                <div>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
-                    <Clock className="h-3 w-3" /> Dernière Ligne Droite
-                  </span>
-                  <h3 className="mt-2.5 font-serif text-2xl font-medium leading-tight text-white">
-                    Prêt(e) pour le <br />
-                    <span className="text-[#E9C46A]">Réveillon ?</span>
-                  </h3>
-                </div>
-
-                <div className="my-auto space-y-2 rounded-xl border border-white/10 bg-black/40 p-4 text-center">
-                  <p className="text-xs font-semibold text-white">
-                    ⚡ LIVRAISON EXPRESS COTONOU & CALAVI
-                  </p>
-                  <p className="text-xs text-[#E5D7F0]">
-                    Commandez avant 16h, livré chez vous avant votre soirée !
-                  </p>
-                  <div className="rounded-lg bg-white/10 py-1.5 text-[11px] font-semibold text-[#E9C46A]">
-                    Ne sortez pas sans votre signature olfactive
+                  <div>
+                    <h3 className="font-serif text-lg font-semibold text-[#241034]">
+                      Pourquoi cette affiche respire « La Fête » ?
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Analyse des choix artistiques par rapport à une pub classique
+                    </p>
                   </div>
                 </div>
 
-                <div className="border-t border-white/10 pt-3">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-semibold text-emerald-400">Livreurs mobilisés</span>
-                    <span className="rounded bg-[#25D366] px-2 py-0.5 text-[10px] font-bold text-white">
-                      WhatsApp Direct
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[9px] text-white/60">
-                    Service garanti les 24, 25 et 31 Décembre 2026
-                  </p>
-                </div>
+                <ul className="mt-5 space-y-3.5 text-xs text-foreground/90">
+                  <li className="flex items-start gap-2.5">
+                    <Check className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
+                    <div>
+                      <strong className="text-[#241034]">
+                        Les halos de lumière dorée (Bokeh) :
+                      </strong>{" "}
+                      Ils évoquent immédiatement les guirlandes, les bougies de Noël et l'éclairage
+                      tamisé des dîners de gala.
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
+                    <div>
+                      <strong className="text-[#241034]">Le contraste Velours Noir & Or :</strong>{" "}
+                      C'est le code universel du luxe de fin d'année, inspiré des nuits de gala et
+                      des réveillons prestigieux.
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
+                    <div>
+                      <strong className="text-[#241034]">L'émotion plutôt que le prix :</strong>{" "}
+                      Aucun prix barré ni slogan agressif. Le spectateur s'imagine déjà élégant,
+                      souriant et parfumé le soir du 31 décembre.
+                    </div>
+                  </li>
+                </ul>
               </div>
 
-              {/* Arguments & Texte de publication */}
-              <div className="mt-5 space-y-2 text-xs">
-                <h4 className="font-semibold text-[#241034]">💡 Objectif :</h4>
-                <p className="text-muted-foreground">
-                  Capter les acheteurs de dernière minute du 20 au 31 décembre avec la promesse
-                  d'une livraison express ultra fiable.
-                </p>
-                <h4 className="font-semibold text-[#241034]">📝 Texte de publication prêt :</h4>
-                <div className="rounded-lg bg-secondary/50 p-3 font-mono text-[11px] text-foreground">
-                  « La fête est dans quelques heures et il vous manque le cadeau parfait ou votre
-                  parfum de soirée ? ⏳ Pas de panique : nos livreurs sillonnent Cotonou et Calavi
-                  en continu. Écrivez-nous sur WhatsApp, c'est chez vous en un éclair ! ⚡🍾 »
+              {/* Exemple de texte d'accompagnement pour les réseaux sociaux */}
+              <div className="rounded-2xl border border-border bg-[#FAF7F2] p-6">
+                <h4 className="font-serif text-base font-semibold text-[#241034]">
+                  📱 Texte de publication (Instagram / Statut WhatsApp) :
+                </h4>
+                <div className="mt-3 rounded-xl bg-white p-4 font-mono text-xs text-foreground shadow-sm">
+                  « La nuit du réveillon n'arrive qu'une fois par an. ✨ <br />
+                  <br />
+                  Chaque détail compte : votre tenue, votre sourire, et ce sillage mystérieux qui
+                  flotte dans l'air quand vous entrez dans la pièce. <br />
+                  <br />
+                  Célébrez la magie des fêtes avec les fragrances d'exception Al Kareem. <br />
+                  <br />
+                  📍 Cotonou & Calavi · Lien en bio pour explorer la collection. <br />
+                  #AlKareem #MagieDeNoel #Reveillon2026 #Cotonou #ParfumerieLuxe »
                 </div>
               </div>
             </div>
@@ -695,241 +719,138 @@ export function FetesPage() {
       )}
 
       {/* ══════════════════════════════════════════════════════════ */}
-      {/* VUE 3 : LES VIDÉOS PUBLICITAIRES (STORYBOARDS & SCRIPTS)   */}
+      {/* VUE 3 : ESQUISSE VIDÉO - LE SPOT D'AMBIANCE DE FÊTE        */}
       {/* ══════════════════════════════════════════════════════════ */}
-      {activeTab === "videos" && (
+      {activeTab === "video" && (
         <section
-          aria-label="Storyboards des vidéos publicitaires"
+          aria-label="Esquisse de la vidéo publicitaire"
           className="mx-auto my-10 w-full max-w-[1320px] px-4 lg:px-8"
         >
           <div className="mb-8 text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[#8A6420]">
-              Production Vidéo Fêtes 2026
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8A6420]">
+              Esquisse Vidéo Publicitaire
             </span>
-            <h2 className="font-serif text-3xl font-medium text-[#241034] lg:text-4xl">
-              2 Concepts Vidéos Publicitaires avec Scripts & Storyboards
+            <h2 className="mt-1 font-serif text-3xl font-medium text-[#241034] lg:text-4xl">
+              Le Spot Vidéo : L'Émotion des Préparatifs de Réveillon
             </h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
-              Conçus spécialement pour les formats courts TikTok / Instagram Reels / Statuts
-              WhatsApp, et prêts à être enregistrés ou montés avec les visuels du site.
+              Découvrez la vidéo d'ambiance et son découpage scène par scène : comment plonger le
+              spectateur dans la féerie d'une soirée inoubliable.
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* ───────────── VIDÉO 1 : FORMAT COURT 20s (REELS / TIKTOK) ───────────── */}
-            <div className="flex flex-col rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between border-b pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E9C46A] text-[#241034]">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            {/* LECTEUR VIDÉO INTERACTIF */}
+            <div className="flex flex-col rounded-3xl border border-[#E9C46A]/40 bg-[#1A0A26] p-6 text-white shadow-xl">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E9C46A] text-[#241034]">
                     <Play className="h-4 w-4" />
                   </span>
                   <div>
-                    <h3 className="font-serif text-lg font-semibold text-[#241034]">
-                      Spot Court 20s · « Le Dilemme du Cadeau »
+                    <h3 className="font-serif text-lg font-medium text-white">
+                      Extrait Vidéo : « L'Éclat de la Fête »
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Format vertical 9:16 pour TikTok, Reels et Statuts WhatsApp
+                    <p className="text-xs text-[#E5D7F0]">
+                      Projet publicitaire Al Kareem (Prêt à visionner)
                     </p>
                   </div>
                 </div>
-                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
-                  Haute Conversion
+                <span className="rounded-full bg-[#E9C46A]/20 px-3 py-1 text-[11px] font-semibold text-[#E9C46A]">
+                  40 secondes
                 </span>
               </div>
 
-              {/* Storyboard pas à pas */}
-              <div className="mt-5 space-y-4 text-xs">
-                {/* Plan 1 */}
-                <div className="flex gap-3 rounded-xl border border-border/60 bg-[#FAF7F2] p-3.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#241034] font-bold text-[#E9C46A]">
-                    0-3s
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-semibold text-[#241034]">
-                      Scène 1 : L'Accroche / Le Problème (Pattern Interrupt)
-                    </p>
-                    <p className="text-muted-foreground">
-                      <strong>Visuel :</strong> Gros plan dynamique sur une personne songeuse avec
-                      son smartphone à Cotonou. Texte clignotant à l'écran : « Tu n'as toujours pas
-                      trouvé ton cadeau de fête ? »
-                    </p>
-                    <p className="italic text-[#8A6420]">
-                      <strong>🎙️ Voix-off (chaleureuse & rythmée) :</strong> « Décembre avance… et
-                      tu ne sais toujours pas quoi lui offrir pour les fêtes ? »
-                    </p>
-                  </div>
-                </div>
-
-                {/* Plan 2 */}
-                <div className="flex gap-3 rounded-xl border border-border/60 bg-[#FAF7F2] p-3.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#241034] font-bold text-[#E9C46A]">
-                    3-10s
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-semibold text-[#241034]">
-                      Scène 2 : La Solution Sensorielle (Unboxing Prestige)
-                    </p>
-                    <p className="text-muted-foreground">
-                      <strong>Visuel :</strong> Gros plan macro ralenti sur les mains qui délient un
-                      ruban satin doré Al Kareem, ouverture du coffret, flacon étincelant avec la
-                      lumière dorée des fêtes.
-                    </p>
-                    <p className="italic text-[#8A6420]">
-                      <strong>🎙️ Voix-off :</strong> « Chez Al Kareem Parfumerie, on a préparé
-                      l'inratable : des fragrances authentiques qui marquent les esprits, dans un
-                      coffret luxe prêt à offrir. »
-                    </p>
-                  </div>
-                </div>
-
-                {/* Plan 3 */}
-                <div className="flex gap-3 rounded-xl border border-border/60 bg-[#FAF7F2] p-3.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#241034] font-bold text-[#E9C46A]">
-                    10-15s
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-semibold text-[#241034]">
-                      Scène 3 : La Réassurance Express (Zéro stress)
-                    </p>
-                    <p className="text-muted-foreground">
-                      <strong>Visuel :</strong> Capture rapide de l'écran WhatsApp avec la commande
-                      en 1 clic, puis le livreur souriant remettant le colis avec le badge Al
-                      Kareem.
-                    </p>
-                    <p className="italic text-[#8A6420]">
-                      <strong>🎙️ Voix-off :</strong> « Tu commandes sur WhatsApp en 30 secondes, et
-                      c'est livré chez toi le jour même à Cotonou et Calavi ! »
-                    </p>
-                  </div>
-                </div>
-
-                {/* Plan 4 */}
-                <div className="flex gap-3 rounded-xl border border-border/60 bg-[#FAF7F2] p-3.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#241034] font-bold text-[#E9C46A]">
-                    15-20s
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-semibold text-[#241034]">
-                      Scène 4 : Appel à l'action immédiat (Call-to-Action)
-                    </p>
-                    <p className="text-muted-foreground">
-                      <strong>Visuel :</strong> Logo Al Kareem éclatant, bouton WhatsApp vert
-                      vibrant avec le numéro 61 88 89 87 et le site web.
-                    </p>
-                    <p className="italic text-[#8A6420]">
-                      <strong>🎙️ Voix-off :</strong> « Écris-nous vite sur WhatsApp avant la rupture
-                      des coffrets. Al Kareem : sublimez votre aura pour les fêtes. »
-                    </p>
-                  </div>
-                </div>
+              {/* Le lecteur HTML5 branché sur le fichier vidéo */}
+              <div className="relative mt-5 aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-inner">
+                <video
+                  controls
+                  playsInline
+                  className="h-full w-full object-contain"
+                  poster="/alkareem-logo.webp"
+                >
+                  <source src="/video-fetes.mp4" type="video/mp4" />
+                  Votre navigateur ne supporte pas la lecture de cette vidéo.
+                </video>
               </div>
 
-              {/* Fiche technique de production */}
-              <div className="mt-5 rounded-xl bg-secondary/50 p-4 text-xs space-y-1.5">
-                <p>
-                  <strong>🎵 Ambiance sonore :</strong> Beat Afro-House / R&B doux avec carillon de
-                  cloches festives en fond sonore.
-                </p>
-                <p>
-                  <strong>💡 Matériel nécessaire :</strong> Un smartphone (iPhone/Samsung) en mode
-                  cinématique 4K 60fps pour les ralentis sur le ruban et le flacon.
-                </p>
+              <div className="mt-4 flex items-center justify-between text-xs text-[#E5D7F0]">
+                <div className="flex items-center gap-2">
+                  <Volume2 className="h-4 w-4 text-[#E9C46A]" />
+                  <span>Bande-son : Mélodie de gala chaleureuse & violons feutrés</span>
+                </div>
+                <span className="italic text-[#E9C46A]">Al Kareem 2026</span>
               </div>
             </div>
 
-            {/* ───────────── VIDÉO 2 : SPOT PRESTIGE 40s (V9 FÊTES) ───────────── */}
-            <div className="flex flex-col rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between border-b pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#241034] text-[#E9C46A]">
-                    <Volume2 className="h-4 w-4" />
+            {/* LE STORYBOARD SCÈNE PAR SCÈNE */}
+            <div className="space-y-4">
+              <h3 className="font-serif text-2xl font-medium text-[#241034]">
+                Le Storyboard d'Ambiance de Noël
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Ce spot ne vend pas un objet : il vend le moment magique où l'on s'apprête à faire
+                la fête.
+              </p>
+
+              {/* Scène 1 */}
+              <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
+                <div className="flex items-center justify-between border-b pb-2 text-xs">
+                  <span className="font-bold text-[#241034]">
+                    Scène 1 : L'Illumination de la Nuit (0s - 10s)
                   </span>
-                  <div>
-                    <h3 className="font-serif text-lg font-semibold text-[#241034]">
-                      Spot 40s « La Magie des Fêtes »
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Évolution festive du projet V9 existant (`video siteweb`)
-                    </p>
-                  </div>
+                  <span className="rounded bg-secondary px-2 py-0.5 text-[10px]">Plan Large</span>
                 </div>
-                <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-900">
-                  Image de Marque & Ventes
-                </span>
-              </div>
-
-              {/* Déroulé complet scène par scène */}
-              <div className="mt-5 space-y-3.5 text-xs">
-                <div className="rounded-xl border border-border/60 bg-[#FAF7F2] p-3">
-                  <p className="font-semibold text-[#241034]">
-                    ⏱️ 00:00 - 00:08 · Introduction Féerique
-                  </p>
-                  <p className="text-muted-foreground mt-0.5">
-                    <strong>Visuel :</strong> Coucher de soleil élégant sur Cotonou, transition vers
-                    une ambiance tamisée de fête. Flacon de parfum mis en lumière avec poussière
-                    d'étoiles dorées.
-                  </p>
-                  <p className="italic text-[#8A6420] mt-0.5">
-                    « Pour ces fêtes de fin d'année, il y a ce que l'on porte… et il y a l'émotion
-                    que l'on laisse derrière soi. »
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-[#FAF7F2] p-3">
-                  <p className="font-semibold text-[#241034]">
-                    ⏱️ 00:08 - 00:18 · Le Savoir-Faire & L'Authenticité
-                  </p>
-                  <p className="text-muted-foreground mt-0.5">
-                    <strong>Visuel :</strong> Défilé dynamique des catégories phares : flacons
-                    scellés, vaporisation ralentie, zoom sur les marques prestigieuses disponibles
-                    en boutique.
-                  </p>
-                  <p className="italic text-[#8A6420] mt-0.5">
-                    « Al Kareem Parfumerie réunit pour vous les plus grandes fragrances d'Orient et
-                    d'Occident. 100 % authentiques, testées pour tenir toute la nuit du réveillon. »
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-[#FAF7F2] p-3">
-                  <p className="font-semibold text-[#241034]">
-                    ⏱️ 00:18 - 00:28 · L'Offre Coffrets & Le Cadeau
-                  </p>
-                  <p className="text-muted-foreground mt-0.5">
-                    <strong>Visuel :</strong> Préparation soignée d'une commande : pose du ruban or,
-                    carte manuscrite glissée dans le paquet cadeau avec soin.
-                  </p>
-                  <p className="italic text-[#8A6420] mt-0.5">
-                    « Profitez de nos coffrets cadeaux exclusifs : duo parfum et déodorant, huiles
-                    rares et brumes corporelles, emballés avec raffinement et offerts avec amour. »
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-[#FAF7F2] p-3">
-                  <p className="font-semibold text-[#241034]">
-                    ⏱️ 00:28 - 00:40 · Clôture & Appel à l'action
-                  </p>
-                  <p className="text-muted-foreground mt-0.5">
-                    <strong>Visuel :</strong> Sourire d'une cliente recevant son paquet, puis carton
-                    final doré avec l'adresse du site et le numéro WhatsApp 61 88 89 87.
-                  </p>
-                  <p className="italic text-[#8A6420] mt-0.5">
-                    « Commandez dès maintenant sur al-kareemparfurmerie.com ou via WhatsApp.
-                    Livraison express partout au Bénin. Al Kareem : votre signature olfactive pour
-                    des fêtes magiques. »
-                  </p>
-                </div>
-              </div>
-
-              {/* Fiche technique */}
-              <div className="mt-5 rounded-xl bg-secondary/50 p-4 text-xs space-y-1.5">
-                <p>
-                  <strong>🎙️ Enregistrement voix :</strong> Voix posée, confiante et raffinée
-                  (idéalement féminine ou masculine chaleureuse).
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  <strong>Visuel :</strong> Les lumières festives scintillent à travers la vitre. En
+                  arrière-plan, l'ambiance chaleureuse d'un réveillon qui se prépare.
+                  <br />
+                  <strong>Voix-off :</strong>{" "}
+                  <em>« Il y a des nuits où chaque seconde a le goût de l'exception… »</em>
                 </p>
-                <p>
-                  <strong>📹 Réutilisation V9 :</strong> Vous pouvez reprendre la vidéo existante
-                  située dans le dossier `video siteweb` et poser cette voix-off dessus avec une
-                  musique festive !
+              </div>
+
+              {/* Scène 2 */}
+              <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
+                <div className="flex items-center justify-between border-b pb-2 text-xs">
+                  <span className="font-bold text-[#241034]">
+                    Scène 2 : Le Rituel du Flacon (10s - 25s)
+                  </span>
+                  <span className="rounded bg-secondary px-2 py-0.5 text-[10px]">
+                    Macro Slow-Motion
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  <strong>Visuel :</strong> Gros plan sur le flacon Al Kareem qui tourne sous un
+                  faisceau doré. La vaporisation se fait au ralenti, créant une brume dorée
+                  étincelante.
+                  <br />
+                  <strong>Voix-off :</strong>{" "}
+                  <em>
+                    « Quand l'or, l'ambre et le bois noble s'unissent pour sublimer votre allure. »
+                  </em>
+                </p>
+              </div>
+
+              {/* Scène 3 */}
+              <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
+                <div className="flex items-center justify-between border-b pb-2 text-xs">
+                  <span className="font-bold text-[#241034]">
+                    Scène 3 : L'Entrée dans la Fête (25s - 40s)
+                  </span>
+                  <span className="rounded bg-secondary px-2 py-0.5 text-[10px]">
+                    Émotion & Signature
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  <strong>Visuel :</strong> L'arrivée dans le salon illuminé, les regards qui se
+                  tournent, le sourire complice. Le logo Al Kareem apparaît dans une pluie d'étoiles
+                  dorées.
+                  <br />
+                  <strong>Voix-off :</strong>{" "}
+                  <em>
+                    « Pour les fêtes, offrez-vous l'inoubliable. Al Kareem Parfumerie, Cotonou. »
+                  </em>
                 </p>
               </div>
             </div>
@@ -938,72 +859,147 @@ export function FetesPage() {
       )}
 
       {/* ══════════════════════════════════════════════════════════ */}
-      {/* VUE 4 : STRATÉGIE CADEAUX & LOGISTIQUE FÊTES 2026          */}
+      {/* VUE 4 : DÉCOMPOSITION COMPLÈTE DES ÉLÉMENTS DE FÊTE        */}
       {/* ══════════════════════════════════════════════════════════ */}
-      {activeTab === "guide" && (
+      {activeTab === "elements" && (
         <section
-          aria-label="Stratégie commerciale des Fêtes"
+          aria-label="Décomposition des éléments de fête"
           className="mx-auto my-10 w-full max-w-[1320px] px-4 lg:px-8"
         >
           <div className="mb-8 text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[#8A6420]">
-              Plan d'Action Commercial
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8A6420]">
+              Guide & Architecture
             </span>
-            <h2 className="font-serif text-3xl font-medium text-[#241034] lg:text-4xl">
-              Guide Stratégique pour Maximiser les Ventes des Fêtes
+            <h2 className="mt-1 font-serif text-3xl font-medium text-[#241034] lg:text-4xl">
+              En quoi consiste « L'Ambiance de Fête » pour Al Kareem ?
             </h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
-              Voici les 4 leviers concrets à activer pour faire de ce mois de décembre le meilleur
-              mois de l'année pour Al Kareem.
+              Voici la division méthodique des 4 piliers indispensables qui transforment
+              l'expérience visuelle sans paraître trop commerciale.
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <span className="text-3xl">🎁</span>
-              <h3 className="mt-3 font-serif text-lg font-semibold text-[#241034]">
-                1. L'Emballage Cadeau Gratuit
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                À Cotonou, la corvée de faire emballer un cadeau fait perdre des ventes. En offrant
-                une pochette rigide luxe et un ruban satiné or sur chaque commande, le client gagne
-                du temps et n'hésite plus à acheter chez vous.
-              </p>
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Pilier 1 */}
+            <div className="rounded-2xl border border-[#E9C46A]/30 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 border-b pb-4">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
+                  <Sparkles className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-serif text-lg font-semibold text-[#241034]">
+                    1. La Lumière & La Féerie Visuelle
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Ce qui capte immédiatement le regard
+                  </p>
+                </div>
+              </div>
+              <ul className="mt-4 space-y-2 text-xs text-foreground/80">
+                <li>
+                  • <strong>Particules dorées :</strong> Scintillement subtil rappelant les étoiles
+                  et les réveillons.
+                </li>
+                <li>
+                  • <strong>Bokeh & Halos :</strong> Effets de flou lumineux simulant les guirlandes
+                  et les bougies.
+                </li>
+                <li>
+                  • <strong>Typographie Serif & Or :</strong> L'alliance du classique Cormorant
+                  Garamond avec l'or chaud.
+                </li>
+              </ul>
             </div>
 
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <span className="text-3xl">📦</span>
-              <h3 className="mt-3 font-serif text-lg font-semibold text-[#241034]">
-                2. Les Packs « Duo Gagnant »
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Proposer un parfum + son déodorant ou brume assortie avec une réduction de 2 000
-                FCFA augmente le panier moyen de 40%. Présentez-les comme le « Pack Clé-en-main ».
-              </p>
+            {/* Pilier 2 */}
+            <div className="rounded-2xl border border-[#E9C46A]/30 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 border-b pb-4">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
+                  <Flame className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-serif text-lg font-semibold text-[#241034]">
+                    2. L'Atmosphère Olfactive des Soirées
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    L'évocation des sens et du confort
+                  </p>
+                </div>
+              </div>
+              <ul className="mt-4 space-y-2 text-xs text-foreground/80">
+                <li>
+                  • <strong>Notes de Réveillon :</strong> Ambre chaud, cannelle douce, vanille
+                  bourbon et bois d'oud.
+                </li>
+                <li>
+                  • <strong>Tenue exceptionnelle :</strong> Des fragrances pensées pour durer
+                  jusqu'aux premières lueurs de l'aube.
+                </li>
+                <li>
+                  • <strong>Vocabulaire poétique :</strong> On parle de « sillage », de « présence
+                  », d'« éclat ».
+                </li>
+              </ul>
             </div>
 
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <span className="text-3xl">⚡</span>
-              <h3 className="mt-3 font-serif text-lg font-semibold text-[#241034]">
-                3. Garantie 24 Déc. & 31 Déc.
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Mobiliser 2 livreurs dédiés les 23, 24, 30 et 31 décembre et communiquer sur le
-                slogan : « Commandé à midi, sous votre sapin à 16h ». L'urgence est le premier
-                déclencheur d'achat de fin d'année.
-              </p>
+            {/* Pilier 3 */}
+            <div className="rounded-2xl border border-[#E9C46A]/30 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 border-b pb-4">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
+                  <Wine className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-serif text-lg font-semibold text-[#241034]">
+                    3. L'Art de Vivre & La Célébration
+                  </h3>
+                  <p className="text-xs text-muted-foreground">L'émotion du rassemblement</p>
+                </div>
+              </div>
+              <ul className="mt-4 space-y-2 text-xs text-foreground/80">
+                <li>
+                  • <strong>Les préparatifs :</strong> Le plaisir de choisir sa tenue et de se
+                  parfumer pour une nuit spéciale.
+                </li>
+                <li>
+                  • <strong>La fête à Cotonou :</strong> Les retrouvailles en famille, les
+                  réceptions, la musique et les dîners.
+                </li>
+                <li>
+                  • <strong>L'accueil de la Nouvelle Année :</strong> L'énergie de l'espérance, de
+                  la joie et de la beauté.
+                </li>
+              </ul>
             </div>
 
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <span className="text-3xl">📲</span>
-              <h3 className="mt-3 font-serif text-lg font-semibold text-[#241034]">
-                4. Statuts WhatsApp Quotidien
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Publier 3 à 5 statuts par jour : 1 parfum du jour, 1 coffret avec son prix, 1
-                témoignage client satisfait, et un rappel du lien vers la sélection fêtes du site
-                web.
-              </p>
+            {/* Pilier 4 */}
+            <div className="rounded-2xl border border-[#E9C46A]/30 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 border-b pb-4">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#241034] text-[#E9C46A]">
+                  <Palette className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-serif text-lg font-semibold text-[#241034]">
+                    4. La Sobriété Luxueuse (Non Agressif)
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    La signature d'une grande maison de parfum
+                  </p>
+                </div>
+              </div>
+              <ul className="mt-4 space-y-2 text-xs text-foreground/80">
+                <li>
+                  • <strong>Pas de bandeau criard :</strong> Pas de remises en gros caractères
+                  rouges qui cassent le prestige.
+                </li>
+                <li>
+                  • <strong>Raffinement des visuels :</strong> Chaque image donne envie de célébrer
+                  avec élégance.
+                </li>
+                <li>
+                  • <strong>L'humain au centre :</strong> Le parfum comme sublimateur de votre
+                  personnalité lors des fêtes.
+                </li>
+              </ul>
             </div>
           </div>
         </section>
